@@ -119,7 +119,7 @@ if one is given use the argument as a filename to write the savegame to."""
       self.files.changeOutputFile(exportFileName)
       if self.files.outFileStatus != "Ready":
          print("Cannot write to that file. Please try again.")
-      elif self._booleanPrompt("This will erase the contents of the t file before writing. Continue?"):
+      elif self._booleanPrompt("This will erase the contents of the the export file before writing. Continue?"):
          self.files.writeGame()
          
    def do_config(self,arg):
