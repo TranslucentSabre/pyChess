@@ -1,1 +1,12 @@
-This is the pyChess project by Timothy Myers
+This is the pyChess project by Timothy Myers.
+The goal of the project is to create a chess engine that imports and exports 
+partial games in the Portable Game Notation file format so that chess games may be
+played over email.
+
+It is being implemented in Python 3 as a learning tool.
+
+To Run:
+./chess.py
+
+Requires:
+Python 3 installed
