@@ -78,6 +78,26 @@ class Chess(cmd.Cmd):
             currentPlayer.undoLastMove()
       else:
          print("Move Failed:\n"+currentPlayer.moveResultReason)
+         
+   def do_algebra(self,arg):
+      """Move a piece, this function takes one move in algebraic notation.\n
+         Ex. algebra Nf3\n"""
+      move = arg.split()
+      if len(move) > 1:
+         print("Only one argument is valid.")
+         return
+      currentPlayer = self._getNextPlayer()
+      if currentPlayer.algebraicMove(move[0]):
+         self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
+         print(self.gameBoard.getPendingMoveString())
+         if self._booleanPrompt("Are you sure this is the move you would like to make?"):
+            self.gameBoard.commitTurn()
+            self.files.appendMoveForWrite(currentPlayer.lastMoveString)
+         else:
+            self.gameBoard.cancelCommit()
+            currentPlayer.undoLastMove()
+      else:
+         print("Move Failed:\n"+currentPlayer.moveResultReason)
       
    def do_import(self,arg):
       """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,

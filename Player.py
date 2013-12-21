@@ -26,7 +26,7 @@ class Player(object):
       
       self.parser = AlgebraicParser()
       self.algebraicMoveClass = AlgebraicMove()
-      self.debugAlgebraicMoveClass = AlgebraicMove()
+      self.parsedAlgebraicMoveClass = AlgebraicMove()
       
       self.pawns = [Pawn(self.color,file+self.pawnRank) for file in Coord.files]
       self.rooks = [Rook(self.color,file+self.majorRank) for file in rookFiles]
@@ -82,11 +82,13 @@ class Player(object):
       self.parser.setAlgebraicMove(move)
       if self.parser.valid == True:
          algebraicMove = self.parser.getAlgebraicMoveClass()
-         potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.capture)
+         #Save off this move class, we will use it as a comparison after the move
+         self.parsedAlgebraicMoveClass = algebraicMove
+         potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.capture, algebraicMove.disambiguation)
          if len(potentialPieces) == 0:
             self.moveResultReason = "No pieces of that type may move to the selected location"
          elif len(potentialPieces) > 1:
-            self.moveResultReason = "Additional narrowing down required (use disambiguation)"
+               self.moveResultReason = "More than one piece may move based upon your selection"
          else:
             moveValid = self._movePiece(potentialPieces[0].position, algebraicMove.destination)
             if moveValid:
@@ -98,17 +100,19 @@ class Player(object):
       else:
          self.moveResultReason = "Invalid algebraic notation given."
          return False
-         
-   def getPiecesThatCanMoveToLocation(self, pieceType, location, capture):
-      """Return a list of my pieces that can move to given location"""
+   
+   def getPiecesThatCanMoveToLocation(self, pieceType, location, capture, disambiguation):
+      """Return a list of my pieces that can move to given location, filtered by capture potential and disambiguation"""
       vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
       def canPieceMoveToLocation(piece):
          moves = piece.getValidMoves(vBoard)
-         result = False
-         if location in moves:
-            result = True
-            if capture and not self.enemyPieceIsAtLocation(location,vBoard):
-               result = False
+         result = True
+         if location not in moves:
+            result = False
+         if capture and not self.enemyPieceIsAtLocation(location,vBoard):
+            result = False
+         if disambiguation != "" and disambiguation not in piece.position:
+            result = False
          return result
       return list(filter(canPieceMoveToLocation, self.pieceMap[pieceType]))
    
