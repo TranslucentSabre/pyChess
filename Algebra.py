@@ -1,0 +1,253 @@
+#!/usr/bin/python3
+import re
+import Piece
+import Coord
+
+
+class AlgebraicMove(object):
+   
+   def __init__(self, destination="a1", piece="Pawn", disambiguation="", capture=False, promotion="", check=False, mate=False, castle=False, kingside=False):
+      self.destination = destination
+      self.piece = piece
+      self.disambiguation = disambiguation
+      self.capture = capture
+      self.promotion = promotion
+      self.check = check
+      self.mate = mate
+
+      self.castle = castle
+      self.kingside = kingside
+      
+   def __str__(self):
+      retString = ""
+      for item in dir(self):
+         if not item.startswith("_"):
+            value = getattr(self, item)
+            retString += item + ": "+ str(value) + "\n"
+      return retString
+
+class AlgebraicParser(object):
+   pieces = r"[RNBQK]"
+   ranks = r"[1-8]"
+   files = r"[a-h]"
+   rePieceString = r"("+pieces+")?"
+   reDisambiguationString = r"(?:("+files+")?("+ranks+")?)"
+   reCaptureString = r"(x)?"
+   reDestinationString = r"("+files+ranks+")"
+   rePromotionString = r"(?:=("+pieces+"))?"
+   reCheckMateString = r"(\+|#)?"
+   reCastleString = "O-(O-)?O"
+   reString = r"\A"+rePieceString + reDisambiguationString + reCaptureString \
+            + reDestinationString + rePromotionString + reCheckMateString + r"\Z"
+
+   def __init__(self):
+      self.castle = re.compile(self.reCastleString)
+      self.move = re.compile(self.reString)
+      self.moveString = ""
+      self.moveClass = None
+      self.valid = False
+
+   def setAlgebraicMove(self, move):
+      if type(move) == str:
+         self.setAlgebraicMoveUsingString(move)
+      elif type(move) == AlgebraicMove:
+         self.setAlgebraicMoveUsingClass(move)
+      else:
+         return
+
+   def getAlgebraicMoveString(self):
+      return self.moveString
+
+   def getAlgebraicMoveClass(self):
+      return self.moveClass
+
+   def setAlgebraicMoveUsingString(self, move):
+      """Generate our internal AlgebraicMove class and use that to reset the string"""
+      self.moveString = move
+      castleMatch = self.castle.match(move)
+      regularMatch = self.move.match(move)
+      if castleMatch:
+         kingsideCastle = self.isKingsideCastleFromMatch(castleMatch.group(1))
+         move = AlgebraicMove(castle=True, kingside=kingsideCastle)
+         self.valid = self.setAlgebraicMoveUsingClass(move)
+      elif regularMatch:
+         subs = regularMatch.groups()
+         piece = self.getPieceStringFromMatch(subs[0])
+         disambiguation = self.getDisambiguationFromMatches(subs[1], subs[2])
+         capture = self.isCaptureFromMatch(subs[3])
+         promotion = self.getPieceStringFromMatch(subs[5], True)
+         check = self.isCheckFromMatch(subs[6])
+         mate = self.isMateFromMatch(subs[6])
+         move = AlgebraicMove(subs[4], piece, disambiguation, capture, promotion, check, mate, False, False)
+         self.valid = self.setAlgebraicMoveUsingClass(move)
+      else:
+         self.setAlgebraicMoveUsingClass(AlgebraicMove())
+         self.valid = False
+      return self.valid
+      
+   def isKingsideCastleFromMatch(self, matchValue):
+      if matchValue != None:
+         return False
+      else:
+         return True
+         
+   def getPieceStringFromMatch(self, matchValue, pawnPossible=False):
+      piece = ""
+      if matchValue != None:
+         piece = Piece.invPieces[matchValue]
+      else:
+         if not pawnPossible:
+            piece = "Pawn"
+      return piece
+      
+   def getDisambiguationFromMatches(self, fileValue, rankValue):
+      disambiguation = ""
+      if fileValue != None:
+         disambiguation += fileValue
+      if rankValue != None:
+         disambiguation += rankValue
+      return disambiguation
+      
+   def isCaptureFromMatch(self, matchValue):
+      capture = False
+      if matchValue != None:
+         capture = True
+      return capture
+      
+   def isCheckFromMatch(self, matchValue):
+      check = False
+      if matchValue != None and matchValue == "+":
+         check = True
+      return check
+      
+   def isMateFromMatch(self, matchValue):
+      mate = False
+      if matchValue != None and matchValue == "#":
+         mate = True
+      return mate
+         
+   def setAlgebraicMoveUsingClass(self, move):
+      """Set the passed in move class and generate our move string based upon it"""
+      self.moveClass = move
+      
+      if self.moveClass.castle == True:
+         self.valid = True
+         self.moveString = self.getCastleStringFromClass(self.moveClass.kingside)
+         
+      else:
+         self.valid = True
+         self.moveString = ""
+         self.moveString += self.getPieceStringFromClassAndValidate(self.moveClass.piece)
+         self.moveString += self.getDisambiguationStringFromClassAndValidate(self.moveClass.disambiguation)
+         self.moveString += self.getCaptureStringFromClass(self.moveClass.capture)
+         self.moveString += self.getDestinationStringFromClassAndValidate(self.moveClass.destination)
+         self.moveString += self.getPromotionStringFromClassAndValidate(self.moveClass.promotion, self.moveClass.piece)
+         self.moveString += self.getCheckMateStringFromClassAndValidate(self.moveClass.check, self.moveClass.mate)
+    
+      return self.valid
+         
+   def getCastleStringFromClass(self, classValue):
+      castleStr = "O-"
+      if classValue == False:
+         castleStr += "O-"
+      castleStr += "O"
+      return castleStr
+         
+   def getPieceStringFromClassAndValidate(self, classValue):
+      pieceStr = ""
+      if classValue != "Pawn":
+         if classValue in Piece.pieces:
+            pieceStr = Piece.pieces[classValue]
+         else:
+            self.valid = False
+            pieceStr = classValue
+      return pieceStr
+      
+   def getDisambiguationStringFromClassAndValidate(self, classValue):
+      disambigLen = len(classValue)
+      if disambigLen > 2:
+         self.valid = False
+      elif disambigLen == 2 and not Coord.isCoordValid(classValue):
+         self.valid = False
+      elif disambigLen == 1 and not (classValue in Coord.ranks or classValue in Coord.files):
+         self.valid = False
+      return classValue
+      
+   def getCaptureStringFromClass(self, classValue):
+      captureStr = ""
+      if classValue:
+         captureStr += "x"
+      return captureStr
+      
+   def getDestinationStringFromClassAndValidate(self, classValue):
+      destLen = len(classValue)
+      if destLen > 2 or destLen == 0:
+         self.valid = False
+      elif destLen == 2 and not Coord.isCoordValid(classValue):
+         self.valid = False
+      return classValue
+      
+   def getPromotionStringFromClassAndValidate(self, classPromoteValue, classPieceValue):
+      promotionStr = ""
+      if classPieceValue != "Pawn" and classPromoteValue != "":
+         self.valid = False
+      if classPromoteValue != "":
+         if classPromoteValue in Piece.pieces:
+            promotionStr += "="+Piece.pieces[classPromoteValue]
+         else:
+            self.valid = False
+            promotionStr += "="+classPromoteValue
+      return promotionStr
+      
+   def getCheckMateStringFromClassAndValidate(self, classCheckValue, classMateValue):
+      checkOrMate = ""
+      if classCheckValue and classMateValue:
+         self.valid = False
+      if classCheckValue:
+         checkOrMate += "+"
+      if classMateValue:
+         checkOrMate += "#"
+      return checkOrMate
+         
+  
+      
+
+
+if __name__ == "__main__":
+   print("Algebraic Notation Module") 
+   
+   parser = AlgebraicParser()
+   print(parser.move.pattern)
+
+   def setAndDisplay(move):
+      parser.setAlgebraicMove(move)
+      print(parser.getAlgebraicMoveString())
+      print(parser.getAlgebraicMoveClass())
+      print("VALIDITY: "+ str(parser.valid))
+      print("")
+
+
+   setAndDisplay("Pe4")
+   setAndDisplay("Be4")
+   setAndDisplay("Nxe4#")
+   setAndDisplay("bxa8=Q+#")
+   setAndDisplay("B5c1")
+   setAndDisplay("O-O")
+   setAndDisplay("O-O-O")
+
+   
+   #def destination, 
+   #piece="Pawn", 
+   #disambiguation="", 
+   #capture=False, 
+   #promotion="", 
+   #check=False, 
+   #mate=False, 
+   #castle=False, 
+   #kingside=False):
+   setAndDisplay(AlgebraicMove("h8", "Pawn", "g", True, "Rook", False, False))
+   setAndDisplay(AlgebraicMove("e2", "King", "", False, "", False, False))
+   setAndDisplay(AlgebraicMove("a6", "Queen", "", True, "", True, True))
+   setAndDisplay(AlgebraicMove(castle=True, kingside=False))
+   
+   
