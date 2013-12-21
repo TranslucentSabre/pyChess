@@ -218,6 +218,7 @@ if __name__ == "__main__":
    
    parser = AlgebraicParser()
    print(parser.move.pattern)
+   print(parser.castle.pattern)
 
    def setAndDisplay(move):
       parser.setAlgebraicMove(move)
