@@ -119,17 +119,21 @@ if one is given use the argument as a filename to write the savegame to."""
       self.files.changeOutputFile(exportFileName)
       if self.files.outFileStatus != "Ready":
          print("Cannot write to that file. Please try again.")
-      elif self._booleanPrompt("This will erase the contents of the export file before writing. Continue?"):
+      elif self._booleanPrompt("This will erase the contents of the t file before writing. Continue?"):
          self.files.writeGame()
          
    def do_config(self,arg):
       """Set or read configuration options. The first argument must be one of the following settings:
-      import (read/set default import file)
-      export (read/set default export file)
+      import    (read/set default import file)
+      export    (read/set default export file)
+      name      (read/set the players real name)
+      location  (read/set the physical location of the player)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen.""" 
-      configMap = {"import":ValidConfig.ImportFile, "export":ValidConfig.ExportFile}
-      args = arg.split()
+      configMap = {"import":ValidConfig.ImportFile, "export":ValidConfig.ExportFile, \
+                   "name":ValidConfig.PlayerName, "location":ValidConfig.Location}
+      #Only split once, this allows the user to supply items with spaces in them
+      args = arg.split(None,1)
       numOfArgs = len(args)
       if numOfArgs == 0:
          print("You must specify a configuration item to set or read.")
@@ -144,6 +148,7 @@ if one is given use the argument as a filename to write the savegame to."""
                else:
                   print(config)
             else:
+               args[1] = args[1].strip("\"")
                self._setConfigOption(configMap[args[0]],args[1])
          else:
             print("Invalid setting provided")

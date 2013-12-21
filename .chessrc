@@ -1,2 +1,4 @@
-defImportFile:savegame.dat
+playerName:Tim Myers
 defExportFile:savegame.dat
+defImportFile:savegame.dat
+location:Huntsville

@@ -2,9 +2,11 @@
 import io
 
 class ValidConfig(object):
-      validConfigItems = ["defImportFile","defExportFile"]
+      validConfigItems = ["defImportFile","defExportFile","playerName","location"]
       ImportFile = validConfigItems[0]
       ExportFile = validConfigItems[1]
+      PlayerName = validConfigItems[2]
+      Location   = validConfigItems[3]
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""
