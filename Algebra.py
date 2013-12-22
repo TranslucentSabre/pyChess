@@ -26,6 +26,22 @@ class AlgebraicMove(object):
             retString += item + ": "+ str(value) + "\n"
       return retString
 
+   def __eq__(self, other):
+      if type(other) != AlgebraicMove:
+         return NotImplemented
+      if self.destination == other.destination and \
+         self.piece == other.piece and \
+         self.disambiguation == other.disambiguation and \
+         self.capture == other.capture and \
+         self.promotion == other.promotion and \
+         self.check == other.check and \
+         self.mate == other.mate and \
+         self.castle == other.castle and \
+         self.kingside == other.kingside:
+         return True
+      else:
+         return False
+
 class AlgebraicParser(object):
    pieces = r"[RNBQK]"
    ranks = r"[1-8]"
@@ -227,6 +243,10 @@ if __name__ == "__main__":
       print("VALIDITY: "+ str(parser.valid))
       print("")
 
+   def areMovesTheSame(move1, move2):
+      print(move1)
+      print(move2)
+      print(str(move1 == move2))
 
    setAndDisplay("Pe4")
    setAndDisplay("Be4")
@@ -251,4 +271,9 @@ if __name__ == "__main__":
    setAndDisplay(AlgebraicMove("a6", "Queen", "", True, "", True, True))
    setAndDisplay(AlgebraicMove(castle=True, kingside=False))
    
-   
+   areMovesTheSame(AlgebraicMove("a1", "Bishop", "", False, "", False, False, False, False), \
+                   AlgebraicMove("a1", "Bishop", "", False, "", False, False, False, False))
+   areMovesTheSame(AlgebraicMove("f3", "Rook", "e", False, "", True, False, True, False), \
+                   AlgebraicMove("f3", "Rook", "e", False, "", True, False, False, False))
+   areMovesTheSame(AlgebraicMove("f3", "Rook", "e", False, "", True, False, True, False), \
+                   "Ref3+")
