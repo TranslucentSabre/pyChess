@@ -27,6 +27,7 @@ class Player(object):
       self.parser = AlgebraicParser()
       self.algebraicMoveClass = AlgebraicMove()
       self.parsedAlgebraicMoveClass = AlgebraicMove()
+      self.updateMoveValues = False
       
       self.pawns = [Pawn(self.color,file+self.pawnRank) for file in Coord.files]
       self.rooks = [Rook(self.color,file+self.majorRank) for file in rookFiles]
@@ -84,12 +85,13 @@ class Player(object):
          algebraicMove = self.parser.getAlgebraicMoveClass()
          #Save off this move class, we will use it as a comparison after the move
          self.parsedAlgebraicMoveClass = algebraicMove
-         potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.capture, algebraicMove.disambiguation)
+         potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.disambiguation)
          if len(potentialPieces) == 0:
             self.moveResultReason = "No pieces of that type may move to the selected location"
          elif len(potentialPieces) > 1:
                self.moveResultReason = "More than one piece may move based upon your selection"
          else:
+            self.updateMoveValues = True
             moveValid = self._movePiece(potentialPieces[0].position, algebraicMove.destination)
             if moveValid:
                self.parser.setAlgebraicMove(self.algebraicMoveClass)
@@ -101,15 +103,13 @@ class Player(object):
          self.moveResultReason = "Invalid algebraic notation given."
          return False
    
-   def getPiecesThatCanMoveToLocation(self, pieceType, location, capture, disambiguation):
-      """Return a list of my pieces that can move to given location, filtered by capture potential and disambiguation"""
+   def getPiecesThatCanMoveToLocation(self, pieceType, location, disambiguation):
+      """Return a list of my pieces that can move to given location, filtered by disambiguation"""
       vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
       def canPieceMoveToLocation(piece):
          moves = piece.getValidMoves(vBoard)
          result = True
          if location not in moves:
-            result = False
-         if capture and not self.enemyPieceIsAtLocation(location,vBoard):
             result = False
          if disambiguation != "" and disambiguation not in piece.position:
             result = False
@@ -128,17 +128,14 @@ class Player(object):
          result = True
       return result
       
-   def _movePiece(self, startCoord, endCoord, debugMove=False):
+   def _movePiece(self, startCoord, endCoord):
       """This checks a number of things, it makes sure that we do have a piece at the start location, it makes sure that the requested 
          end location is in the physical move set of the peice, it captures an opponent piece at the end location if necessary, and it 
          makes sure that the requested move does not expose or leave our king in check. If any of these problem areas arise, it leaves both 
          players in their initial state."""
-      if not debugMove:
+      if self.updateMoveValues:
          self.algebraicMoveClass = AlgebraicMove()
          moveClass = self.algebraicMoveClass
-      else:
-         self.debugAlgebraicMoveClass = AlgebraicMove()
-         moveClass = self.debugAlgebraicMoveClass
       checkBoard = VerifyBoard(self.getAllPieces()+self.otherPlayer.getAllPieces())
       pieces = filter(self._generateLocator(startCoord), self.getAllPieces())
       self.moveResultReason = "Success"
@@ -151,6 +148,7 @@ class Player(object):
          validMoves = piece.getValidMoves(checkBoard)
          #print(validMoves)
          if endCoord in validMoves:
+            self.generateDisambiguation(piece, endCoord)
             moveClass.destination = endCoord
             piece.move(endCoord)
             self.moveResultReason = piece.moveResultReason
@@ -186,6 +184,27 @@ class Player(object):
       """Run and checks after a move is completed successfully"""
       self.otherPlayer.verifyCheck()
       self.otherPlayer.verifyMate()
+      
+   def generateDisambiguation(self, piece, destination):
+      """If required, based upon instance variable, generate the disambiguation string"""
+      if self.updateMoveValues:
+         #We need the file if that works, the rank if the file does not, and both if neither is sufficient
+         pieces = self.getPiecesThatCanMoveToLocation(piece.piece, destination, "")
+         pieces.remove(piece)
+         if len(pieces) > 0:
+            fileAndRank = piece.position
+            otherPositions = []
+            for otherPiece in pieces:
+               otherPositions.append(otherPiece.position)
+            if any(fileAndRank[0] not in position for position in otherPositions):
+               self.algebraicMoveClass.disambiguation = fileAndRank[0]
+            elif any(fileAndRank[1] not in position for position in otherPositions):
+               self.algebraicMoveClass.disambiguation = fileAndRank[1]
+            else:
+               self.algebraicMoveClass.disambiguation = piece.position
+         else:
+            #This is the only piece that can move here, no disambiguation needed
+            self.algebraicMoveClass.disambiguation = ""
    
    def undoLastMove(self):
       """Undo the previous move"""

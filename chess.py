@@ -123,7 +123,7 @@ if one is given use the argument as a filename to read a savegame from."""
                self.files.appendMoveForWrite(currentPlayer.lastMoveString)
             else:
                print("Move:",move,"\nMove Failed:\n"+currentPlayer.moveResultReason)
-               self.do_restart(self,"") 
+               self.do_restart() 
 
    def do_export(self,arg):
       """Write the current game out to a file. This will erase the old export file. If no argument is given use the default export file configured,
