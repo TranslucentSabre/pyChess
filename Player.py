@@ -144,17 +144,17 @@ class Player(object):
          #This is a little weird at first glance
          #It is possible that filter could return more than one piece
          #so what we do is we move the first one found
-         moveClass.piece = piece.piece
+         self.algebraicMoveClass.piece = piece.piece
          validMoves = piece.getValidMoves(checkBoard)
          #print(validMoves)
          if endCoord in validMoves:
             self.generateDisambiguation(piece, endCoord)
-            moveClass.destination = endCoord
+            self.algebraicMoveClass.destination = endCoord
             piece.move(endCoord)
             self.moveResultReason = piece.moveResultReason
             capturePiece = None
             if self.enemyPieceIsAtLocation(endCoord, checkBoard):
-               moveClass.capture = True
+               self.algebraicMoveClass.capture = True
                capturePiece = self.capture(endCoord, checkBoard)
             self.lastMove = (piece, capturePiece)
             if self.verifyCheck():
@@ -174,10 +174,13 @@ class Player(object):
    def _testMove(self, startCoord, endCoord):
       """We are just testing to see if a move is valid, we do not care if it affects the other player,
          and we want it to have no lasting impact on the board"""
-      testMoveValid = self._movePiece(startCoord, endCoord, True)
+      savedSetting = self.updateMoveValues
+      self.updateMoveValues = False
+      testMoveValid = self._movePiece(startCoord, endCoord)
       if testMoveValid:
          #Undo that move if it happened to be valid
          self.undoLastMove()
+      self.updateMoveValues = savedSetting
       return testMoveValid
       
    def _postMoveChecks(self):
