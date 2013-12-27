@@ -63,12 +63,14 @@ class Player(object):
       self.lastMoveString = ""
       if self.mateCheck():
          return False
+      self.updateMoveValues = True
       moveValid = self._movePiece(startCoord, endCoord)
       if moveValid:
          #print(self.algebraicMoveClass)
+         self._postMoveChecks()
+         self.algebraicMoveClass.valid = True
          self.parser.setAlgebraicMove(self.algebraicMoveClass)
          self.lastMoveString = self.parser.getAlgebraicMoveString()
-         self._postMoveChecks()
       return moveValid
       
    def setPromotionPiece(self, piece):
@@ -89,14 +91,15 @@ class Player(object):
          if len(potentialPieces) == 0:
             self.moveResultReason = "No pieces of that type may move to the selected location"
          elif len(potentialPieces) > 1:
-               self.moveResultReason = "More than one piece may move based upon your selection"
+            self.moveResultReason = "More than one piece may move based upon your selection"
          else:
             self.updateMoveValues = True
             moveValid = self._movePiece(potentialPieces[0].position, algebraicMove.destination)
             if moveValid:
+               self._postMoveChecks()
+               self.algebraicMoveClass.valid = True
                self.parser.setAlgebraicMove(self.algebraicMoveClass)
                self.lastMoveString = self.parser.getAlgebraicMoveString()
-               self._postMoveChecks()
             
          return moveValid
       else:
@@ -135,6 +138,7 @@ class Player(object):
          players in their initial state."""
       if self.updateMoveValues:
          self.algebraicMoveClass = AlgebraicMove()
+         self.algebraicMoveClass.valid = False
          moveClass = self.algebraicMoveClass
       checkBoard = VerifyBoard(self.getAllPieces()+self.otherPlayer.getAllPieces())
       pieces = filter(self._generateLocator(startCoord), self.getAllPieces())
@@ -144,17 +148,17 @@ class Player(object):
          #This is a little weird at first glance
          #It is possible that filter could return more than one piece
          #so what we do is we move the first one found
-         self.algebraicMoveClass.piece = piece.piece
+         self.generateMovePiece(piece)
          validMoves = piece.getValidMoves(checkBoard)
          #print(validMoves)
          if endCoord in validMoves:
             self.generateDisambiguation(piece, endCoord)
-            self.algebraicMoveClass.destination = endCoord
+            self.generateDestination(endCoord)
             piece.move(endCoord)
             self.moveResultReason = piece.moveResultReason
             capturePiece = None
             if self.enemyPieceIsAtLocation(endCoord, checkBoard):
-               self.algebraicMoveClass.capture = True
+               self.generateCapture(True)
                capturePiece = self.capture(endCoord, checkBoard)
             self.lastMove = (piece, capturePiece)
             if self.verifyCheck():
@@ -187,6 +191,7 @@ class Player(object):
       """Run and checks after a move is completed successfully"""
       self.otherPlayer.verifyCheck()
       self.otherPlayer.verifyMate()
+      self.generateCheckMate(self.otherPlayer.checked, self.otherPlayer.mated)
       
    def generateDisambiguation(self, piece, destination):
       """If required, based upon instance variable, generate the disambiguation string"""
@@ -208,6 +213,28 @@ class Player(object):
          else:
             #This is the only piece that can move here, no disambiguation needed
             self.algebraicMoveClass.disambiguation = ""
+
+   def generateMovePiece(self, piece):
+      """If required, generate the piece string for the piece to be moved"""
+      if self.updateMoveValues:
+         self.algebraicMoveClass.piece = piece.piece
+
+   def generateDestination(self, coord):
+      """If required, generate the destination coordinate for the move"""
+      if self.updateMoveValues:
+         self.algebraicMoveClass.destination = coord
+
+   def generateCapture(self, captureHappened):
+      """If required, generate the capture status for the move"""
+      if self.updateMoveValues:
+         self.algebraicMoveClass.capture = captureHappened
+
+   def generateCheckMate(self, checkStatus, mateStatus):
+      """If required, generate the check and mate status for the move"""
+      if self.updateMoveValues:
+         self.algebraicMoveClass.check = checkStatus
+         self.algebraicMoveClass.mate = mateStatus
+      
    
    def undoLastMove(self):
       """Undo the previous move"""

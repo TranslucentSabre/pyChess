@@ -132,7 +132,8 @@ class AlgebraicParser(object):
       
    def isCheckFromMatch(self, matchValue):
       check = False
-      if matchValue != None and matchValue == "+":
+      #If we are mated then we are also checked
+      if matchValue != None and matchValue == "+" or matchValue == "#":
          check = True
       return check
       
@@ -217,12 +218,14 @@ class AlgebraicParser(object):
       
    def getCheckMateStringFromClassAndValidate(self, classCheckValue, classMateValue):
       checkOrMate = ""
-      if classCheckValue and classMateValue:
-         self.valid = False
-      if classCheckValue:
-         checkOrMate += "+"
+      #If we are mated then we are also checked, so make sure that both flags are true before signalling mate
       if classMateValue:
-         checkOrMate += "#"
+         if classCheckValue:
+            checkOrMate += "#"
+         else:
+            self.valid = False
+      elif classCheckValue:
+         checkOrMate += "+"
       return checkOrMate
          
   
