@@ -337,6 +337,44 @@ class Pawn(Piece):
    """A Pawn"""
    def __init__(self, color, position):
       super(Pawn,self).__init__("Pawn", color, position)
+      self.enPassantCapturable = False
+      #Pawns need to be color self-aware to allow for En Passant capture
+      if self.color == colors.WHITE:
+         self.startingRank = "2"
+         self.chargeRank = "4"
+      elif self.color == colors.BLACK:
+         self.startingRank = "7"
+         self.chargeRank = "5"
+      
+   def move(self,coord):
+      """Attempt to move this piece, it will fail if the movement places it outside the
+         board or if it does not have an initial position"""
+      self.moveResultReason = "Success"
+      if self.placed:
+         if Coord.isCoordValid(coord):
+            self.lastState = (self.position, self.moved, self.enPassantCapturable)
+            self.position = coord
+            self.moved = True
+            if self.startingRank in self.position and self.chargeRank in coord:
+               self.enPassantCapturable = True
+            else:
+               self.enPassantCapturable = False
+            return True
+         self.moveResultReason = "Destination is not a valid chess square."
+         return False
+      self.moveResultReason = "Piece has not been placed on the board."
+      return False
+      
+   def undoLastMove(self):
+      """Undo the last move performed by this piece"""
+      if len(self.lastState) == 3:
+         self.position = self.lastState[0]
+         self.moved = self.lastState[1]
+         self.enPassantCapturable = self.lastState[2]
+         self.lastState = ()
+         
+   def getCaptureCoords(self):
+      pass
 
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Pawn"""
@@ -347,8 +385,8 @@ class Pawn(Piece):
          rankModifier = 1
          if self.color == colors.BLACK:
             rankModifier = -1
-         captures = [ chr(fileNum-1) + str(rankNum + (rankModifier * 1)), chr(fileNum +1) + str(rankNum + (rankModifier * 1))]
-         regular = [ chr(fileNum) + str(rankNum + (rankModifier * 1)) ]
+         captures = [ chr(fileNum-1) + str(rankNum + rankModifier), chr(fileNum +1) + str(rankNum + rankModifier)]
+         regular = [ chr(fileNum) + str(rankNum + rankModifier) ]
          if (not self.moved):
             regular.append(chr(fileNum) + str(rankNum + (rankModifier * 2)))
          validMoves = []

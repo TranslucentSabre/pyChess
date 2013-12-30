@@ -170,6 +170,10 @@ class Player(object):
                return False
             #print(moveClass)
             return True
+         elif attemptEnPassant(piece, endCoord):
+            #AttemptEnPassant will do any specialized movement required for that move
+            #It will update all state variables appropriately
+            return True
          self.moveResultReason = "The end square is not in the valid move range of this piece."
          return False
       self.moveResultReason = "No piece found at that start square."
@@ -234,6 +238,11 @@ class Player(object):
       if self.updateMoveValues:
          self.algebraicMoveClass.check = checkStatus
          self.algebraicMoveClass.mate = mateStatus
+         
+   def attemptEnPassant(piece, destination):
+      if type(piece) == Pawn:
+         pass
+      return False
       
    
    def undoLastMove(self):
