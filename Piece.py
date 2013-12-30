@@ -342,9 +342,11 @@ class Pawn(Piece):
       if self.color == colors.WHITE:
          self.startingRank = "2"
          self.chargeRank = "4"
+         self.rankModifier = 1
       elif self.color == colors.BLACK:
          self.startingRank = "7"
          self.chargeRank = "5"
+         self.rankModifier = -1
       
    def move(self,coord):
       """Attempt to move this piece, it will fail if the movement places it outside the
@@ -374,7 +376,9 @@ class Pawn(Piece):
          self.lastState = ()
          
    def getCaptureCoords(self):
-      pass
+      fileNum = ord(self.position[0])
+      rankNum = int(self.position[1])
+      return [coord for coord in [chr(fileNum-1) + str(rankNum + self.rankModifier), chr(fileNum +1) + str(rankNum + self.rankModifier)] if Coord.isCoordValid(coord)]
 
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Pawn"""
@@ -382,13 +386,10 @@ class Pawn(Piece):
       if vBoard.getPiece(currentPosition) == self:
          fileNum = ord(currentPosition[0])
          rankNum = int(currentPosition[1])
-         rankModifier = 1
-         if self.color == colors.BLACK:
-            rankModifier = -1
-         captures = [ chr(fileNum-1) + str(rankNum + rankModifier), chr(fileNum +1) + str(rankNum + rankModifier)]
-         regular = [ chr(fileNum) + str(rankNum + rankModifier) ]
+         captures = [ chr(fileNum-1) + str(rankNum + self.rankModifier), chr(fileNum +1) + str(rankNum + self.rankModifier)]
+         regular = [ chr(fileNum) + str(rankNum + self.rankModifier) ]
          if (not self.moved):
-            regular.append(chr(fileNum) + str(rankNum + (rankModifier * 2)))
+            regular.append(chr(fileNum) + str(rankNum + (self.rankModifier * 2)))
          validMoves = []
          for move in captures:
             if Coord.isCoordValid(move):

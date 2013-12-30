@@ -112,7 +112,7 @@ class Player(object):
       def canPieceMoveToLocation(piece):
          moves = piece.getValidMoves(vBoard)
          result = True
-         if location not in moves:
+         if (location not in moves) and (type(piece) == Pawn and location not in piece.getCaptureCoords()):
             result = False
          if disambiguation != "" and disambiguation not in piece.position:
             result = False
@@ -170,7 +170,7 @@ class Player(object):
                return False
             #print(moveClass)
             return True
-         elif attemptEnPassant(piece, endCoord):
+         elif self.attemptEnPassant(piece, endCoord):
             #AttemptEnPassant will do any specialized movement required for that move
             #It will update all state variables appropriately
             return True
@@ -239,9 +239,12 @@ class Player(object):
          self.algebraicMoveClass.check = checkStatus
          self.algebraicMoveClass.mate = mateStatus
          
-   def attemptEnPassant(piece, destination):
+   def attemptEnPassant(self, piece, destination):
       if type(piece) == Pawn:
-         pass
+         possibles = piece.getCaptureCoords()
+         print(possibles)
+         if destination in possibles:
+            pass
       return False
       
    
