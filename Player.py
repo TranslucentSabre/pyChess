@@ -4,6 +4,11 @@ from Algebra import *
 import Coord
 
 
+class MoveType(object):
+   NORMAL = ""
+   CAPTURE = "x"
+   EN_PASSANT = "e.n."
+   CASTLE = "O"
 
 class Player(object):
    """Base player class"""
@@ -57,7 +62,7 @@ class Player(object):
          mated = True
       return mated
       
-   def move(self, startCoord, endCoord):
+   def move(self, startCoord, endCoord, promotion=""):
       """Attempt to make a move and return whether the move was possible or not, if this returns false
          the reason for the failure will be in my moveResultReason member"""
       self.lastMoveString = ""
@@ -108,9 +113,8 @@ class Player(object):
    
    def getPiecesThatCanMoveToLocation(self, pieceType, location, disambiguation):
       """Return a list of my pieces that can move to given location, filtered by disambiguation"""
-      vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
       def canPieceMoveToLocation(piece):
-         moves = piece.getValidMoves(vBoard)
+         moves = self.getValidMovesForPiece(piece)
          result = True
          #TODO I may need the player-based valid moves here instead so that it can know about En Passant
          if (location not in moves):
@@ -119,7 +123,52 @@ class Player(object):
             result = False
          return result
       return list(filter(canPieceMoveToLocation, self.pieceMap[pieceType]))
-   
+      
+   def getValidMovesForPieceAtCoord(self, coord):
+      """Return a map of available moves for the piece at the coordinate, move mapped to move type"""
+      validMap = {}
+      vBoard = VerifyBoard(self.getAllPieces)
+      piece = vBoard.getPiece(coord)
+      if piece:
+         validMap = self.getValidMovesForPiece(piece)
+      return validMap
+      
+   def getValidMovesForPiece(self, piece):
+      """Return a map of available moves for the piece, move mapped to move type"""
+      validMap = {}
+      vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
+      if piece and piece.color == self.color:
+         validList = piece.getValidMoves(vBoard)
+         for move in validList:
+            if self.enemyPieceIsAtLocation(move, vBoard):
+               validMap[move] = MoveType.CAPTURE
+            else:
+               validMap[move] = MoveType.NORMAL
+         #En Passant checking for Pawns
+         if type(piece) == Pawn:
+            capturables = piece.getCaptureCoords()
+            for move in capturables:
+               if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
+                  validMap[move] = MoveType.EN_PASSANT
+         #TODO Now check for Castle Moves
+         elif type(piece) == King:
+            pass
+      return validMap
+      
+   def canPawnCaptureEnPassantAtCoord(self, pawn, coord):
+      if type(pawn) == Pawn:
+         possibleEnemyPosition = coord[0] + pawn.position[1]
+         vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
+         enemyPiece = vBoard.getPiece(possibleEnemyPosition)
+         if type(enemyPiece) == Pawn:
+            if enemyPiece.enPassantCapturable:
+               return True
+            else:
+               return False
+         else:
+            return False
+      return False
+      
    def _generateLocator(self,coord):
       """Returns a function that only accepts pieces that are at the specificed coordinate"""
       return lambda piece: piece.position == coord
