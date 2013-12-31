@@ -116,7 +116,6 @@ class Player(object):
       def canPieceMoveToLocation(piece):
          moves = self.getValidMovesForPiece(piece)
          result = True
-         #TODO I may need the player-based valid moves here instead so that it can know about En Passant
          if (location not in moves):
             result = False
          if disambiguation != "" and disambiguation not in piece.position:
@@ -190,7 +189,7 @@ class Player(object):
          self.algebraicMoveClass = AlgebraicMove()
          self.algebraicMoveClass.valid = False
          moveClass = self.algebraicMoveClass
-      checkBoard = VerifyBoard(self.getAllPieces()+self.otherPlayer.getAllPieces())
+ 
       pieces = filter(self._generateLocator(startCoord), self.getAllPieces())
       self.moveResultReason = "Success"
       previousCheckStatus = self.checked
@@ -199,17 +198,21 @@ class Player(object):
          #It is possible that filter could return more than one piece
          #so what we do is we move the first one found
          self.generateMovePiece(piece)
-         validMoves = piece.getValidMoves(checkBoard)
+         validMoves = self.getValidMovesForPiece(piece)
          #print(validMoves)
          if endCoord in validMoves:
             self.generateDisambiguation(piece, endCoord)
             self.generateDestination(endCoord)
+            capturePiece = None
+            if validMoves[endCoord] == MoveType.CAPTURE:
+               self.generateCapture(piece, True)
+               capturePiece = self.capture(endCoord)
+            elif validMoves[endCoord] == MoveType.EN_PASSANT:
+               #We know that this is a pawn now
+               self.generateCapture(piece, True)
+               capturePiece = self.capture(endCoord[0]+piece.position[1])
             piece.move(endCoord)
             self.moveResultReason = piece.moveResultReason
-            capturePiece = None
-            if self.enemyPieceIsAtLocation(endCoord, checkBoard):
-               self.generateCapture(True)
-               capturePiece = self.capture(endCoord, checkBoard)
             self.lastMove = (piece, capturePiece)
             if self.verifyCheck():
                self.undoLastMove()
@@ -220,13 +223,8 @@ class Player(object):
                return False
             #print(moveClass)
             return True
-         elif self.attemptEnPassant(piece, endCoord):
-            #AttemptEnPassant will do any specialized movement required for that move
-            #It will update all state variables appropriately
-            return True
          else:
-            #TODO Add back this line, I am currently abusing the move result reason for debug
-            #self.moveResultReason = "The end square is not in the valid move range of this piece."
+            self.moveResultReason = "The end square is not in the valid move range of this piece."
             pass
          return False
       self.moveResultReason = "No piece found at that start square."
@@ -281,35 +279,19 @@ class Player(object):
       if self.updateMoveValues:
          self.algebraicMoveClass.destination = coord
 
-   def generateCapture(self, captureHappened):
+   def generateCapture(self, piece, captureHappened):
       """If required, generate the capture status for the move"""
       if self.updateMoveValues:
          self.algebraicMoveClass.capture = captureHappened
+         if captureHappened and type(piece) == Pawn:
+            #Pawns need to specify their file as disambiguation when capturing
+            self.algebraicMoveClass.disambiguation = piece.position[0]
 
    def generateCheckMate(self, checkStatus, mateStatus):
       """If required, generate the check and mate status for the move"""
       if self.updateMoveValues:
          self.algebraicMoveClass.check = checkStatus
          self.algebraicMoveClass.mate = mateStatus
-         
-   def attemptEnPassant(self, piece, destination):
-      if type(piece) == Pawn:
-         possibles = piece.getCaptureCoords()
-         #print(possibles)
-         if destination in possibles:
-            possibleEnemyPosition = destination[0] + piece.position[1]
-            vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
-            enemyPiece = vBoard.getPiece(possibleEnemyPosition)
-            if type(enemyPiece) == Pawn:
-               if enemyPiece.enPassantCapturable:
-                  self.moveResultReason = "En Passant Capturable pawn detected at " + possibleEnemyPosition
-               else:
-                  self.moveResultReason = "Non En Passant Capturable pawn detected at " + possibleEnemyPosition
-            else:
-               self.moveResultReason = "Non-pawn (or no) piece detected at " + possibleEnemyPosition + ", not en Passant"
-         else:
-            self.moveResultReason = "Non-valid move for En Passant possibility"
-      return False
       
    
    def undoLastMove(self):
@@ -325,8 +307,9 @@ class Player(object):
          return True
       return False
       
-   def capture(self, coord, vBoard):
+   def capture(self, coord):
       """Capture the piece from the other player at the given coordinate"""
+      vBoard = VerifyBoard(self.getAllPieces()+self.otherPlayer.getAllPieces())
       capturePiece = vBoard.getPiece(coord)
       self.otherPlayer.giveCapturedPiece(capturePiece)
       self.captured.append(capturePiece)
@@ -350,7 +333,7 @@ class Player(object):
       """Return a list of my pieces that can capture the piece at the given location"""
       vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
       def canPieceAttackLocation(piece):
-         moves = piece.getValidMoves(vBoard)
+         moves = self.getValidMovesForPiece(piece)
          if location in moves and self.enemyPieceIsAtLocation(location,vBoard):
             return True
       return list(filter(canPieceAttackLocation, self.getAllPieces()))
@@ -379,9 +362,8 @@ class Player(object):
             #Assume mated unless proven otherwise"""
             self.mated = True
             #Always check to see if we can just move the king away"""
-            vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
             kingCanMove = False
-            kingMovements = self.king.getValidMoves(vBoard)
+            kingMovements = self.getValidMovesForPiece(self.king)
             for move in kingMovements:
                   if self._testMove(self.king.position, move):
                      kingCanMove = True
@@ -393,6 +375,7 @@ class Player(object):
                #I believe that there are no cases where two or more attacking pieces can be stopped by
                #anything other than moving the king
                attacker = attackingPieces[0]
+               vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
                pathToKing = attacker.getPath(self.king.position, vBoard)
                
                #Now get all of my pieces minus the king, we have already taken care of his movements
