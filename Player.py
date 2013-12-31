@@ -112,7 +112,8 @@ class Player(object):
       def canPieceMoveToLocation(piece):
          moves = piece.getValidMoves(vBoard)
          result = True
-         if (location not in moves) and (type(piece) == Pawn and location not in piece.getCaptureCoords()):
+         #TODO I may need the player-based valid moves here instead so that it can know about En Passant
+         if (location not in moves):
             result = False
          if disambiguation != "" and disambiguation not in piece.position:
             result = False
@@ -174,7 +175,10 @@ class Player(object):
             #AttemptEnPassant will do any specialized movement required for that move
             #It will update all state variables appropriately
             return True
-         self.moveResultReason = "The end square is not in the valid move range of this piece."
+         else:
+            #TODO Add back this line, I am currently abusing the move result reason for debug
+            #self.moveResultReason = "The end square is not in the valid move range of this piece."
+            pass
          return False
       self.moveResultReason = "No piece found at that start square."
       return False
@@ -242,9 +246,20 @@ class Player(object):
    def attemptEnPassant(self, piece, destination):
       if type(piece) == Pawn:
          possibles = piece.getCaptureCoords()
-         print(possibles)
+         #print(possibles)
          if destination in possibles:
-            pass
+            possibleEnemyPosition = destination[0] + piece.position[1]
+            vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
+            enemyPiece = vBoard.getPiece(possibleEnemyPosition)
+            if type(enemyPiece) == Pawn:
+               if enemyPiece.enPassantCapturable:
+                  self.moveResultReason = "En Passant Capturable pawn detected at " + possibleEnemyPosition
+               else:
+                  self.moveResultReason = "Non En Passant Capturable pawn detected at " + possibleEnemyPosition
+            else:
+               self.moveResultReason = "Non-pawn (or no) piece detected at " + possibleEnemyPosition + ", not en Passant"
+         else:
+            self.moveResultReason = "Non-valid move for En Passant possibility"
       return False
       
    

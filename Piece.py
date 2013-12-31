@@ -355,12 +355,12 @@ class Pawn(Piece):
       if self.placed:
          if Coord.isCoordValid(coord):
             self.lastState = (self.position, self.moved, self.enPassantCapturable)
-            self.position = coord
-            self.moved = True
             if self.startingRank in self.position and self.chargeRank in coord:
                self.enPassantCapturable = True
             else:
                self.enPassantCapturable = False
+            self.position = coord
+            self.moved = True
             return True
          self.moveResultReason = "Destination is not a valid chess square."
          return False
