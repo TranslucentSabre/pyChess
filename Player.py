@@ -5,10 +5,11 @@ import Coord
 
 
 class MoveType(object):
-   NORMAL = ""
-   CAPTURE = "x"
-   EN_PASSANT = "e.n."
-   CASTLE = "O"
+   NORMAL = 1
+   CAPTURE = 2
+   EN_PASSANT = 4
+   CASTLE = 8
+   PROMOTION = 16
 
 class Player(object):
    """Base player class"""
@@ -69,7 +70,7 @@ class Player(object):
       if self.mateCheck():
          return False
       self.updateMoveValues = True
-      moveValid = self._movePiece(startCoord, endCoord)
+      moveValid = self._movePiece(startCoord, endCoord, promotion)
       if moveValid:
          #print(self.algebraicMoveClass)
          self._postMoveChecks()
@@ -99,7 +100,7 @@ class Player(object):
             self.moveResultReason = "More than one piece may move based upon your selection"
          else:
             self.updateMoveValues = True
-            moveValid = self._movePiece(potentialPieces[0].position, algebraicMove.destination)
+            moveValid = self._movePiece(potentialPieces[0].position, algebraicMove.destination, algebraicMove.promotion)
             if moveValid:
                self._postMoveChecks()
                self.algebraicMoveClass.valid = True
@@ -139,16 +140,20 @@ class Player(object):
       if piece and piece.color == self.color:
          validList = piece.getValidMoves(vBoard)
          for move in validList:
+            validMap[move] = 0
             if self.enemyPieceIsAtLocation(move, vBoard):
-               validMap[move] = MoveType.CAPTURE
+               validMap[move] |= MoveType.CAPTURE
             else:
-               validMap[move] = MoveType.NORMAL
-         #En Passant checking for Pawns
+               validMap[move] |= MoveType.NORMAL
+         #En Passant and promotion checking for Pawns
          if type(piece) == Pawn:
             capturables = piece.getCaptureCoords()
             for move in capturables:
                if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
-                  validMap[move] = MoveType.EN_PASSANT
+                  validMap[move] |= MoveType.EN_PASSANT
+            for move in validMap:
+               if self.promotionRank in move:
+                  validMap[move] |= MoveType.PROMOTION
          #TODO Now check for Castle Moves
          elif type(piece) == King:
             pass
@@ -180,7 +185,7 @@ class Player(object):
          result = True
       return result
       
-   def _movePiece(self, startCoord, endCoord):
+   def _movePiece(self, startCoord, endCoord, promotionPiece=""):
       """This checks a number of things, it makes sure that we do have a piece at the start location, it makes sure that the requested 
          end location is in the physical move set of the peice, it captures an opponent piece at the end location if necessary, and it 
          makes sure that the requested move does not expose or leave our king in check. If any of these problem areas arise, it leaves both 
@@ -204,10 +209,10 @@ class Player(object):
             self.generateDisambiguation(piece, endCoord)
             self.generateDestination(endCoord)
             capturePiece = None
-            if validMoves[endCoord] == MoveType.CAPTURE:
+            if validMoves[endCoord] & MoveType.CAPTURE:
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord)
-            elif validMoves[endCoord] == MoveType.EN_PASSANT:
+            elif validMoves[endCoord] & MoveType.EN_PASSANT:
                #We know that this is a pawn now
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord[0]+piece.position[1])
