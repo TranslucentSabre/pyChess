@@ -3,6 +3,7 @@ from colorama import init
 from Board import *
 from Player import *
 from ChessFile import *
+import Piece
 import Coord
 import cmd
 
@@ -56,18 +57,30 @@ class Chess(cmd.Cmd):
       self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)
       
    def do_move(self,arg):
-      """Move a piece, this function takes two chess coordinates, the first being the starting square of the piece to move and the second being the ending square of the move.\n
-         Ex. move b2 b4\n"""
+      """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n
+         Ex. move b2 b4\n
+             move e7 f8 Q\n"""
       moves = arg.split()
-      if len(moves) != 2:
+      if len(moves) < 2:
          print("Two coordinates are required.")
          return
+      if len(moves) > 3:
+         print("Only two coordinates and one promotion piece are accepted")
+         return
+      index = 0
+      promotionPieceStr = None
       for move in moves:
-         if not Coord.isCoordValid(move):
-            print("Both arguments must be valid chess coordinates.")
+         if index == 2:
+            if move not in Piece.invPieces:
+               print("Third argument must be a valid Piece abbreviation")
+               return
+            promotionPieceStr = move
+         elif not Coord.isCoordValid(move):
+            print("First two arguments must be valid chess coordinates.")
             return
+         index = index + 1
       currentPlayer = self._getNextPlayer()
-      if currentPlayer.move(moves[0], moves[1]):
+      if currentPlayer.move(moves[0], moves[1], promotionPieceStr):
          self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
          print(self.gameBoard.getPendingMoveString())
          if self._booleanPrompt("Are you sure this is the move you would like to make?"):

@@ -140,20 +140,20 @@ class Player(object):
       if piece and piece.color == self.color:
          validList = piece.getValidMoves(vBoard)
          for move in validList:
-            validMap[move] = 0
+            validMap[move] = set()
             if self.enemyPieceIsAtLocation(move, vBoard):
-               validMap[move] |= MoveType.CAPTURE
+               validMap[move].add(MoveType.CAPTURE)
             else:
-               validMap[move] |= MoveType.NORMAL
+               validMap[move].add(MoveType.NORMAL)
          #En Passant and promotion checking for Pawns
          if type(piece) == Pawn:
             capturables = piece.getCaptureCoords()
             for move in capturables:
                if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
-                  validMap[move] |= MoveType.EN_PASSANT
+                  validMap[move].add(MoveType.EN_PASSANT)
             for move in validMap:
                if self.promotionRank in move:
-                  validMap[move] |= MoveType.PROMOTION
+                  validMap[move].add(MoveType.PROMOTION)
          #TODO Now check for Castle Moves
          elif type(piece) == King:
             pass
@@ -185,7 +185,7 @@ class Player(object):
          result = True
       return result
       
-   def _movePiece(self, startCoord, endCoord, promotionPiece=""):
+   def _movePiece(self, startCoord, endCoord, promotionPieceStr=""):
       """This checks a number of things, it makes sure that we do have a piece at the start location, it makes sure that the requested 
          end location is in the physical move set of the peice, it captures an opponent piece at the end location if necessary, and it 
          makes sure that the requested move does not expose or leave our king in check. If any of these problem areas arise, it leaves both 
@@ -195,10 +195,10 @@ class Player(object):
          self.algebraicMoveClass.valid = False
          moveClass = self.algebraicMoveClass
  
-      pieces = filter(self._generateLocator(startCoord), self.getAllPieces())
+      currPieces = filter(self._generateLocator(startCoord), self.getAllPieces())
       self.moveResultReason = "Success"
       previousCheckStatus = self.checked
-      for piece in pieces:
+      for piece in currPieces:
          #This is a little weird at first glance
          #It is possible that filter could return more than one piece
          #so what we do is we move the first one found
@@ -209,16 +209,28 @@ class Player(object):
             self.generateDisambiguation(piece, endCoord)
             self.generateDestination(endCoord)
             capturePiece = None
-            if validMoves[endCoord] & MoveType.CAPTURE:
+            promotionPiece = None
+            if MoveType.CAPTURE in validMoves[endCoord]:
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord)
-            elif validMoves[endCoord] & MoveType.EN_PASSANT:
+            elif MoveType.EN_PASSANT in validMoves[endCoord]:
                #We know that this is a pawn now
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord[0]+piece.position[1])
             piece.move(endCoord)
+            if MoveType.PROMOTION in validMoves[endCoord]:
+               if promotionPieceStr not in invPieces or promotionPieceStr == pieces["Pawn"]:
+                  piece.undoLastMove()
+                  self.moveResultReason = "No valid piece given to promote to."
+                  return False
+               promotionTypeString = invPieces[promotionPieceStr]
+               promotionPiece = globals()[promotionTypeString](self.color, endCoord)
+               pieceList = self.pieceMap[piece.piece]
+               pieceList.remove(piece)
+               promotionPieceList = self.pieceMap[promotionPiece.piece]
+               promotionPieceList.append(promotionPiece)
             self.moveResultReason = piece.moveResultReason
-            self.lastMove = (piece, capturePiece)
+            self.lastMove = (piece, capturePiece, promotionPiece)
             if self.verifyCheck():
                self.undoLastMove()
                if previousCheckStatus:
@@ -301,10 +313,16 @@ class Player(object):
    
    def undoLastMove(self):
       """Undo the previous move"""
-      if len(self.lastMove) == 2:
+      if len(self.lastMove) == 3:
          self.lastMove[0].undoLastMove()
          if self.lastMove[1] != None:
             self.otherPlayer.returnPiece(self.captured.pop(self.captured.index(self.lastMove[1])))
+         if self.lastMove[2] != None:
+            #We are undoing a promotion special things need to happened
+            pieceList = self.pieceMap[self.lastMove[0].piece]
+            pieceList.append(self.lastMove[0])
+            promotionPieceList = self.pieceMap[self.lastMove[2].piece]
+            promotionPieceList.remove(self.lastMove[2])
          self.lastMove = ()
          #It is almost guaranteed that we could undo back into a check position. Because of that, run
          #the verify to update our state properly
