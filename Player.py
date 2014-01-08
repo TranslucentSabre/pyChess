@@ -1,6 +1,7 @@
 from Piece import *
 from Board import *
 from Algebra import *
+from ChessFile import *
 import Coord
 
 
@@ -190,6 +191,8 @@ class Player(object):
          end location is in the physical move set of the peice, it captures an opponent piece at the end location if necessary, and it 
          makes sure that the requested move does not expose or leave our king in check. If any of these problem areas arise, it leaves both 
          players in their initial state."""
+      if isDebugEnabled():
+         print("Debuging information is enabled")
       if self.updateMoveValues:
          self.algebraicMoveClass = AlgebraicMove()
          self.algebraicMoveClass.valid = False
@@ -432,3 +435,13 @@ class BlackPlayer(Player):
       self.majorRank = "8"
       self.promotionRank = "1"
       super(BlackPlayer,self).__init__()
+      
+def isDebugEnabled():
+   config = ConfigFile()
+   debug = config.getConfigItem(ValidConfig.Debug["name"])
+   if debug == "True":
+      debug = True
+   else:
+      debug = False
+   del config
+   return debug

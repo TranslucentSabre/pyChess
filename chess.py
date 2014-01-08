@@ -161,10 +161,12 @@ if one is given use the argument as a filename to write the savegame to."""
       export    (read/set default export file)
       name      (read/set the players real name)
       location  (read/set the physical location of the player)
+      debug     (read/set whether or not debugging information should be displayed, valid values are True and False)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen.""" 
       configMap = {"import":ValidConfig.ImportFile, "export":ValidConfig.ExportFile, \
-                   "name":ValidConfig.PlayerName, "location":ValidConfig.Location}
+                   "name":ValidConfig.PlayerName, "location":ValidConfig.Location, \
+                   "debug":ValidConfig.Debug}
       #Only split once, this allows the user to supply items with spaces in them
       args = arg.split(None,1)
       numOfArgs = len(args)
@@ -182,7 +184,8 @@ if one is given use the argument as a filename to write the savegame to."""
                   print(config)
             else:
                args[1] = args[1].strip("\"")
-               self._setConfigOption(configMap[args[0]],args[1])
+               if not self._setConfigOption(configMap[args[0]],args[1]):
+                  print("Set Failed. Valid options are:", configMap[args[0]]["values"])
          else:
             print("Invalid setting provided")
 
@@ -195,14 +198,18 @@ if one is given use the argument as a filename to write the savegame to."""
 
    def _getConfigOption(self, option):
       retVal = ""
-      if option in ValidConfig.validConfigItems:
-         retVal = self.files.getConfigItem(option)
+      if option["name"] in ValidConfig.validConfigItems:
+         retVal = self.files.getConfigItem(option["name"])
       return retVal
 
    def _setConfigOption(self, option, value):
-      if option in ValidConfig.validConfigItems:
-         self.files.setConfigItem(option, value)
+      if option["name"] in ValidConfig.validConfigItems:
+         if option["values"] and value not in option["values"]:
+            return False
+         self.files.setConfigItem(option["name"], value)
          self.files.writeConfig()
+         return True
+      return False
       
    def _booleanPrompt(self, prompt):
       confirmation = input(prompt+" [y/n]:")

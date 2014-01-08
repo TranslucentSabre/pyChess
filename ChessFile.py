@@ -2,11 +2,12 @@
 import io
 
 class ValidConfig(object):
-      validConfigItems = ["defImportFile","defExportFile","playerName","location"]
-      ImportFile = validConfigItems[0]
-      ExportFile = validConfigItems[1]
-      PlayerName = validConfigItems[2]
-      Location   = validConfigItems[3]
+      validConfigItems = ["defImportFile","defExportFile","playerName","location","debug"]
+      ImportFile = {"name" : validConfigItems[0]}
+      ExportFile = {"name" : validConfigItems[1]}
+      PlayerName = {"name" : validConfigItems[2]}
+      Location   = {"name" : validConfigItems[3]}
+      Debug      = {"name" : validConfigItems[4], "values" : ["True", "False"]}
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""
@@ -51,8 +52,8 @@ class ChessFiles(ConfigFile):
 
    def __init__(self):
       super(ChessFiles, self).__init__()
-      self.inFileName = self.getConfigItem(ValidConfig.ImportFile)
-      self.outFileName = self.getConfigItem(ValidConfig.ExportFile)
+      self.inFileName = self.getConfigItem(ValidConfig.ImportFile["name"])
+      self.outFileName = self.getConfigItem(ValidConfig.ExportFile["name"])
 
       self.attemptInputFileOpen(self.inFileName)
       self.attemptOutputFileOpen(self.outFileName)
