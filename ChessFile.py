@@ -45,6 +45,21 @@ class ConfigFile(object):
    def setConfigItem(self,key,item):
       if key in ValidConfig.validConfigItems:
          self.configDict[key] = item
+         
+         
+def isDebugEnabled():
+   config = ConfigFile()
+   debug = config.getConfigItem(ValidConfig.Debug["name"])
+   if debug == "True":
+      debug = True
+   else:
+      debug = False
+   del config
+   return debug
+   
+def debugPrint(*printables):
+   if isDebugEnabled():
+      print(printables)
 
 
 class ChessFiles(ConfigFile):

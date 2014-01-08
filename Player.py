@@ -67,21 +67,22 @@ class Player(object):
    def move(self, startCoord, endCoord, promotion=""):
       """Attempt to make a move and return whether the move was possible or not, if this returns false
          the reason for the failure will be in my moveResultReason member"""
+      debugPrint("Two coordinate move attempted.")
       self.lastMoveString = ""
       if self.mateCheck():
+         debugPrint("Checkmate detected, game over.")
          return False
       self.updateMoveValues = True
       moveValid = self._movePiece(startCoord, endCoord, promotion)
       if moveValid:
          #print(self.algebraicMoveClass)
+         debugPrint("Checking for check and checkmate.")
          self._postMoveChecks()
          self.algebraicMoveClass.valid = True
          self.parser.setAlgebraicMove(self.algebraicMoveClass)
          self.lastMoveString = self.parser.getAlgebraicMoveString()
+         debugPrint("Algebraic move string:", self.lastMoveString)
       return moveValid
-      
-   def setPromotionPiece(self, piece):
-      pass
       
    def algebraicMove(self, move):
       """Take in a string in algebraic notation and attempt that move"""
@@ -435,13 +436,4 @@ class BlackPlayer(Player):
       self.majorRank = "8"
       self.promotionRank = "1"
       super(BlackPlayer,self).__init__()
-      
-def isDebugEnabled():
-   config = ConfigFile()
-   debug = config.getConfigItem(ValidConfig.Debug["name"])
-   if debug == "True":
-      debug = True
-   else:
-      debug = False
-   del config
-   return debug
+
