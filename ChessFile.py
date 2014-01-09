@@ -1,5 +1,7 @@
 #!/usr/bin/python3
+from __future__ import print_function
 import io
+
 
 class ValidConfig(object):
       validConfigItems = ["defImportFile","defExportFile","playerName","location","debug"]
@@ -59,7 +61,7 @@ def isDebugEnabled():
    
 def debugPrint(*printables):
    if isDebugEnabled():
-      print(printables)
+      print(*printables)
 
 
 class ChessFiles(ConfigFile):

@@ -67,7 +67,7 @@ class Player(object):
    def move(self, startCoord, endCoord, promotion=""):
       """Attempt to make a move and return whether the move was possible or not, if this returns false
          the reason for the failure will be in my moveResultReason member"""
-      debugPrint("Two coordinate move attempted.")
+      debugPrint("move-Two coordinate move attempted.")
       self.lastMoveString = ""
       if self.mateCheck():
          debugPrint("Checkmate detected, game over.")
@@ -75,27 +75,33 @@ class Player(object):
       self.updateMoveValues = True
       moveValid = self._movePiece(startCoord, endCoord, promotion)
       if moveValid:
-         #print(self.algebraicMoveClass)
          debugPrint("Checking for check and checkmate.")
          self._postMoveChecks()
          self.algebraicMoveClass.valid = True
          self.parser.setAlgebraicMove(self.algebraicMoveClass)
+         debugPrint("Output Algebraic move class:\n", self.algebraicMoveClass)
          self.lastMoveString = self.parser.getAlgebraicMoveString()
          debugPrint("Algebraic move string:", self.lastMoveString)
+      debugPrint("move-end\n")
       return moveValid
       
    def algebraicMove(self, move):
       """Take in a string in algebraic notation and attempt that move"""
+      debugPrint("algebraicMove-Algebraic move attempted.")
       self.lastMoveString = ""
       if self.mateCheck():
+         debugPrint("Checkmate detected, game over.")
          return False
       moveValid = False
       self.parser.setAlgebraicMove(move)
+      debugPrint("Incoming Algebraic move string: ", move)
       if self.parser.valid == True:
          algebraicMove = self.parser.getAlgebraicMoveClass()
-         #Save off this move class, we will use it as a comparison after the move
+         #Save off this move class, we can use it as a comparison after the move
          self.parsedAlgebraicMoveClass = algebraicMove
+         debugPrint("Parsed Algebraic move class:\n", self.parsedAlgebraicMoveClass)
          potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.disambiguation)
+         debugPrint("Pieces that can move: ", potentialPieces)
          if len(potentialPieces) == 0:
             self.moveResultReason = "No pieces of that type may move to the selected location"
          elif len(potentialPieces) > 1:
@@ -104,64 +110,87 @@ class Player(object):
             self.updateMoveValues = True
             moveValid = self._movePiece(potentialPieces[0].position, algebraicMove.destination, algebraicMove.promotion)
             if moveValid:
+               debugPrint("Checking for check and checkmate.")
                self._postMoveChecks()
                self.algebraicMoveClass.valid = True
                self.parser.setAlgebraicMove(self.algebraicMoveClass)
+               debugPrint("Output Algebraic move class:\n", self.algebraicMoveClass)
                self.lastMoveString = self.parser.getAlgebraicMoveString()
-            
+               debugPrint("Algebraic move string:", self.lastMoveString)
+         debugPrint("\n")   
          return moveValid
       else:
+         debugPrint("Invalid Algebraic move string.")
          self.moveResultReason = "Invalid algebraic notation given."
+         debugPrint("algebraicMove-end\n")
          return False
    
    def getPiecesThatCanMoveToLocation(self, pieceType, location, disambiguation):
       """Return a list of my pieces that can move to given location, filtered by disambiguation"""
+      debugPrint("getPiecesThatCanMoveToLocation-Finding piece to move.")
       def canPieceMoveToLocation(piece):
          moves = self.getValidMovesForPiece(piece)
+         debugPrint("Piece and it's moves:", piece.position, moves)
          result = True
          if (location not in moves):
+            debugPrint("Piece disqualified due to lack of ability to move.")
             result = False
          if disambiguation != "" and disambiguation not in piece.position:
+            debugPrint("Piece disqualified due to disambiguation.")
             result = False
          return result
-      return list(filter(canPieceMoveToLocation, self.pieceMap[pieceType]))
+      pieceList = list(filter(canPieceMoveToLocation, self.pieceMap[pieceType]))
+      debugPrint("getPiecesThatCanMoveToLocation-end\n")
+      return pieceList
       
    def getValidMovesForPieceAtCoord(self, coord):
       """Return a map of available moves for the piece at the coordinate, move mapped to move type"""
+      debugPrint("getValidMovesForPieceAtCoord-begin")
       validMap = {}
       vBoard = VerifyBoard(self.getAllPieces)
       piece = vBoard.getPiece(coord)
       if piece:
+         debugPrint("Found piece for getting valid moves.")
          validMap = self.getValidMovesForPiece(piece)
+      debugPrint("getValidMovesForPieceAtCoord-end\n")
       return validMap
       
    def getValidMovesForPiece(self, piece):
       """Return a map of available moves for the piece, move mapped to move type"""
+      debugPrint("getValidMovesForPiece-Get valid moves for: ", piece.position)
       validMap = {}
       vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
       if piece and piece.color == self.color:
          validList = piece.getValidMoves(vBoard)
+         debugPrint("Valid moves from Piece: ", validList)
          for move in validList:
             validMap[move] = set()
             if self.enemyPieceIsAtLocation(move, vBoard):
+               debugPrint("Set move as capture:", move)
                validMap[move].add(MoveType.CAPTURE)
             else:
                validMap[move].add(MoveType.NORMAL)
          #En Passant and promotion checking for Pawns
          if type(piece) == Pawn:
+            debugPrint("Pawn Specials.")
             capturables = piece.getCaptureCoords()
             for move in capturables:
                if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
+                  debugPrint("Set move as En Passant: ", move)
                   validMap[move].add(MoveType.EN_PASSANT)
             for move in validMap:
                if self.promotionRank in move:
+                  debugPrint("Set move as Promotion: ", move)
                   validMap[move].add(MoveType.PROMOTION)
          #TODO Now check for Castle Moves
          elif type(piece) == King:
+            debugPrint("King Specials.")
             pass
+      debugPrint("getValidMovesForPiece-end\n")
       return validMap
       
    def canPawnCaptureEnPassantAtCoord(self, pawn, coord):
+      """Determine if the destination coordinate is an En Passant capture for the given pawn"""
       if type(pawn) == Pawn:
          possibleEnemyPosition = coord[0] + pawn.position[1]
          vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
@@ -192,8 +221,7 @@ class Player(object):
          end location is in the physical move set of the peice, it captures an opponent piece at the end location if necessary, and it 
          makes sure that the requested move does not expose or leave our king in check. If any of these problem areas arise, it leaves both 
          players in their initial state."""
-      if isDebugEnabled():
-         print("Debuging information is enabled")
+      debugPrint("_movePiece-begin")
       if self.updateMoveValues:
          self.algebraicMoveClass = AlgebraicMove()
          self.algebraicMoveClass.valid = False
@@ -203,12 +231,13 @@ class Player(object):
       self.moveResultReason = "Success"
       previousCheckStatus = self.checked
       for piece in currPieces:
+         debugPrint("Found piece at location: ", piece)
          #This is a little weird at first glance
          #It is possible that filter could return more than one piece
          #so what we do is we move the first one found
          self.generateMovePiece(piece)
          validMoves = self.getValidMovesForPiece(piece)
-         #print(validMoves)
+         debugPrint("Valid moves for piece: ", validMoves)
          if endCoord in validMoves:
             self.generateDisambiguation(piece, endCoord)
             self.generateDestination(endCoord)
@@ -226,6 +255,7 @@ class Player(object):
                if promotionPieceStr not in invPieces or promotionPieceStr == pieces["Pawn"]:
                   piece.undoLastMove()
                   self.moveResultReason = "No valid piece given to promote to."
+                  debugPrint("_movePiece-end")
                   return False
                promotionTypeString = invPieces[promotionPieceStr]
                promotionPiece = globals()[promotionTypeString](self.color, endCoord)
@@ -241,14 +271,18 @@ class Player(object):
                   self.moveResultReason = "That move does not resolve the check!"
                else:
                   self.moveResultReason = "That move results in check!"
+               debugPrint("_movePiece-end")
                return False
             #print(moveClass)
+            debugPrint("_movePiece-end")
             return True
          else:
             self.moveResultReason = "The end square is not in the valid move range of this piece."
             pass
+         debugPrint("_movePiece-end")
          return False
       self.moveResultReason = "No piece found at that start square."
+      debugPrint("_movePiece-end")
       return False
       
    def _testMove(self, startCoord, endCoord):
