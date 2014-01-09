@@ -23,7 +23,7 @@ class AlgebraicMove(object):
       for item in dir(self):
          if not item.startswith("_"):
             value = getattr(self, item)
-            retString += item + ": "+ str(value) + "\n"
+            retString += item + ": "+ str(value) + "; "
       return retString
 
    def __eq__(self, other):
