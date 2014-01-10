@@ -6,11 +6,11 @@ import Coord
 
 
 class MoveType(object):
-   NORMAL = 1
-   CAPTURE = 2
-   EN_PASSANT = 4
-   CASTLE = 8
-   PROMOTION = 16
+   NORMAL = "normal"
+   CAPTURE = "capture"
+   EN_PASSANT = "enPassant"
+   CASTLE = "castle"
+   PROMOTION = "promotion"
 
 class Player(object):
    """Base player class"""
@@ -250,28 +250,42 @@ class Player(object):
             capturePiece = None
             promotionPiece = None
             if MoveType.CAPTURE in validMoves[endCoord]:
+               self.debug.dprint("Capture move.")
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord)
+               self.debug.dprint("Captured piece: ", capturePiece)
             elif MoveType.EN_PASSANT in validMoves[endCoord]:
                #We know that this is a pawn now
+               self.debug.dprint("En Passant Capture move.")
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord[0]+piece.position[1])
+               self.debug.dprint("En Passant Captured piece: ", capturePiece)
             piece.move(endCoord)
+            self.moveResultReason = piece.moveResultReason
+            #Go ahead and set the last move, minus any promotion piece, so that we can do an undo if promotion falls through
+            self.lastMove = (piece, capturePiece, promotionPiece)
             if MoveType.PROMOTION in validMoves[endCoord]:
-               if promotionPieceStr not in invPieces or promotionPieceStr == pieces["Pawn"]:
-                  piece.undoLastMove()
+               if promotionPieceStr not in pieces or promotionPieceStr == "Pawn":
+                  self.debug.dprint("Invalid promotion move.")
+                  self.undoLastMove()
                   self.moveResultReason = "No valid piece given to promote to."
                   self.debug.endSection()
                   return False
-               promotionTypeString = invPieces[promotionPieceStr]
-               promotionPiece = globals()[promotionTypeString](self.color, endCoord)
+               self.debug.dprint("Valid promotion move.")
+               self.generatePromotion(promotionPieceStr)
+               promotionPiece = globals()[promotionPieceStr](self.color, endCoord)
+               self.debug.dprint("Pawn: ", id(piece))
                pieceList = self.pieceMap[piece.piece]
                pieceList.remove(piece)
+               self.debug.dprint("Pawn list: ", [id(printPiece) for printPiece in pieceList])
+               self.debug.dprint("Promotion piece: ", promotionPieceStr, id(promotionPiece))
                promotionPieceList = self.pieceMap[promotionPiece.piece]
                promotionPieceList.append(promotionPiece)
-            self.moveResultReason = piece.moveResultReason
+               self.debug.dprint("Promotion piece list: ", [id(printPiece) for printPiece in promotionPieceList])
             self.lastMove = (piece, capturePiece, promotionPiece)
+            self.debug.dprint("Last Move: ", self.lastMove)
             if self.verifyCheck():
+               self.debug.dprint("That move placed us in check.")
                self.undoLastMove()
                if previousCheckStatus:
                   self.moveResultReason = "That move does not resolve the check!"
@@ -279,7 +293,6 @@ class Player(object):
                   self.moveResultReason = "That move results in check!"
                self.debug.endSection()
                return False
-            #print(moveClass)
             self.debug.endSection()
             return True
          else:
@@ -353,6 +366,16 @@ class Player(object):
       if self.updateMoveValues:
          self.algebraicMoveClass.check = checkStatus
          self.algebraicMoveClass.mate = mateStatus
+         
+   def generatePromotion(self, promotion):
+      """If required, generate the promotion piece for the move"""
+      if self.updateMoveValues:
+         if promotion in pieces:
+            self.algebraicMoveClass.promotion = promotion
+         elif promotion in invPieces:
+            self.algebraicMoveClass.promotion = invPieces[promotion]
+         else:
+            self.algebraicMoveClass.promotion = ""
       
    
    def undoLastMove(self):
