@@ -443,10 +443,9 @@ class Player(object):
       
    def getPiecesThatThreatenLocation(self, location):
       """Return a list of my pieces that can capture the piece at the given location"""
-      vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
       def canPieceAttackLocation(piece):
          moves = self.getValidMovesForPiece(piece)
-         if location in moves and self.enemyPieceIsAtLocation(location,vBoard):
+         if location in moves and MoveTypes.CAPTURE in moves[location]:
             return True
       return list(filter(canPieceAttackLocation, self.getAllPieces()))
    

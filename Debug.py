@@ -1,5 +1,5 @@
 from __future__ import print_function
-from ChessFile import * 
+from ChessFile import isDebugEnabled 
 
 
 class Debug(object):
@@ -32,13 +32,4 @@ class Debug(object):
       numSections = len(self.sections)
       if numSections > 1:
          self.indentString = "".center((numSections-1)*self.indent)
-         
-def isDebugEnabled():
-     config = ConfigFile()
-     debug = config.getConfigItem(ValidConfig.Debug["name"])
-     if debug == "True":
-        debug = True
-     else:
-        debug = False
-     del config
-     return debug
+

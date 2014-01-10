@@ -14,8 +14,10 @@ class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""
    
    def __init__(self):
-      self.configFile = open(".chessrc", "r+")
-      self.configDict = {}
+      try:
+         self.configFile = open(".chessrc", "r+")
+      except OSError:
+         self.configFile = open(".chessrc", "w")
       self.readConfig()
       
    def __del__(self):
@@ -135,6 +137,16 @@ class ChessFiles(ConfigFile):
    def _seekToMoves(self):
       self.inFile.seek(self.moveSeekLocation)
 
+         
+def isDebugEnabled():
+     config = ConfigFile()
+     debug = config.getConfigItem(ValidConfig.Debug["name"])
+     if debug == "True":
+        debug = True
+     else:
+        debug = False
+     del config
+     return debug
 
 
 if __name__ == "__main__":
