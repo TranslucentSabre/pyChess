@@ -44,13 +44,14 @@ class AlgebraicMove(object):
 
 class AlgebraicParser(object):
    pieces = r"[RNBQK]"
+   promotionPieces = r"[RNBQ]"
    ranks = r"[1-8]"
    files = r"[a-h]"
    rePieceString = r"("+pieces+")?"
    reDisambiguationString = r"(?:("+files+")?("+ranks+")?)"
    reCaptureString = r"(x)?"
    reDestinationString = r"("+files+ranks+")"
-   rePromotionString = r"(?:=("+pieces+"))?"
+   rePromotionString = r"(?:=("+promotionPieces+"))?"
    reCheckMateString = r"(\+|#)?"
    reCastleString = "O-(O-)?O"
    reString = r"\A"+rePieceString + reDisambiguationString + reCaptureString \

@@ -265,7 +265,7 @@ class Player(object):
             #Go ahead and set the last move, minus any promotion piece, so that we can do an undo if promotion falls through
             self.lastMove = (piece, capturePiece, promotionPiece)
             if MoveType.PROMOTION in validMoves[endCoord]:
-               if promotionPieceStr not in pieces or promotionPieceStr == "Pawn":
+               if promotionPieceStr not in pieces or promotionPieceStr == "Pawn" or promotionPieceStr == "King":
                   self.debug.dprint("Invalid promotion move.")
                   self.undoLastMove()
                   self.moveResultReason = "No valid piece given to promote to."
@@ -277,11 +277,11 @@ class Player(object):
                self.debug.dprint("Pawn: ", id(piece))
                pieceList = self.pieceMap[piece.piece]
                pieceList.remove(piece)
-               self.debug.dprint("Pawn list: ", [id(printPiece) for printPiece in pieceList])
+               self.debug.dprint("Pawn list: ", getIds(pieceList))
                self.debug.dprint("Promotion piece: ", promotionPieceStr, id(promotionPiece))
                promotionPieceList = self.pieceMap[promotionPiece.piece]
                promotionPieceList.append(promotionPiece)
-               self.debug.dprint("Promotion piece list: ", [id(printPiece) for printPiece in promotionPieceList])
+               self.debug.dprint("Promotion piece list: ", getIds(promotionPieceList))
             self.lastMove = (piece, capturePiece, promotionPiece)
             self.debug.dprint("Last Move: ", self.lastMove)
             if self.verifyCheck():
@@ -307,20 +307,27 @@ class Player(object):
    def _testMove(self, startCoord, endCoord):
       """We are just testing to see if a move is valid, we do not care if it affects the other player,
          and we want it to have no lasting impact on the board"""
+      self.debug.startSection("_testMove")
       savedSetting = self.updateMoveValues
       self.updateMoveValues = False
+      self.debug.dprint("Disabling algebraic move generation")
       testMoveValid = self._movePiece(startCoord, endCoord)
       if testMoveValid:
-         #Undo that move if it happened to be valid
+         self.debug.dprint("Move succeeded, undoing.")
          self.undoLastMove()
       self.updateMoveValues = savedSetting
+      self.debug.dprint("Algebraic move generation restored to: ", self.updateMoveValues)
+      self.debug.endSection()
       return testMoveValid
       
    def _postMoveChecks(self):
       """Run and checks after a move is completed successfully"""
+      self.debug.startSection("_postMoveChecks")
+      self.debug.dprint(self.color, "Player Post move checking, transfer control to other player to check and see if they are checked or mated.")
       self.otherPlayer.verifyCheck()
       self.otherPlayer.verifyMate()
       self.generateCheckMate(self.otherPlayer.checked, self.otherPlayer.mated)
+      self.debug.endSection()
       
    def generateDisambiguation(self, piece, destination):
       """If required, based upon instance variable, generate the disambiguation string"""
@@ -380,12 +387,14 @@ class Player(object):
    
    def undoLastMove(self):
       """Undo the previous move"""
+      self.debug.startSection("undoLastMove")
       if len(self.lastMove) == 3:
+         self.debug.dprint("Valid last move to undo detected: ", self.lastMove)
          self.lastMove[0].undoLastMove()
          if self.lastMove[1] != None:
             self.otherPlayer.returnPiece(self.captured.pop(self.captured.index(self.lastMove[1])))
          if self.lastMove[2] != None:
-            #We are undoing a promotion special things need to happened
+            #We are undoing a promotion, special things need to happen
             pieceList = self.pieceMap[self.lastMove[0].piece]
             pieceList.append(self.lastMove[0])
             promotionPieceList = self.pieceMap[self.lastMove[2].piece]
@@ -394,23 +403,36 @@ class Player(object):
          #It is almost guaranteed that we could undo back into a check position. Because of that, run
          #the verify to update our state properly
          self.verifyCheck()
+         self.debug.dprint("Verifying/setting check status after undo: ", self.checked)
+         self.debug.endSection()
          return True
+      self.debug.endSection()
       return False
       
    def capture(self, coord):
       """Capture the piece from the other player at the given coordinate"""
+      self.debug.startSection("capture")
       vBoard = VerifyBoard(self.getAllPieces()+self.otherPlayer.getAllPieces())
       capturePiece = vBoard.getPiece(coord)
+      self.debug.dprint("Piece to capture: ", id(capturePiece))
+      self.debug.dprint(self.color, "Player transferring control to other to get captured piece")
       self.otherPlayer.giveCapturedPiece(capturePiece)
       self.captured.append(capturePiece)
+      self.debug.dprint("New capture list: ", getIds(self.captured))
+      self.debug.endSection()
       return capturePiece
       
    def giveCapturedPiece(self, piece):
       """Remove the selected piece from our list and return it"""
+      self.debug.startSection("capture")
       #I cannot simply use the all pieces API because that returns a new list
       # and I need to get these pieces where they live
       pieceList = self.pieceMap[piece.piece]
+      self.debug.dprint("Piece list prior to giving: ", piece, getIds(pieceList))
+      self.debug.dprint("Piece removed: ", id(piece))
       capturedPiece = pieceList.pop(pieceList.index(piece))
+      self.debug.dprint("New piece list: ", getIds(pieceList))
+      self.debug.endSection()
       return capturedPiece
       
    def returnPiece(self, piece):
@@ -430,29 +452,34 @@ class Player(object):
    
    def verifyCheck(self):
       """Check to see if I am checked, and update my flag as appropriate"""
+      self.debug.startSection("verifyCheck")
+      self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
       if len(self.otherPlayer.getPiecesThatThreatenLocation(self.king.position)) != 0:
          self.checked = True
       else:
          self.checked = False
-      self.algebraicMoveClass.check = self.checked
+      self.debug.dprint("Our checked status: ", self.checked)
+      self.debug.endSection()
       return self.checked
       
    def verifyMate(self):
       """Check to see if I am mated, and update my flag as appropriate""" 
+      self.debug.startSection("verifyMate")
       if self.checked:
          #Get the attacking pieces to start off with"""
+         self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
          attackingPieces = self.otherPlayer.getPiecesThatThreatenLocation(self.king.position)
          numberOfAttackers = len(attackingPieces)
+         self.debug.dprint("Number of pieces attacking our King: ", numberOfAttackers)
          if numberOfAttackers == 0:
             self.checked = False
-            #We must set this here for correctness
-            self.algebraicMoveClass.check = self.checked
             self.mated = False
          else:
             #Assume mated unless proven otherwise"""
             self.mated = True
             #Always check to see if we can just move the king away"""
             kingCanMove = False
+            self.debug.dprint("Getting all valid moves for the king and trying them.")
             kingMovements = self.getValidMovesForPiece(self.king)
             for move in kingMovements:
                   if self._testMove(self.king.position, move):
@@ -464,6 +491,7 @@ class Player(object):
                #We only check other pieces to see if they can interfere if there is only one attacker,
                #I believe that there are no cases where two or more attacking pieces can be stopped by
                #anything other than moving the king
+               self.debug.dprint("The king is stuck, try moving all other pieces into the path of the one attacker.")
                attacker = attackingPieces[0]
                vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
                pathToKing = attacker.getPath(self.king.position, vBoard)
@@ -477,8 +505,10 @@ class Player(object):
                         self.mated = False
                         break
       else:
+         self.debug.dprint("Not checked.")
          self.mated = False
-      self.algebraicMoveClass.mate = self.mated
+      self.debug.dprint("Our mated status: ", self.mated)
+      self.debug.endSection()
       return self.mated
 
 
@@ -499,4 +529,7 @@ class BlackPlayer(Player):
       self.majorRank = "8"
       self.promotionRank = "1"
       super(BlackPlayer,self).__init__()
+      
+def getIds(lst):
+   return [id(val) for val in lst]
 
