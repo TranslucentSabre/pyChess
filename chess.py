@@ -204,7 +204,7 @@ if one is given use the argument as a filename to write the savegame to."""
 
    def _setConfigOption(self, option, value):
       if option["name"] in ValidConfig.validConfigItems:
-         if option["values"] and value not in option["values"]:
+         if "values" in option and value not in option["values"]:
             return False
          self.files.setConfigItem(option["name"], value)
          self.files.writeConfig()
