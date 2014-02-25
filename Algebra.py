@@ -115,7 +115,7 @@ class AlgebraicParser(object):
    def getPieceStringFromMatch(self, matchValue, pawnPossible=False):
       piece = ""
       if matchValue != None:
-         piece = Piece.invPieces[matchValue]
+         piece = Util.invPieces[matchValue]
       else:
          if not pawnPossible:
             piece = "Pawn"
@@ -178,8 +178,8 @@ class AlgebraicParser(object):
    def getPieceStringFromClassAndValidate(self, classValue):
       pieceStr = ""
       if classValue != "Pawn":
-         if classValue in Piece.pieces:
-            pieceStr = Piece.pieces[classValue]
+         if classValue in Util.pieces:
+            pieceStr = Util.pieces[classValue]
          else:
             self.valid = False
             pieceStr = classValue
@@ -214,8 +214,8 @@ class AlgebraicParser(object):
       if classPieceValue != "Pawn" and classPromoteValue != "":
          self.valid = False
       if classPromoteValue != "":
-         if classPromoteValue in Piece.pieces:
-            promotionStr += "="+Piece.pieces[classPromoteValue]
+         if classPromoteValue in Util.pieces:
+            promotionStr += "="+Util.pieces[classPromoteValue]
          else:
             self.valid = False
             promotionStr += "="+classPromoteValue
@@ -264,6 +264,8 @@ if __name__ == "__main__":
    setAndDisplay("B5c1")
    setAndDisplay("O-O")
    setAndDisplay("O-O-O")
+   setAndDisplay("0-0")
+   setAndDisplay("0-0-0")
 
    
    #def destination, 

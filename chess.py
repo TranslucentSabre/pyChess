@@ -71,10 +71,10 @@ class Chess(cmd.Cmd):
       promotionPieceStr = None
       for move in moves:
          if index == 2:
-            if move not in Piece.invPieces:
+            if move not in Util.invPieces:
                print("Third argument must be a valid Piece abbreviation")
                return
-            promotionPieceStr = Piece.invPieces[move]
+            promotionPieceStr = Util.invPieces[move]
          elif not Util.isCoordValid(move):
             print("First two arguments must be valid chess coordinates.")
             return

@@ -1,12 +1,5 @@
 import Util
 
-pieces = { "Pawn" : "P", "Rook" : "R", "Knight" : "N", "Bishop" : "B", "Queen" : "Q", "King" : "K"}
-invPieces = {"P" : "Pawn", "R" : "Rook", "N" : "Knight", "B" : "Bishop", "Q" : "Queen", "K" : "King"}
-class colors(object):
-   """Central holding place for my colors"""
-   WHITE = "white"
-   BLACK = "black"
-
 class Piece(object):
    """Base Piece Class""" 
    def __init__(self,piece="",color="",position=""):
@@ -20,15 +13,15 @@ class Piece(object):
       if Util.isCoordValid(position):
          self.position = position
          self.placed = True
-      if color in [colors.WHITE, colors.BLACK]:
+      if color in [Util.colors.WHITE, Util.colors.BLACK]:
          self.color = color
-      if piece in pieces:
+      if piece in Util.pieces:
          self.piece = piece
             
    def getPieceLetter(self):
       """Returns the letter used to represent this chess piece"""
       if self.piece != "":
-         return pieces[self.piece]
+         return Util.pieces[self.piece]
       else:
          return " "
             
@@ -341,15 +334,6 @@ class Pawn(Piece):
    def __init__(self, color, position):
       super(Pawn,self).__init__("Pawn", color, position)
       self.enPassantCapturable = False
-      #Pawns need to be color self-aware to allow for En Passant capture
-      if self.color == colors.WHITE:
-         self.startingRank = "2"
-         self.chargeRank = "4"
-         self.rankModifier = 1
-      elif self.color == colors.BLACK:
-         self.startingRank = "7"
-         self.chargeRank = "5"
-         self.rankModifier = -1
       
    def move(self,coord):
       """Attempt to move this piece, it will fail if the movement places it outside the
@@ -358,7 +342,7 @@ class Pawn(Piece):
       if self.placed:
          if Util.isCoordValid(coord):
             self.lastState = (self.position, self.moved, self.enPassantCapturable)
-            if self.startingRank in self.position and self.chargeRank in coord:
+            if self.color.pawnRank in self.position and self.color.pawnChargeRank in coord:
                self.enPassantCapturable = True
             else:
                self.enPassantCapturable = False
@@ -381,7 +365,7 @@ class Pawn(Piece):
    def getCaptureCoords(self):
       fileNum = ord(self.position[0])
       rankNum = int(self.position[1])
-      return [coord for coord in [chr(fileNum-1) + str(rankNum + self.rankModifier), chr(fileNum +1) + str(rankNum + self.rankModifier)] if Util.isCoordValid(coord)]
+      return [coord for coord in [chr(fileNum-1) + str(rankNum + self.color.pawnRankModifier), chr(fileNum +1) + str(rankNum + self.color.pawnRankModifier)] if Util.isCoordValid(coord)]
 
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Pawn"""
@@ -389,10 +373,10 @@ class Pawn(Piece):
       if vBoard.getPiece(currentPosition) == self:
          fileNum = ord(currentPosition[0])
          rankNum = int(currentPosition[1])
-         captures = [ chr(fileNum-1) + str(rankNum + self.rankModifier), chr(fileNum +1) + str(rankNum + self.rankModifier)]
-         regular = [ chr(fileNum) + str(rankNum + self.rankModifier) ]
+         captures = [ chr(fileNum-1) + str(rankNum + self.color.pawnRankModifier), chr(fileNum +1) + str(rankNum + self.color.pawnRankModifier)]
+         regular = [ chr(fileNum) + str(rankNum + self.color.pawnRankModifier) ]
          if (not self.moved):
-            regular.append(chr(fileNum) + str(rankNum + (self.rankModifier * 2)))
+            regular.append(chr(fileNum) + str(rankNum + (self.color.pawnRankModifier * 2)))
          validMoves = []
          for move in captures:
             if Util.isCoordValid(move):

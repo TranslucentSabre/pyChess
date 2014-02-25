@@ -38,12 +38,12 @@ class Player(object):
       
       self.debug = Debug()
       
-      self.pawns = [Pawn(self.color,file+self.pawnRank) for file in Util.files]
-      self.rooks = [Rook(self.color,file+self.majorRank) for file in rookFiles]
-      self.knights = [Knight(self.color,file+self.majorRank) for file in knightFiles]
-      self.bishops = [Bishop(self.color,file+self.majorRank) for file in bishopFiles]
-      self.queens = [Queen(self.color,"d"+self.majorRank)]
-      self.king = King(self.color,"e"+self.majorRank)
+      self.pawns = [Pawn(self.color,file+self.color.pawnRank) for file in Util.files]
+      self.rooks = [Rook(self.color,file+self.color.majorRank) for file in rookFiles]
+      self.knights = [Knight(self.color,file+self.color.majorRank) for file in knightFiles]
+      self.bishops = [Bishop(self.color,file+self.color.majorRank) for file in bishopFiles]
+      self.queens = [Queen(self.color,"d"+self.color.majorRank)]
+      self.king = King(self.color,"e"+self.color.majorRank)
       #This is a lookup table that is primarily used for captures and un-captures
       self.pieceMap = { "Pawn" : self.pawns, 
                         "Rook" : self.rooks, 
@@ -185,7 +185,7 @@ class Player(object):
                   self.debug.dprint("Set move as En Passant: ", move)
                   validMap[move].add(MoveType.EN_PASSANT)
             for move in validMap:
-               if self.promotionRank in move:
+               if self.color.promotionRank in move:
                   self.debug.dprint("Set move as Promotion: ", move)
                   validMap[move].add(MoveType.PROMOTION)
          #TODO Now check for Castle Moves
@@ -265,7 +265,7 @@ class Player(object):
             #Go ahead and set the last move, minus any promotion piece, so that we can do an undo if promotion falls through
             self.lastMove = (piece, capturePiece, promotionPiece)
             if MoveType.PROMOTION in validMoves[endCoord]:
-               if promotionPieceStr not in pieces or promotionPieceStr == "Pawn" or promotionPieceStr == "King":
+               if promotionPieceStr not in Util.pieces or promotionPieceStr == "Pawn" or promotionPieceStr == "King":
                   self.debug.dprint("Invalid promotion move.")
                   self.undoLastMove()
                   self.moveResultReason = "No valid piece given to promote to."
@@ -377,10 +377,10 @@ class Player(object):
    def generatePromotion(self, promotion):
       """If required, generate the promotion piece for the move"""
       if self.updateMoveValues:
-         if promotion in pieces:
+         if promotion in Util.pieces:
             self.algebraicMoveClass.promotion = promotion
-         elif promotion in invPieces:
-            self.algebraicMoveClass.promotion = invPieces[promotion]
+         elif promotion in Util.invPieces:
+            self.algebraicMoveClass.promotion = Util.invPieces[promotion]
          else:
             self.algebraicMoveClass.promotion = ""
       
@@ -445,7 +445,7 @@ class Player(object):
       """Return a list of my pieces that can capture the piece at the given location"""
       def canPieceAttackLocation(piece):
          moves = self.getValidMovesForPiece(piece)
-         if location in moves and MoveTypes.CAPTURE in moves[location]:
+         if location in moves and MoveType.CAPTURE in moves[location]:
             return True
       return list(filter(canPieceAttackLocation, self.getAllPieces()))
    
@@ -514,19 +514,13 @@ class Player(object):
 class WhitePlayer(Player):
    """The Player of the White Pieces"""
    def __init__(self):
-      self.color = colors.WHITE
-      self.pawnRank = "2"
-      self.majorRank = "1"
-      self.promotionRank = "8"
+      self.color = Util.colors.WHITE
       super(WhitePlayer,self).__init__()
       
 class BlackPlayer(Player):
    """The Player of the Black Pieces"""
    def __init__(self):
-      self.color = colors.BLACK
-      self.pawnRank = "7"
-      self.majorRank = "8"
-      self.promotionRank = "1"
+      self.color = Util.colors.BLACK
       super(BlackPlayer,self).__init__()
       
 def getIds(lst):

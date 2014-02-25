@@ -19,17 +19,17 @@ class DisplayBoard(Board):
       self.captures = [[],[]]
       self.whiteCheckMateStatus = (False,False)
       self.blackCheckMateStatus = (False,False)
-      color = colors.WHITE
+      color = Util.colors.WHITE
       numberOfCoordinates = len(Util.allCoords)
       for index in range(numberOfCoordinates):
          coordKey = Util.allCoords[index]
          self.board[coordKey] = [color,Piece()]
          #If we reach the end of the rank we do not flip the color
          if index % self.rankLen != self.lastRank:
-            if color == colors.WHITE:
-               color = colors.BLACK
+            if color == Util.colors.WHITE:
+               color = Util.colors.BLACK
             else:
-               color = colors.WHITE
+               color = Util.colors.WHITE
       self.placePieces(pieces)
    
    def __str__(self):
@@ -66,14 +66,14 @@ class DisplayBoard(Board):
          coordKey = Util.allCoords[index]
          #Because we are printing to CLI use red for black and yellow for white
          backColor = self.board[coordKey][0]
-         if backColor  == colors.WHITE:
+         if backColor  == Util.colors.WHITE:
             backColor = Back.YELLOW
          else:
             backColor = Back.RED
          #Now we get the current piece and retrieve it's color and piece letter
          currentPiece = self.board[coordKey][1]
          foreColor = currentPiece.color
-         if foreColor == colors.WHITE:
+         if foreColor == Util.colors.WHITE:
             foreColor = Fore.WHITE
          else:
             foreColor = Fore.BLACK
@@ -101,7 +101,7 @@ class DisplayBoard(Board):
    def setCaptured(self, color, pieces):
       """Take the list of currently captures pieces from the player 
          and save them off for display"""      
-      if color == colors.WHITE:
+      if color == Util.colors.WHITE:
          self.captures[0] = pieces[:]
       else:
          self.captures[1] = pieces[:]
@@ -122,7 +122,7 @@ class DisplayBoard(Board):
       """Take the current check and checkmake status from the player 
          and save them off for display"""
       status = (player.checked, player.mated)
-      if player.color == colors.WHITE:
+      if player.color == Util.colors.WHITE:
          self.whiteCheckMateStatus = status
       else:
          self.blackCheckMateStatus = status
