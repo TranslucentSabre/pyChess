@@ -1,4 +1,4 @@
-import Coord
+import Util
 
 pieces = { "Pawn" : "P", "Rook" : "R", "Knight" : "N", "Bishop" : "B", "Queen" : "Q", "King" : "K"}
 invPieces = {"P" : "Pawn", "R" : "Rook", "N" : "Knight", "B" : "Bishop", "Q" : "Queen", "K" : "King"}
@@ -17,7 +17,7 @@ class Piece(object):
       self.moved = False
       self.lastMove = ()
       self.moveResultReason = "Success"
-      if Coord.isCoordValid(position):
+      if Util.isCoordValid(position):
          self.position = position
          self.placed = True
       if color in [colors.WHITE, colors.BLACK]:
@@ -45,7 +45,7 @@ class Piece(object):
          board or if it does not have an initial position"""
       self.moveResultReason = "Success"
       if self.placed:
-         if Coord.isCoordValid(coord):
+         if Util.isCoordValid(coord):
             self.lastMove = (self.position, self.moved)
             self.position = coord
             self.moved = True
@@ -80,7 +80,7 @@ class Piece(object):
       """Returns whether or not the move is valid, and if we should stop looking"""
       stopLooking = True
       valid = True
-      if not Coord.isCoordValid(coord):
+      if not Util.isCoordValid(coord):
          return False, stopLooking
       piece = vBoard.getPiece(coord)
       #If there is no piece here than it is a valid move and we can keep looking
@@ -332,6 +332,9 @@ class King(Piece):
             if (valid):
                validMoves.append(move)
          return validMoves
+         
+   def getCastleCoords(self):
+      pass
 
 class Pawn(Piece):
    """A Pawn"""
@@ -353,7 +356,7 @@ class Pawn(Piece):
          board or if it does not have an initial position"""
       self.moveResultReason = "Success"
       if self.placed:
-         if Coord.isCoordValid(coord):
+         if Util.isCoordValid(coord):
             self.lastState = (self.position, self.moved, self.enPassantCapturable)
             if self.startingRank in self.position and self.chargeRank in coord:
                self.enPassantCapturable = True
@@ -378,7 +381,7 @@ class Pawn(Piece):
    def getCaptureCoords(self):
       fileNum = ord(self.position[0])
       rankNum = int(self.position[1])
-      return [coord for coord in [chr(fileNum-1) + str(rankNum + self.rankModifier), chr(fileNum +1) + str(rankNum + self.rankModifier)] if Coord.isCoordValid(coord)]
+      return [coord for coord in [chr(fileNum-1) + str(rankNum + self.rankModifier), chr(fileNum +1) + str(rankNum + self.rankModifier)] if Util.isCoordValid(coord)]
 
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Pawn"""
@@ -392,12 +395,12 @@ class Pawn(Piece):
             regular.append(chr(fileNum) + str(rankNum + (self.rankModifier * 2)))
          validMoves = []
          for move in captures:
-            if Coord.isCoordValid(move):
+            if Util.isCoordValid(move):
                piece = vBoard.getPiece(move)
                if piece != None and piece.color != self.color:
                   validMoves.append(move)
          for move in regular:
-            if Coord.isCoordValid(move):
+            if Util.isCoordValid(move):
                piece = vBoard.getPiece(move)
                if piece == None:
                   validMoves.append(move)

@@ -4,7 +4,7 @@ from Board import *
 from Player import *
 from ChessFile import *
 import Piece
-import Coord
+import Util
 import cmd
 
 """This tries to make raw_input look like input for python 2.7
@@ -75,7 +75,7 @@ class Chess(cmd.Cmd):
                print("Third argument must be a valid Piece abbreviation")
                return
             promotionPieceStr = Piece.invPieces[move]
-         elif not Coord.isCoordValid(move):
+         elif not Util.isCoordValid(move):
             print("First two arguments must be valid chess coordinates.")
             return
          index = index + 1

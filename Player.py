@@ -2,7 +2,7 @@ from Piece import *
 from Board import *
 from Algebra import *
 from Debug import *
-import Coord
+import Util
 
 
 class MoveType(object):
@@ -38,7 +38,7 @@ class Player(object):
       
       self.debug = Debug()
       
-      self.pawns = [Pawn(self.color,file+self.pawnRank) for file in Coord.files]
+      self.pawns = [Pawn(self.color,file+self.pawnRank) for file in Util.files]
       self.rooks = [Rook(self.color,file+self.majorRank) for file in rookFiles]
       self.knights = [Knight(self.color,file+self.majorRank) for file in knightFiles]
       self.bishops = [Bishop(self.color,file+self.majorRank) for file in bishopFiles]

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import re
 import Piece
-import Coord
+import Util
 
 
 class AlgebraicMove(object):
@@ -53,12 +53,14 @@ class AlgebraicParser(object):
    reDestinationString = r"("+files+ranks+")"
    rePromotionString = r"(?:=("+promotionPieces+"))?"
    reCheckMateString = r"(\+|#)?"
-   reCastleString = "O-(O-)?O"
+   rePGNCastleString = "O-(O-)?O"
+   reCastleString = "0-(0-)?0"
    reString = r"\A"+rePieceString + reDisambiguationString + reCaptureString \
             + reDestinationString + rePromotionString + reCheckMateString + r"\Z"
 
    def __init__(self):
       self.castle = re.compile(self.reCastleString)
+      self.pgnCastle = re.compile(self.rePGNCastleString)
       self.move = re.compile(self.reString)
       self.moveString = ""
       self.moveClass = None
@@ -82,6 +84,8 @@ class AlgebraicParser(object):
       """Generate our internal AlgebraicMove class and use that to reset the string"""
       self.moveString = move
       castleMatch = self.castle.match(move)
+      if not castleMatch:
+        castleMatch = self.pgnCastle.match(move)
       regularMatch = self.move.match(move)
       if castleMatch:
          kingsideCastle = self.isKingsideCastleFromMatch(castleMatch.group(1))
@@ -185,9 +189,9 @@ class AlgebraicParser(object):
       disambigLen = len(classValue)
       if disambigLen > 2:
          self.valid = False
-      elif disambigLen == 2 and not Coord.isCoordValid(classValue):
+      elif disambigLen == 2 and not Util.isCoordValid(classValue):
          self.valid = False
-      elif disambigLen == 1 and not (classValue in Coord.ranks or classValue in Coord.files):
+      elif disambigLen == 1 and not (classValue in Util.ranks or classValue in Util.files):
          self.valid = False
       return classValue
       
@@ -201,7 +205,7 @@ class AlgebraicParser(object):
       destLen = len(classValue)
       if destLen > 2 or destLen == 0:
          self.valid = False
-      elif destLen == 2 and not Coord.isCoordValid(classValue):
+      elif destLen == 2 and not Util.isCoordValid(classValue):
          self.valid = False
       return classValue
       
@@ -239,6 +243,7 @@ if __name__ == "__main__":
    parser = AlgebraicParser()
    print(parser.move.pattern)
    print(parser.castle.pattern)
+   print(parser.pgnCastle.pattern)
 
    def setAndDisplay(move):
       parser.setAlgebraicMove(move)

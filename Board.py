@@ -1,5 +1,5 @@
 from colorama import Style, Fore, Back
-import Coord
+import Util
 from Piece import *
 from math import ceil
 
@@ -20,9 +20,9 @@ class DisplayBoard(Board):
       self.whiteCheckMateStatus = (False,False)
       self.blackCheckMateStatus = (False,False)
       color = colors.WHITE
-      numberOfCoordinates = len(Coord.allCoords)
+      numberOfCoordinates = len(Util.allCoords)
       for index in range(numberOfCoordinates):
-         coordKey = Coord.allCoords[index]
+         coordKey = Util.allCoords[index]
          self.board[coordKey] = [color,Piece()]
          #If we reach the end of the rank we do not flip the color
          if index % self.rankLen != self.lastRank:
@@ -36,7 +36,7 @@ class DisplayBoard(Board):
       """Returns the nice printable form of the board"""
       rep = ""
       rank = -1 
-      numberOfCoordinates = len(Coord.allCoords)
+      numberOfCoordinates = len(Util.allCoords)
       if self.blackCheckMateStatus[0]:
          if self.blackCheckMateStatus[1]:
             rep += "Black is CHECKMATED! Game Over.\n"
@@ -62,8 +62,8 @@ class DisplayBoard(Board):
          #If we are about the print the first file, print the rank designator
          if index % self.rankLen == self.firstRank:
             rank += 1
-            rep += Coord.ranks[rank]
-         coordKey = Coord.allCoords[index]
+            rep += Util.ranks[rank]
+         coordKey = Util.allCoords[index]
          #Because we are printing to CLI use red for black and yellow for white
          backColor = self.board[coordKey][0]
          if backColor  == colors.WHITE:
@@ -84,7 +84,7 @@ class DisplayBoard(Board):
          if index % self.rankLen == self.lastRank:
             rep += Style.RESET_ALL + "\n"
       #Print out all of the file designators at the bottom
-      rep += " "+Coord.files+"\n"
+      rep += " "+Util.files+"\n"
       rep += "Captured by White:\n"
       rep += Fore.RED + " "
       captureCounter = 1
@@ -115,7 +115,7 @@ class DisplayBoard(Board):
    def getPiece(self, coordinate):
       """Return the piece found at the coordinate or None
          if the coordinate is not valid"""
-      if Coord.isCoordValid(coordinate):
+      if Util.isCoordValid(coordinate):
          return self.board[coordinate][1]
          
    def setCheckMateStatus(self, player):
