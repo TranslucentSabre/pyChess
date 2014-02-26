@@ -29,8 +29,10 @@ class colors(object):
 
    class CommonColorEnums(object):
       kingsideRookFile = "h"
+      kingsideRookMoveFile = "f"
       kingsideKingFile = "g"
       queensideRookFile = "a"
+      queensideRookMoveFile = "d"
       queensideKingFile = "c"
       
       def __str__(self):

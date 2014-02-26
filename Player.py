@@ -4,6 +4,14 @@ from Algebra import *
 from Debug import *
 import Util
 
+class PlayerLastMove(object):
+   """Class used to hold the previous move of a player"""
+   
+   def __init__(self, pieceMoved, pieceCaptured=None, piecePromoted=None, rookCastled=None ):
+      self.pieceMoved = pieceMoved
+      self.pieceCaptured = pieceCaptured
+      self.piecePromoted = piecePromoted
+      self.rookCastled = rookCastled
 
 class Player(object):
    """Base player class"""
@@ -14,7 +22,7 @@ class Player(object):
       self.checked = False
       self.mated = False
       
-      self.lastMove = ()
+      self.lastMove = None
       self.captured = []
 
       self.moveResultResaon = "Success"
@@ -97,23 +105,38 @@ class Player(object):
          #Save off this move class, we can use it as a comparison after the move
          self.parsedAlgebraicMoveClass = algebraicMove
          self.debug.dprint("Parsed Algebraic move class:\n", self.parsedAlgebraicMoveClass)
-         potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.disambiguation)
-         self.debug.dprint("Pieces that can move: ", potentialPieces)
-         if len(potentialPieces) == 0:
-            self.moveResultReason = "No pieces of that type may move to the selected location"
-         elif len(potentialPieces) > 1:
-            self.moveResultReason = "More than one piece may move based upon your selection"
+         if algebraicMove.castle:
+            promotionPiece = ""
+            currentPieceLocation = self.king.position
+            if algebraicMove.kingside:
+               pieceDestination = self.color.kingsideKingFile + self.color.majorRank
+            else:
+               pieceDestination = self.color.queensideKingFile + self.color.majorRank 
          else:
-            self.updateMoveValues = True
-            moveValid = self._movePiece(potentialPieces[0].position, algebraicMove.destination, algebraicMove.promotion)
-            if moveValid:
-               self.debug.dprint("Checking for check and checkmate.")
-               self._postMoveChecks()
-               self.algebraicMoveClass.valid = True
-               self.parser.setAlgebraicMove(self.algebraicMoveClass)
-               self.debug.dprint("Output Algebraic move class:\n", self.algebraicMoveClass)
-               self.lastMoveString = self.parser.getAlgebraicMoveString()
-               self.debug.dprint("Algebraic move string:", self.lastMoveString)
+            potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.disambiguation)
+            self.debug.dprint("Pieces that can move: ", potentialPieces)
+            if len(potentialPieces) == 0:
+               self.moveResultReason = "No pieces of that type may move to the selected location"
+               self.debug.endSection()   
+               return moveValid
+            elif len(potentialPieces) > 1:
+               self.moveResultReason = "More than one piece may move based upon your selection"
+               self.debug.endSection()   
+               return moveValid
+            else:
+                currentPieceLocation = potentialPieces[0].position
+                pieceDestination = algebraicMove.destination
+                promotionPiece = algebraicMove.promotion
+         self.updateMoveValues = True
+         moveValid = self._movePiece(currentPieceLocation, pieceDestination, promotionPiece)
+         if moveValid:
+            self.debug.dprint("Checking for check and checkmate.")
+            self._postMoveChecks()
+            self.algebraicMoveClass.valid = True
+            self.parser.setAlgebraicMove(self.algebraicMoveClass)
+            self.debug.dprint("Output Algebraic move class:\n", self.algebraicMoveClass)
+            self.lastMoveString = self.parser.getAlgebraicMoveString()
+            self.debug.dprint("Algebraic move string:", self.lastMoveString)
          self.debug.endSection()   
          return moveValid
       else:
@@ -188,11 +211,13 @@ class Player(object):
                if self.kingsideCastleIsValid(piece):
                   move = self.color.kingsideKingFile + self.color.majorRank
                   self.debug.dprint("Set move as Kingside Castle: ", move)
-                  validMap[move] = set(Util.MoveType.KINGSIDECASTLE)
+                  validMap[move] = set()
+                  validMap[move].add(Util.MoveType.KINGSIDECASTLE)
                if self.queensideCastleIsValid(piece):
                   move = self.color.queensideKingFile + self.color.majorRank
                   self.debug.dprint("Set move as Queenside Castle: ", move)
-                  validMap[move] = set(Util.MoveType.QUEENSIDECASTLE)
+                  validMap[move] = set()
+                  validMap[move].add(Util.MoveType.QUEENSIDECASTLE)
       self.debug.endSection()
       return validMap
       
@@ -208,38 +233,46 @@ class Player(object):
       self.debug.startSection("getValidMovesForPiece")
       self.debug.dprint("Checking "+direction+".")
       result = False
-      for rook in self.rooks:
-         if rook.castleOption == direction:
-            self.debug.dprint("Found "+direction+" Rook.")
-            if not rook.moved:
-               self.debug.dprint(direction+" rook has not moved.")
-               #Get the files for the squares between
-               files = ""
+      rook = self.findCastlingRook(direction)
+      if rook != None:
+         self.debug.dprint("Found "+direction+" Rook.")
+         if not rook.moved:
+            self.debug.dprint(direction+" rook has not moved.")
+            #Get the files for the squares between
+            files = ""
+            if direction == Util.Castle.QUEENSIDE:
+               files = Util.files[Util.files.index(rook.position[0])+1:Util.files.index(king.position[0])]
+            elif direction == Util.Castle.KINGSIDE:
+               files = Util.files[Util.files.index(king.position[0])+1:Util.files.index(rook.position[0])]
+            self.debug.dprint("Files to check for pieces: ", files)
+            vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
+            if not any(None != vBoard.getPiece(file + self.color.majorRank) for file in files):
+               self.debug.dprint("No pieces found in the way.")
+               #A quirk of QUEENSIDE is that we do not need to check for file b, so get rid of it
                if direction == Util.Castle.QUEENSIDE:
-                  files = Util.files[Util.files.index(rook.position[0])+1:Util.files.index(king.position[0])]
-               elif direction == Util.Castle.KINGSIDE:
-                  files = Util.files[Util.files.index(king.position[0])+1:Util.files.index(rook.position[0])]
-               self.debug.dprint("Files to check for pieces: ", files)
-               vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
-               if not any(None != vBoard.getPiece(file + self.color.majorRank) for file in files):
-                  self.debug.dprint("No pieces found in the way.")
-                  #A quirk of QUEENSIDE is that we do not need to check for file b, so get rid of it
-                  if direction == Util.Castle.QUEENSIDE:
-                     files = files[files.index(self.color.queensideKingFile)-1:]
-                  #Assume we make it unless we find otherwise at this point
-                  #result = True
-                  for file in files:
-                     nextMove = file+king.position[1]
-                     king.move(nextMove)
-                     self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
-                     if len(self.otherPlayer.getPiecesThatThreatenLocation(king.position)) != 0:
-                        self.debug.dprint("Check found attempting to verify castle at:", nextMove)
-                        king.undoLastMove()
-                        result = False
-                        break;
+                  files = files[files.index(self.color.queensideKingFile)-1:]
+               #Assume we make it unless we find otherwise at this point
+               result = True
+               for file in files:
+                  nextMove = file+king.position[1]
+                  king.move(nextMove)
+                  self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
+                  if len(self.otherPlayer.getPiecesThatThreatenLocation(king.position)) != 0:
+                     self.debug.dprint("Check found attempting to verify castle at:", nextMove)
                      king.undoLastMove()
+                     result = False
+                     break;
+                  king.undoLastMove()
       self.debug.endSection()
       return result
+      
+   def findCastlingRook(self, castleDirection):
+      foundRook = None
+      for rook in self.rooks:
+         if rook.castleOption == castleDirection:
+            foundRook = rook
+            break
+      return foundRook
       
    def canPawnCaptureEnPassantAtCoord(self, pawn, coord):
       """Determine if the destination coordinate is an En Passant capture for the given pawn"""
@@ -295,6 +328,7 @@ class Player(object):
             self.generateDestination(endCoord)
             capturePiece = None
             promotionPiece = None
+            castledRook = None
             if Util.MoveType.CAPTURE in validMoves[endCoord]:
                self.debug.dprint("Capture move.")
                self.generateCapture(piece, True)
@@ -306,10 +340,20 @@ class Player(object):
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord[0]+piece.position[1])
                self.debug.dprint("En Passant Captured piece: ", capturePiece)
+            elif Util.MoveType.KINGSIDECASTLE in validMoves[endCoord]:
+               self.debug.dprint("Kingside Castle move.")
+               self.generateCastle(Util.Castle.KINGSIDE)
+               castledRook = self.findCastlingRook(Util.Castle.KINGSIDE)
+               castledRook.move(self.color.kingsideRookMoveFile+self.color.majorRank)
+            elif Util.MoveType.QUEENSIDECASTLE in validMoves[endCoord]:
+               self.debug.dprint("Queenside Castle move.")
+               self.generateCastle(Util.Castle.QUEENSIDE)
+               castledRook = self.findCastlingRook(Util.Castle.QUEENSIDE)
+               castledRook.move(self.color.queensideRookMoveFile+self.color.majorRank)
             piece.move(endCoord)
             self.moveResultReason = piece.moveResultReason
             #Go ahead and set the last move, minus any promotion piece, so that we can do an undo if promotion falls through
-            self.lastMove = (piece, capturePiece, promotionPiece)
+            self.lastMove = PlayerLastMove(piece, pieceCaptured = capturePiece, rookCastled = castledRook)
             if Util.MoveType.PROMOTION in validMoves[endCoord]:
                if promotionPieceStr not in Util.pieces or promotionPieceStr == "Pawn" or promotionPieceStr == "King":
                   self.debug.dprint("Invalid promotion move.")
@@ -328,7 +372,7 @@ class Player(object):
                promotionPieceList = self.pieceMap[promotionPiece.piece]
                promotionPieceList.append(promotionPiece)
                self.debug.dprint("Promotion piece list: ", getIds(promotionPieceList))
-            self.lastMove = (piece, capturePiece, promotionPiece)
+            self.lastMove = PlayerLastMove(piece, pieceCaptured = capturePiece, piecePromoted = promotionPiece, rookCastled = castledRook)
             self.debug.dprint("Last Move: ", self.lastMove)
             if self.verifyCheck():
                self.debug.dprint("That move placed us in check.")
@@ -429,23 +473,31 @@ class Player(object):
             self.algebraicMoveClass.promotion = Util.invPieces[promotion]
          else:
             self.algebraicMoveClass.promotion = ""
+            
+   def generateCastle(self, direction):
+      if self.updateMoveValues:
+         self.algebraicMoveClass.castle = True
+         self.algebraicMoveClass.kingside = direction == Util.Castle.KINGSIDE
       
    
    def undoLastMove(self):
       """Undo the previous move"""
       self.debug.startSection("undoLastMove")
-      if len(self.lastMove) == 3:
+      if self.lastMove != None:
          self.debug.dprint("Valid last move to undo detected: ", self.lastMove)
-         self.lastMove[0].undoLastMove()
-         if self.lastMove[1] != None:
-            self.otherPlayer.returnPiece(self.captured.pop(self.captured.index(self.lastMove[1])))
-         if self.lastMove[2] != None:
+         self.lastMove.pieceMoved.undoLastMove()
+         if self.lastMove.pieceCaptured != None:
+            self.captured.remove(self.lastMove.pieceCaptured)
+            self.otherPlayer.returnPiece(self.lastMove.pieceCaptured)
+         if self.lastMove.piecePromoted != None:
             #We are undoing a promotion, special things need to happen
-            pieceList = self.pieceMap[self.lastMove[0].piece]
-            pieceList.append(self.lastMove[0])
-            promotionPieceList = self.pieceMap[self.lastMove[2].piece]
-            promotionPieceList.remove(self.lastMove[2])
-         self.lastMove = ()
+            pieceList = self.pieceMap[self.lastMove.pieceMoved.piece]
+            pieceList.append(self.lastMove.pieceMoved)
+            promotionPieceList = self.pieceMap[self.lastMove.piecePromoted.piece]
+            promotionPieceList.remove(self.lastMove.piecePromoted)
+         if self.lastMove.rookCastled != None:
+            self.lastMove.rookCastled.undoLastMove()
+         self.lastMove = None
          #It is almost guaranteed that we could undo back into a check position. Because of that, run
          #the verify to update our state properly
          self.verifyCheck()

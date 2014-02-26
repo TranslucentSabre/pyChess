@@ -16,7 +16,7 @@ except NameError:
 
 class Chess(cmd.Cmd):
    files = ChessFiles()
-   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 0.7\n"
+   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 0.8\n"
    prompt = "pyChess# "
    whitePlayer = WhitePlayer()
    blackPlayer = BlackPlayer()
@@ -58,8 +58,10 @@ class Chess(cmd.Cmd):
       
    def do_move(self,arg):
       """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n
+         In order to perform a castle move, move the king to the final position required for the castle.
          Ex. move b2 b4\n
-             move e7 f8 Q\n"""
+             move e7 f8 Q\n
+             move e8 c8"""
       moves = arg.split()
       if len(moves) < 2:
          print("Two coordinates are required.")
@@ -94,7 +96,8 @@ class Chess(cmd.Cmd):
          
    def do_algebra(self,arg):
       """Move a piece, this function takes one move in algebraic notation.\n
-         Ex. algebra Nf3\n"""
+         Ex. algebra Nf3\n
+             algebra O-O\n"""
       move = arg.split()
       if len(move) > 1:
          print("Only one argument is valid.")

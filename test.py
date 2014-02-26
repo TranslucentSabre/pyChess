@@ -20,6 +20,7 @@ def moveAndPrint(board, white, black, start, end, cancel = False):
          print(board.getPendingMoveString())
          board.cancelCommit()
          currentPlayer.undoLastMove()
+         print(board)
 
    else:
       print(currentPlayer.moveResultReason)
@@ -41,6 +42,7 @@ def algebraicMoveAndPrint(board, white, black, move, cancel = False):
          print(board.getPendingMoveString())
          board.cancelCommit()
          currentPlayer.undoLastMove()
+         print(board)
 
    else:
       print(currentPlayer.moveResultReason)
@@ -129,6 +131,8 @@ b2 = GameBoard(white2, black2)
 print(b2)
 algebraicMoveAndPrint(b2,white2,black2,"g4")
 algebraicMoveAndPrint(b2,white2,black2,"g5")
+algebraicMoveAndPrint(b2,white2,black2,"0-0")
+algebraicMoveAndPrint(b2,white2,black2,"0-0-0", True)
 
 """
 print("")
