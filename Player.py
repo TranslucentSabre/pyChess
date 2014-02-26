@@ -191,7 +191,19 @@ class Player(object):
          #TODO Now check for Castle Moves
          elif type(piece) == King:
             self.debug.dprint("King Specials.")
-            pass
+            if not piece.moved:
+               self.debug.dprint("Checking Kingside.")
+               for rook in self.rooks:
+                  if rook.castleOption == Util.Castle.KINGSIDE:
+                     self.debug.dprint("Found Kingside Rook.")
+                     if not rook.moved:
+                        self.debug.dprint("Kingside rook has not moved.")
+               self.debug.dprint("Checking Queenside.")
+               for rook in self.rooks:
+                  if rook.castleOption == Util.Castle.QUEENSIDE:
+                     self.debug.dprint("Found Queenside Rook.")
+                     if not rook.moved:
+                        self.debug.dprint("Queenside rook has not moved.")
       self.debug.endSection()
       return validMap
       

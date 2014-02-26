@@ -116,6 +116,12 @@ class Rook(Piece):
 
    def __init__(self, color, position):
       super(Rook,self).__init__("Rook", color, position)
+      self.castleOption = Util.Castle.NONE
+      if self.color.majorRank in self.position:
+         if self.color.kingsideRookFile in self.position:
+            self.castleOption = Util.Castle.KINGSIDE
+         elif self.color.queensideRookFile in self.position:
+            self.castleOption = Util.Castle.QUEENSIDE
 
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Rook"""
@@ -327,7 +333,7 @@ class King(Piece):
          return validMoves
          
    def getCastleCoords(self):
-      pass
+      return { Util.Castle.KINGSIDE : self.color.kingsideKingFile + self.color.majorRank, Util.Castle.QUEENSIDE : self.color.queensideKingFile + self.color.majorRank }
 
 class Pawn(Piece):
    """A Pawn"""
