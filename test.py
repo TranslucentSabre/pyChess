@@ -85,7 +85,9 @@ del white1.knights[:]
 del white1.bishops[:]
 del white1.queens[:]
 white1.rooks[0].position = "g7"
+white1.rooks[0].moved = True
 white1.rooks[1].position = "b5"
+white1.rooks[1].moved = True
 
 del black1.pawns[:]
 del black1.knights[:]
@@ -103,6 +105,30 @@ moveAndPrint(b1,white1,black1,"b5","b8")
 #moveAndPrint(b1,white1,black1,"b7","b8")
 moveAndPrint(b1,white1,black1,"e8","f7")
 
+
+
+
+
+white2 = WhitePlayer()
+black2 = BlackPlayer()
+
+white2.otherPlayer = black2
+black2.otherPlayer = white2
+
+
+del white2.knights[:]
+del white2.bishops[:]
+del white2.queens[:]
+
+del black2.knights[:]
+del black2.bishops[:]
+del black2.queens[:]
+
+
+b2 = GameBoard(white2, black2)
+print(b2)
+algebraicMoveAndPrint(b2,white2,black2,"g4")
+algebraicMoveAndPrint(b2,white2,black2,"g5")
 
 """
 print("")

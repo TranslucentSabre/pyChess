@@ -15,6 +15,14 @@ class Castle(object):
    QUEENSIDE = "queenside"
    NONE = "none"
 
+class MoveType(object):
+   NORMAL = "normal"
+   CAPTURE = "capture"
+   EN_PASSANT = "enPassant"
+   KINGSIDECASTLE = Castle.KINGSIDE
+   QUEENSIDECASTLE = Castle.QUEENSIDE
+   PROMOTION = "promotion"
+
 
 class colors(object):
    """Central holding place for my colors"""
@@ -24,6 +32,9 @@ class colors(object):
       kingsideKingFile = "g"
       queensideRookFile = "a"
       queensideKingFile = "c"
+      
+      def __str__(self):
+         return self.name
 
    class WHITE(CommonColorEnums):
       name  = "white"

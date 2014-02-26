@@ -5,13 +5,6 @@ from Debug import *
 import Util
 
 
-class MoveType(object):
-   NORMAL = "normal"
-   CAPTURE = "capture"
-   EN_PASSANT = "enPassant"
-   CASTLE = "castle"
-   PROMOTION = "promotion"
-
 class Player(object):
    """Base player class"""
    
@@ -173,9 +166,9 @@ class Player(object):
             validMap[move] = set()
             if self.enemyPieceIsAtLocation(move, vBoard):
                self.debug.dprint("Set move as capture:", move)
-               validMap[move].add(MoveType.CAPTURE)
+               validMap[move].add(Util.MoveType.CAPTURE)
             else:
-               validMap[move].add(MoveType.NORMAL)
+               validMap[move].add(Util.MoveType.NORMAL)
          #En Passant and promotion checking for Pawns
          if type(piece) == Pawn:
             self.debug.dprint("Pawn Specials.")
@@ -183,29 +176,70 @@ class Player(object):
             for move in capturables:
                if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
                   self.debug.dprint("Set move as En Passant: ", move)
-                  validMap[move].add(MoveType.EN_PASSANT)
+                  validMap[move].add(Util.MoveType.EN_PASSANT)
             for move in validMap:
                if self.color.promotionRank in move:
                   self.debug.dprint("Set move as Promotion: ", move)
-                  validMap[move].add(MoveType.PROMOTION)
+                  validMap[move].add(Util.MoveType.PROMOTION)
          #TODO Now check for Castle Moves
          elif type(piece) == King:
             self.debug.dprint("King Specials.")
-            if not piece.moved:
-               self.debug.dprint("Checking Kingside.")
-               for rook in self.rooks:
-                  if rook.castleOption == Util.Castle.KINGSIDE:
-                     self.debug.dprint("Found Kingside Rook.")
-                     if not rook.moved:
-                        self.debug.dprint("Kingside rook has not moved.")
-               self.debug.dprint("Checking Queenside.")
-               for rook in self.rooks:
-                  if rook.castleOption == Util.Castle.QUEENSIDE:
-                     self.debug.dprint("Found Queenside Rook.")
-                     if not rook.moved:
-                        self.debug.dprint("Queenside rook has not moved.")
+            if not piece.moved and not self.checked:
+               if self.kingsideCastleIsValid(piece):
+                  move = self.color.kingsideKingFile + self.color.majorRank
+                  self.debug.dprint("Set move as Kingside Castle: ", move)
+                  validMap[move] = set(Util.MoveType.KINGSIDECASTLE)
+               if self.queensideCastleIsValid(piece):
+                  move = self.color.queensideKingFile + self.color.majorRank
+                  self.debug.dprint("Set move as Queenside Castle: ", move)
+                  validMap[move] = set(Util.MoveType.QUEENSIDECASTLE)
       self.debug.endSection()
       return validMap
+      
+   def kingsideCastleIsValid(self, king):
+      castleDirection = Util.Castle.KINGSIDE
+      return self.castleIsValid(king, castleDirection)
+       
+   def queensideCastleIsValid(self, king):
+      castleDirection = Util.Castle.QUEENSIDE
+      return self.castleIsValid(king, castleDirection)
+      
+   def castleIsValid(self, king, direction):
+      self.debug.startSection("getValidMovesForPiece")
+      self.debug.dprint("Checking "+direction+".")
+      result = False
+      for rook in self.rooks:
+         if rook.castleOption == direction:
+            self.debug.dprint("Found "+direction+" Rook.")
+            if not rook.moved:
+               self.debug.dprint(direction+" rook has not moved.")
+               #Get the files for the squares between
+               files = ""
+               if direction == Util.Castle.QUEENSIDE:
+                  files = Util.files[Util.files.index(rook.position[0])+1:Util.files.index(king.position[0])]
+               elif direction == Util.Castle.KINGSIDE:
+                  files = Util.files[Util.files.index(king.position[0])+1:Util.files.index(rook.position[0])]
+               self.debug.dprint("Files to check for pieces: ", files)
+               vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
+               if not any(None != vBoard.getPiece(file + self.color.majorRank) for file in files):
+                  self.debug.dprint("No pieces found in the way.")
+                  #A quirk of QUEENSIDE is that we do not need to check for file b, so get rid of it
+                  if direction == Util.Castle.QUEENSIDE:
+                     files = files[files.index(self.color.queensideKingFile)-1:]
+                  #Assume we make it unless we find otherwise at this point
+                  #result = True
+                  for file in files:
+                     nextMove = file+king.position[1]
+                     king.move(nextMove)
+                     self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
+                     if len(self.otherPlayer.getPiecesThatThreatenLocation(king.position)) != 0:
+                        self.debug.dprint("Check found attempting to verify castle at:", nextMove)
+                        king.undoLastMove()
+                        result = False
+                        break;
+                     king.undoLastMove()
+      self.debug.endSection()
+      return result
       
    def canPawnCaptureEnPassantAtCoord(self, pawn, coord):
       """Determine if the destination coordinate is an En Passant capture for the given pawn"""
@@ -261,12 +295,12 @@ class Player(object):
             self.generateDestination(endCoord)
             capturePiece = None
             promotionPiece = None
-            if MoveType.CAPTURE in validMoves[endCoord]:
+            if Util.MoveType.CAPTURE in validMoves[endCoord]:
                self.debug.dprint("Capture move.")
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord)
                self.debug.dprint("Captured piece: ", capturePiece)
-            elif MoveType.EN_PASSANT in validMoves[endCoord]:
+            elif Util.MoveType.EN_PASSANT in validMoves[endCoord]:
                #We know that this is a pawn now
                self.debug.dprint("En Passant Capture move.")
                self.generateCapture(piece, True)
@@ -276,7 +310,7 @@ class Player(object):
             self.moveResultReason = piece.moveResultReason
             #Go ahead and set the last move, minus any promotion piece, so that we can do an undo if promotion falls through
             self.lastMove = (piece, capturePiece, promotionPiece)
-            if MoveType.PROMOTION in validMoves[endCoord]:
+            if Util.MoveType.PROMOTION in validMoves[endCoord]:
                if promotionPieceStr not in Util.pieces or promotionPieceStr == "Pawn" or promotionPieceStr == "King":
                   self.debug.dprint("Invalid promotion move.")
                   self.undoLastMove()
@@ -457,7 +491,7 @@ class Player(object):
       """Return a list of my pieces that can capture the piece at the given location"""
       def canPieceAttackLocation(piece):
          moves = self.getValidMovesForPiece(piece)
-         if location in moves and MoveType.CAPTURE in moves[location]:
+         if location in moves and Util.MoveType.CAPTURE in moves[location]:
             return True
       return list(filter(canPieceAttackLocation, self.getAllPieces()))
    
