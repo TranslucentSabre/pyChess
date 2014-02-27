@@ -104,14 +104,18 @@ class Chess(cmd.Cmd):
          return
       currentPlayer = self._getNextPlayer()
       if currentPlayer.algebraicMove(move[0]):
-         self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
-         print(self.gameBoard.getPendingMoveString())
-         if self._booleanPrompt("Are you sure this is the move you would like to make?"):
-            self.gameBoard.commitTurn()
-            self.files.appendMoveForWrite(currentPlayer.lastMoveString)
-         else:
-            self.gameBoard.cancelCommit()
+         if booleanConfigItemIsTrue(self._getConfigOption(ValidConfig.StrictParse)) and not currentPlayer.generatedAlgebraicMoveIsEqualToGiven():
+            print("Strict Parsing mode enabled. Input Algebraic move ("+move[0]+") is not the strict move ("+currentPlayer.lastMoveString+")")
             currentPlayer.undoLastMove()
+         else:
+            self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
+            print(self.gameBoard.getPendingMoveString())
+            if self._booleanPrompt("Are you sure this is the move you would like to make?"):
+               self.gameBoard.commitTurn()
+               self.files.appendMoveForWrite(currentPlayer.lastMoveString)
+            else:
+               self.gameBoard.cancelCommit()
+               currentPlayer.undoLastMove()
       else:
          print("Move Failed:\n"+currentPlayer.moveResultReason)
       
@@ -164,12 +168,12 @@ if one is given use the argument as a filename to write the savegame to."""
       export    (read/set default export file)
       name      (read/set the players real name)
       location  (read/set the physical location of the player)
-      debug     (read/set whether or not debugging information should be displayed, valid values are True and False)
+      strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted, False)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen.""" 
       configMap = {"import":ValidConfig.ImportFile, "export":ValidConfig.ExportFile, \
                    "name":ValidConfig.PlayerName, "location":ValidConfig.Location, \
-                   "debug":ValidConfig.Debug}
+                   "debug":ValidConfig.Debug, "strict":ValidConfig.StrictParse}
       #Only split once, this allows the user to supply items with spaces in them
       args = arg.split(None,1)
       numOfArgs = len(args)

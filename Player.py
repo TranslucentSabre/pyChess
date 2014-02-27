@@ -26,6 +26,7 @@ class Player(object):
       self.captured = []
 
       self.moveResultResaon = "Success"
+      self.parsedAlgebraicMoveString = ""
       self.lastMoveString = ""
 
       rookFiles = "ah"
@@ -67,6 +68,9 @@ class Player(object):
          mated = True
       return mated
       
+   def generatedAlgebraicMoveIsEqualToGiven(self):
+      return self.parsedAlgebraicMoveClass == self.algebraicMoveClass
+      
    def move(self, startCoord, endCoord, promotion=""):
       """Attempt to make a move and return whether the move was possible or not, if this returns false
          the reason for the failure will be in my moveResultReason member"""
@@ -104,6 +108,7 @@ class Player(object):
          algebraicMove = self.parser.getAlgebraicMoveClass()
          #Save off this move class, we can use it as a comparison after the move
          self.parsedAlgebraicMoveClass = algebraicMove
+         self.parsedAlgebraicMoveString = self.parser.getAlgebraicMoveString()
          self.debug.dprint("Parsed Algebraic move class:\n", self.parsedAlgebraicMoveClass)
          if algebraicMove.castle:
             promotionPiece = ""
@@ -137,6 +142,7 @@ class Player(object):
             self.debug.dprint("Output Algebraic move class:\n", self.algebraicMoveClass)
             self.lastMoveString = self.parser.getAlgebraicMoveString()
             self.debug.dprint("Algebraic move string:", self.lastMoveString)
+            
          self.debug.endSection()   
          return moveValid
       else:
@@ -501,6 +507,7 @@ class Player(object):
          #It is almost guaranteed that we could undo back into a check position. Because of that, run
          #the verify to update our state properly
          self.verifyCheck()
+         self.verifyMate()
          self.debug.dprint("Verifying/setting check status after undo: ", self.checked)
          self.debug.endSection()
          return True

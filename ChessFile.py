@@ -3,12 +3,13 @@ import io
 
 
 class ValidConfig(object):
-      validConfigItems = ["defImportFile","defExportFile","playerName","location","debug"]
-      ImportFile = {"name" : validConfigItems[0]}
-      ExportFile = {"name" : validConfigItems[1]}
-      PlayerName = {"name" : validConfigItems[2]}
-      Location   = {"name" : validConfigItems[3]}
-      Debug      = {"name" : validConfigItems[4], "values" : ["True", "False"]}
+      validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict"]
+      ImportFile       = {"name" : validConfigItems[0]}
+      ExportFile       = {"name" : validConfigItems[1]}
+      PlayerName       = {"name" : validConfigItems[2]}
+      Location         = {"name" : validConfigItems[3]}
+      Debug            = {"name" : validConfigItems[4], "values" : ["True", "False"]}
+      StrictParse      = {"name" : validConfigItems[5], "values" : ["True", "False"]}
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""
@@ -139,14 +140,18 @@ class ChessFiles(ConfigFile):
 
          
 def isDebugEnabled():
-     config = ConfigFile()
-     debug = config.getConfigItem(ValidConfig.Debug["name"])
-     if debug == "True":
-        debug = True
-     else:
-        debug = False
-     del config
-     return debug
+   config = ConfigFile()
+   debug = config.getConfigItem(ValidConfig.Debug["name"])
+   debug = booleanConfigItemIsTrue(debug)
+   del config
+   return debug
+ 
+def booleanConfigItemIsTrue(configValue):
+   """This is necessary because config items are stored as strings"""
+   if configValue == "True":
+      return True
+   else:
+      return False
 
 
 if __name__ == "__main__":
