@@ -507,7 +507,6 @@ class Player(object):
          #It is almost guaranteed that we could undo back into a check position. Because of that, run
          #the verify to update our state properly
          self.verifyCheck()
-         self.verifyMate()
          self.debug.dprint("Verifying/setting check status after undo: ", self.checked)
          self.debug.endSection()
          return True
@@ -562,6 +561,7 @@ class Player(object):
          self.checked = True
       else:
          self.checked = False
+         self.mated = False
       self.debug.dprint("Our checked status: ", self.checked)
       self.debug.endSection()
       return self.checked
