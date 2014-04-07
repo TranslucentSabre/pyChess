@@ -4,6 +4,8 @@ partial games in the Portable Game Notation file format so that chess games may 
 played over email.
 
 It is being implemented in Python 3 as a learning tool.
+This is stalled slightly right now. The game engine is fully functional and so is
+the save game io. It is still not in in fully compatible PGN format however.
 
 To Run:
 ./chess.py
