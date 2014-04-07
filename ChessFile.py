@@ -17,7 +17,7 @@ class ConfigFile(object):
    def __init__(self):
       try:
          self.configFile = open(".chessrc", "r+")
-      except OSError:
+      except (OSError,IOError):
          self.configFile = open(".chessrc", "w")
       self.readConfig()
       
@@ -75,7 +75,7 @@ class ChessFiles(ConfigFile):
       self.inFileStatus = "Ready"
       try:
          self.inFile = open(filename)
-      except OSError:
+      except (OSError,IOError):
          self.inFile = None
          self.inFileStatus = "Cannot open input file."
 
@@ -87,7 +87,7 @@ class ChessFiles(ConfigFile):
       self.outFileStatus = "Ready"
       try:
          self.outFile = open(filename, "a");
-      except OSError:
+      except (OSError,IOError):
          self.outFile = None
          self.outFileStatus = "Cannot open output file."
 
