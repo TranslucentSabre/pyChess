@@ -286,5 +286,5 @@ if __name__ == "__main__":
                    AlgebraicMove("a1", "Bishop", "", False, "", False, False, False, False))
    areMovesTheSame(AlgebraicMove("f3", "Rook", "e", False, "", True, False, True, False), \
                    AlgebraicMove("f3", "Rook", "e", False, "", True, False, False, False))
-   areMovesTheSame(AlgebraicMove("f3", "Rook", "e", False, "", True, False, True, False), \
-                   "Ref3+")
+   areMovesTheSame("Ref3+", \
+                   AlgebraicMove("f3", "Rook", "e", False, "", True, False, True, False))

@@ -3,6 +3,7 @@ from colorama import init
 from Board import *
 from Player import *
 from ChessFile import *
+from TestPyChess import *
 import Piece
 import Util
 import cmd
@@ -195,10 +196,19 @@ if one is given use the argument as a filename to write the savegame to."""
                   print("Set Failed. Valid options are:", configMap[args[0]]["values"])
          else:
             print("Invalid setting provided")
+            
+   def do_test(self,arg):
+      """Run the unit tests that have been developed for pyChess"""
+      if(arg == "-v" or arg == "--verbose"):
+         unittest.main(verbosity=3, exit=False)
+      else:
+         unittest.main(exit=False)
 
    def do_quit(self,arg):
       """Stop playing chess"""
       return True
+      
+   do_exit = do_quit
    
    def help_help(self):
        print("Display the help for one of the available commands.")
