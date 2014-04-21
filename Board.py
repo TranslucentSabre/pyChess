@@ -67,14 +67,14 @@ class DisplayBoard(Board):
          #Because we are printing to CLI use red for black and yellow for white
          backColor = self.board[coordKey][0]
          if backColor  == Util.colors.WHITE:
-            backColor = Back.YELLOW
+            backColor = Style.DIM + Back.YELLOW
          else:
             backColor = Back.RED
          #Now we get the current piece and retrieve it's color and piece letter
          currentPiece = self.board[coordKey][1]
          foreColor = currentPiece.color
          if foreColor == Util.colors.WHITE:
-            foreColor = Fore.WHITE
+            foreColor = Style.BRIGHT + Fore.WHITE
          else:
             foreColor = Fore.BLACK
          pieceChar = currentPiece.getPieceLetter()
