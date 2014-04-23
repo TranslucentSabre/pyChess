@@ -32,7 +32,7 @@ class Piece(object):
          return "None"
       else:
          return returnValue
-           
+
    def move(self,coord):
       """Attempt to move this piece, it will fail if the movement places it outside the
          board or if it does not have an initial position"""
@@ -60,7 +60,7 @@ class Piece(object):
       """This function returns a list of contiguous valid moves between this piece 
          and the coordinate given, exclusive of the destination, inclusive of this piece.
          Please note that if the piece is right next to the target eg Pawn, or jumps to it's 
-         target eg Knight, the path will contain only location of the piece"""
+         target eg Knight, the path will contain only the location of the piece"""
       self.getValidMoves(vBoard)
       pathToCoord = [self.position]
       if "paths" in dir(self):
