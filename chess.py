@@ -17,7 +17,7 @@ except NameError:
 
 class Chess(cmd.Cmd):
    files = ChessFiles()
-   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 0.8\n"
+   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.0.0\n"
    prompt = "pyChess# "
    whitePlayer = WhitePlayer()
    blackPlayer = BlackPlayer()
@@ -120,7 +120,7 @@ class Chess(cmd.Cmd):
       else:
          print("Move Failed:\n"+currentPlayer.moveResultReason)
       
-   def do_import(self,arg):
+   def do_load(self,arg):
       """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
       numOfArgs = len(arg.split())
@@ -146,8 +146,8 @@ if one is given use the argument as a filename to read a savegame from."""
                print("Move:",move,"\nMove Failed:\n"+currentPlayer.moveResultReason)
                self.do_restart() 
 
-   def do_export(self,arg):
-      """Write the current game out to a file. This will erase the old export file. If no argument is given use the default export file configured,
+   def do_save(self,arg):
+      """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
 if one is given use the argument as a filename to write the savegame to."""
       numOfArgs = len(arg.split())
       if numOfArgs > 1:
@@ -169,7 +169,7 @@ if one is given use the argument as a filename to write the savegame to."""
       export    (read/set default export file)
       name      (read/set the players real name)
       location  (read/set the physical location of the player)
-      strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted, False)
+      strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen.""" 
       configMap = {"import":ValidConfig.ImportFile, "export":ValidConfig.ExportFile, \
