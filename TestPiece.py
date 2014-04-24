@@ -76,6 +76,25 @@ class VerifyBasePiece(unittest.TestCase):
          previousLocation = move
 
       
+class VerifyKnight(unittest.TestCase):
+
+   def test_PieceReadsAsKnight(self):
+      white = Util.colors.WHITE
+      knight = Knight(white, "c3")
+
+      self.assertEqual(knight.getPieceLetter(), "N")
+      self.assertEqual(str(knight), "Knight")
+      
+   def test_KnightGetMovesOnEmptyBoard(self):
+      black = Util.colors.BLACK
+      moveDict = { "a1" : ["b3", "c2"],
+                   "c3" : ["b1", "d1", "a2", "a4", "b5", "d5", "e2", "e4"],
+                   "e8" : ["c7", "d6", "f6", "e7"] }
+
+      for origin in moveDict:
+         knight = Knight(black, origin)
+         computedDestinations = knight.getValidMoves(VerifyBoard([knight]))
+         self.assertEqual(computedDestinations.sort(), moveDict[origin].sort())
 
 
 if __name__ == "__main__":
