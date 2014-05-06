@@ -76,15 +76,20 @@ class VerifyBasePiece(unittest.TestCase):
          previousLocation = move
 
 class VerifySpecificPiece(unittest.TestCase):
-   def VerifyMovement(self, pieceString, moveDict, otherPieces=[]):
-      black = Util.colors.BLACK
+   def VerifyMovement(self, pieceString, moveDict, otherPieces=[], pieceColor=Util.colors.BLACK):
       for origin in moveDict:
-         piece = globals()[pieceString](black, origin);
+         piece = globals()[pieceString](pieceColor, origin);
          computedDestinations = piece.getValidMoves(VerifyBoard(otherPieces+[piece]))
          computedDestinations.sort()
          moveDict[origin].sort()
          self.assertEqual(computedDestinations, moveDict[origin])
-      
+
+   def CreatePieces(self, pieceDict, pieceColor):
+      pieceList = []
+      for coord in pieceDict:
+         pieceList.append(globals()[pieceDict[coord]](pieceColor, coord))
+      return pieceList
+
 class VerifyKnight(VerifySpecificPiece):
 
    def test_PieceReadsAsKnight(self):
@@ -102,6 +107,12 @@ class VerifyKnight(VerifySpecificPiece):
                    "g5" : ["h3", "f3", "e4", "e6", "f7", "h7"] }
 
       self.VerifyMovement("Knight", moveDict)
+
+   def test_KnightGetMovesWithEnemyPieces(self):
+      pieceDict = { "b3" : "Pawn",
+                    "b1" : "Pawn",
+                    "c7" : "Bishop" }
+      pieceList = self.CreatePieces(pieceDict,Util.colors.WHITE)
 
 if __name__ == "__main__":
     unittest.main()
