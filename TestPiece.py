@@ -76,6 +76,8 @@ class VerifyBasePiece(unittest.TestCase):
          previousLocation = move
 
 class VerifySpecificPiece(unittest.TestCase):
+   white = Util.colors.WHITE
+   black = Util.colors.BLACK
    def VerifyMovement(self, pieceString, moveDict, otherPieces=[], pieceColor=Util.colors.BLACK):
       for origin in moveDict:
          piece = globals()[pieceString](pieceColor, origin);
@@ -93,8 +95,7 @@ class VerifySpecificPiece(unittest.TestCase):
 class VerifyKnight(VerifySpecificPiece):
 
    def test_PieceReadsAsKnight(self):
-      white = Util.colors.WHITE
-      knight = Knight(white, "c3")
+      knight = Knight(self.white, "c3")
 
       self.assertEqual(knight.getPieceLetter(), "N")
       self.assertEqual(str(knight), "Knight")
@@ -112,7 +113,25 @@ class VerifyKnight(VerifySpecificPiece):
       pieceDict = { "b3" : "Pawn",
                     "b1" : "Pawn",
                     "c7" : "Bishop" }
-      pieceList = self.CreatePieces(pieceDict,Util.colors.WHITE)
+      moveDict = { "a1" : ["b3", "c2"],
+                   "c3" : ["b1", "d1", "a2", "a4", "b5", "d5", "e2", "e4"],
+                   "e8" : ["c7", "d6", "f6", "g7"],
+                   "a3" : ["b5", "c4", "c2", "b1"],
+                   "g5" : ["h3", "f3", "e4", "e6", "f7", "h7"] }
+      pieceList = self.CreatePieces(pieceDict,self.white)
+      self.VerifyMovement("Knight", moveDict, pieceList, self.black)
+
+   def test_KnightGetMovesWithAlliedPieces(self):
+      pieceDict = { "b3" : "Pawn",
+                    "b1" : "Pawn",
+                    "c7" : "Bishop" }
+      moveDict = { "a1" : ["c2"],
+                   "c3" : ["d1", "a2", "a4", "b5", "d5", "e2", "e4"],
+                   "e8" : ["d6", "f6", "g7"],
+                   "a3" : ["b5", "c4", "c2",],
+                   "g5" : ["h3", "f3", "e4", "e6", "f7", "h7"] }
+      pieceList = self.CreatePieces(pieceDict,self.white)
+      self.VerifyMovement("Knight", moveDict, pieceList, self.white)
 
 if __name__ == "__main__":
     unittest.main()
