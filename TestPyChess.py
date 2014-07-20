@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 from TestAlgebra import *
 from TestBoard import *
 from TestPiece import *

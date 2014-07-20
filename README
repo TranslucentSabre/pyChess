@@ -3,7 +3,8 @@ The goal of the project is to create a chess engine that imports and exports
 partial games in the Portable Game Notation file format so that chess games may be
 played over email.
 
-It is being implemented in Python 3 as a learning tool.
+It is being implemented in Python 3 as a learning tool, although this should also work in
+Python 2.7.
 This is stalled slightly right now. The game engine is fully functional and so is
 the save game io. It is still not in in fully compatible PGN format however.
 
@@ -11,4 +12,5 @@ To Run:
 ./chess.py
 
 Requires:
-Python 3 installed
+colorama modules
+   Install using the command `pip install colorama`

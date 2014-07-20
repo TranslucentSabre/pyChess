@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 from colorama import init
 from Board import *
 from Player import *
