@@ -10,6 +10,8 @@ class ValidConfig(object):
       Location         = {"name" : validConfigItems[3]}
       Debug            = {"name" : validConfigItems[4], "values" : ["True", "False"]}
       StrictParse      = {"name" : validConfigItems[5], "values" : ["True", "False"]}
+      configMap = {"import":ImportFile, "export":ExportFile, "name":PlayerName, \
+                   "location":Location, "debug":Debug, "strict":StrictParse}
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""

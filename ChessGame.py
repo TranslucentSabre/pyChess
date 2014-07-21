@@ -121,43 +121,44 @@ if one is given use the argument as a filename to read a savegame from."""
       self.files.writeGame()
       return True
          
-   def do_config(self,arg):
-      """Set or read configuration options. The first argument must be one of the following settings:
+   def getConfigItem(self,configItem):
+      """Read configuration options. The argument must be one of the following settings:
       import    (read/set default import file)
       export    (read/set default export file)
       name      (read/set the players real name)
       location  (read/set the physical location of the player)
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
-   If the second argument is given then the argument will be saved as the setting, if it is omitted then
-   the current value of the setting is printed to the screen.""" 
-      configMap = {"import":ValidConfig.ImportFile, "export":ValidConfig.ExportFile, \
-                   "name":ValidConfig.PlayerName, "location":ValidConfig.Location, \
-                   "debug":ValidConfig.Debug, "strict":ValidConfig.StrictParse}
-      #Only split once, this allows the user to supply items with spaces in them
-      args = arg.split(None,1)
-      numOfArgs = len(args)
-      if numOfArgs == 0:
-         print("You must specify a configuration item to set or read.")
-      elif numOfArgs > 2:
-         print("Too many aguments provided.")
-      else:
-         if args[0] in configMap:
-            if numOfArgs == 1:
-               config = self._getConfigOption(configMap[args[0]])
-               if config == "":
-                  print("Option is not set, please set it.")
-               else:
-                  print(config)
-            else:
-               args[1] = args[1].strip("\"")
-               if not self._setConfigOption(configMap[args[0]],args[1]):
-                  print("Set Failed. Valid options are:", configMap[args[0]]["values"])
+   The current value of the setting is printed to the screen.""" 
+      if configItem in ValidConfig.configMap:
+         config = self._getConfigOption(ValidConfig.configMap[configItem])
+         if config == "":
+            self.lastError = "Option is not set, please set it."
+            return None
          else:
-            print("Invalid setting provided")
+            return config
+      else:
+         self.lastError = "Invalid setting provided"
+         return None
+
+   def setConfigItem(self,configItem,configValue):
+      """Set configuration options. The first argument must be one of the following settings:
+      import    (read/set default import file)
+      export    (read/set default export file)
+      name      (read/set the players real name)
+      location  (read/set the physical location of the player)
+      strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
+   The second argument will be saved as the setting.""" 
+      if configItem in ValidConfig.configMap:
+         if not self._setConfigOption(ValidConfig.configMap[configItem],configValue):
+            self.lastError = "Set Failed. Valid options are:"+ ValidConfig.configMap[configItem]["values"]
+            return False
+      else:
+         self.lastError = "Invalid setting provided"
+         return False
             
-   def do_test(self,arg):
+   def runTests(self,verbose=False):
       """Run the unit tests that have been developed for pyChess"""
-      if(arg == "-v" or arg == "--verbose"):
+      if(verbose):
          unittest.main(verbosity=3, exit=False)
       else:
          unittest.main(exit=False)
