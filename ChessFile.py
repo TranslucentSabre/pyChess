@@ -69,7 +69,7 @@ class ChessFiles(ConfigFile):
 
       
    def __del__(self):
-      super(ChessFiles, self).__del__()
+      super(self.__class__, self).__del__()
       self.closeInFile()
       self.closeOutFile()
 

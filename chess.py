@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 from colorama import init
-from Board import *
-from Player import *
-from ChessFile import *
-from TestPyChess import *
-import Piece
-import Util
+from ChessGame import *
 import cmd
 
 """This tries to make raw_input look like input for python 2.7
@@ -16,46 +11,36 @@ except NameError:
     pass
 
 class Chess(cmd.Cmd):
-   files = ChessFiles()
    intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.0.0\n"
    prompt = "pyChess# "
-   whitePlayer = WhitePlayer()
-   blackPlayer = BlackPlayer()
-   whitePlayer.setOpponent(blackPlayer)
-   blackPlayer.setOpponent(whitePlayer)
-   gameBoard = GameBoard(whitePlayer, blackPlayer)
+   game = ChessGame()
    
    def emptyline(self):
        return
    
    def do_show(self,arg):
       """Display the current board"""
-      print(self.gameBoard)
+      print(self.game.showCurrentBoard())
       
    def do_first(self,arg):
       """Go to the first move in the game"""
-      self.gameBoard.firstTurn()
+      self.game.firstMove()
       
    def do_last(self,arg):
       """Go to the last move in the game"""
-      self.gameBoard.lastTurn()
+      self.game.lastMove()
       
    def do_next(self,arg):
       """Go to the next move in the game"""
-      self.gameBoard.nextTurn()
+      self.game.nextMove()
       
    def do_previous(self,arg):
       """Go to the previous move in the game"""
-      self.gameBoard.previousTurn()
+      self.game.previousMove()
       
    def do_restart(self,arg):
       """Restart our current game"""
-      self.files.resetWriteString()
-      self.whitePlayer = WhitePlayer()
-      self.blackPlayer = BlackPlayer()
-      self.whitePlayer.otherPlayer = self.blackPlayer
-      self.blackPlayer.otherPlayer = self.whitePlayer
-      self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)
+      self.game.restartGame()
       
    def do_move(self,arg):
       """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n
@@ -70,30 +55,18 @@ class Chess(cmd.Cmd):
       if len(moves) > 3:
          print("Only two coordinates and one promotion piece are accepted")
          return
-      index = 0
-      promotionPieceStr = None
-      for move in moves:
-         if index == 2:
-            if move not in Util.invPieces:
-               print("Third argument must be a valid Piece abbreviation")
-               return
-            promotionPieceStr = Util.invPieces[move]
-         elif not Util.isCoordValid(move):
-            print("First two arguments must be valid chess coordinates.")
-            return
-         index = index + 1
-      currentPlayer = self._getNextPlayer()
-      if currentPlayer.move(moves[0], moves[1], promotionPieceStr):
-         self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
-         print(self.gameBoard.getPendingMoveString())
+      if len(moves) == 2:
+          """Add the nonexistent promotion piece to the array"""
+          moves.append(None)
+      if self.game.twoCoordMove(moves[0], moves[1], moves[2]):
+         print(self.game.showPendingBoard())
          if self._booleanPrompt("Are you sure this is the move you would like to make?"):
-            self.gameBoard.commitTurn()
-            self.files.appendMoveForWrite(currentPlayer.lastMoveString)
+             self.game.commitTurn()
          else:
-            self.gameBoard.cancelCommit()
-            currentPlayer.undoLastMove()
+             self.game.cancelTurn()
       else:
-         print("Move Failed:\n"+currentPlayer.moveResultReason)
+         print(self.game.lastError)
+         self.game.cancelTurn()
          
    def do_algebra(self,arg):
       """Move a piece, this function takes one move in algebraic notation.\n
@@ -103,65 +76,29 @@ class Chess(cmd.Cmd):
       if len(move) > 1:
          print("Only one argument is valid.")
          return
-      currentPlayer = self._getNextPlayer()
-      if currentPlayer.algebraicMove(move[0]):
-         if booleanConfigItemIsTrue(self._getConfigOption(ValidConfig.StrictParse)) and not currentPlayer.generatedAlgebraicMoveIsEqualToGiven():
-            print("Strict Parsing mode enabled. Input Algebraic move ("+move[0]+") is not the strict move ("+currentPlayer.lastMoveString+")")
-            currentPlayer.undoLastMove()
+      if self.game.algebraicMove(move[0]):
+         print(self.game.showPendingBoard())
+         if self._booleanPrompt("Are you sure this is the move you would like to make?"):
+            self.game.commitTurn()
          else:
-            self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
-            print(self.gameBoard.getPendingMoveString())
-            if self._booleanPrompt("Are you sure this is the move you would like to make?"):
-               self.gameBoard.commitTurn()
-               self.files.appendMoveForWrite(currentPlayer.lastMoveString)
-            else:
-               self.gameBoard.cancelCommit()
-               currentPlayer.undoLastMove()
+            self.game.cancelTurn()
       else:
-         print("Move Failed:\n"+currentPlayer.moveResultReason)
+         print(self.game.lastError)
+         self.game.cancelTurn()
       
    def do_load(self,arg):
       """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
-      numOfArgs = len(arg.split())
-      if numOfArgs > 1:
-         print("Too many arguments recieved")
-         return
-      elif numOfArgs == 1:
-         importFileName = arg
-      else:
-         importFileName = self._getConfigOption(ValidConfig.ImportFile)
-      self.files.changeInputFile(importFileName)
-      if self.files.inFileStatus != "Ready":
-         print("Cannot read from that file. Please try again.")
-         return
-      elif self._booleanPrompt("If any moves are invalid, this game will be reset. Continue?"):
-         for move in self.files.readMoves():
-            currentPlayer = self._getNextPlayer()
-            if currentPlayer.algebraicMove(move):
-               self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
-               self.gameBoard.commitTurn()
-               self.files.appendMoveForWrite(currentPlayer.lastMoveString)
-            else:
-               print("Move:",move,"\nMove Failed:\n"+currentPlayer.moveResultReason)
-               self.do_restart() 
+      if self._booleanPrompt("If any moves are invalid, this game will be reset. Continue?"):
+         if not self.game.loadSaveFile(arg):
+            print(self.game.lastError)
 
    def do_save(self,arg):
       """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
 if one is given use the argument as a filename to write the savegame to."""
-      numOfArgs = len(arg.split())
-      if numOfArgs > 1:
-         print("Too many arguments recieved")
-         return
-      elif numOfArgs == 1:
-         exportFileName = arg
-      else:
-         exportFileName = self._getConfigOption(ValidConfig.ExportFile)
-      self.files.changeOutputFile(exportFileName)
-      if self.files.outFileStatus != "Ready":
-         print("Cannot write to that file. Please try again.")
-      elif self._booleanPrompt("This will erase the contents of the the export file before writing. Continue?"):
-         self.files.writeGame()
+      if self._booleanPrompt("This will erase the contents of the the export file before writing. Continue?"):
+         if not self.game.writeSaveFile():
+            print(self.game.lastError)
          
    def do_config(self,arg):
       """Set or read configuration options. The first argument must be one of the following settings:
@@ -172,9 +109,6 @@ if one is given use the argument as a filename to write the savegame to."""
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen.""" 
-      configMap = {"import":ValidConfig.ImportFile, "export":ValidConfig.ExportFile, \
-                   "name":ValidConfig.PlayerName, "location":ValidConfig.Location, \
-                   "debug":ValidConfig.Debug, "strict":ValidConfig.StrictParse}
       #Only split once, this allows the user to supply items with spaces in them
       args = arg.split(None,1)
       numOfArgs = len(args)
@@ -183,26 +117,23 @@ if one is given use the argument as a filename to write the savegame to."""
       elif numOfArgs > 2:
          print("Too many aguments provided.")
       else:
-         if args[0] in configMap:
-            if numOfArgs == 1:
-               config = self._getConfigOption(configMap[args[0]])
-               if config == "":
-                  print("Option is not set, please set it.")
-               else:
-                  print(config)
+         if numOfArgs == 1:
+            value = self.game.getConfigItem(args[0])
+            if value != None:
+               print(value)
             else:
-               args[1] = args[1].strip("\"")
-               if not self._setConfigOption(configMap[args[0]],args[1]):
-                  print("Set Failed. Valid options are:", configMap[args[0]]["values"])
+               print(self.game.lastError)
          else:
-            print("Invalid setting provided")
+            if not self.game.setConfigItem(args[0], args[1]):
+               print(self.game.lastError)
             
    def do_test(self,arg):
       """Run the unit tests that have been developed for pyChess"""
       if(arg == "-v" or arg == "--verbose"):
-         unittest.main(verbosity=3, exit=False)
+         verbose = True
       else:
-         unittest.main(exit=False)
+         verbose = False
+      self.game.runTests(verbose)
 
    def do_quit(self,arg):
       """Stop playing chess"""
@@ -213,38 +144,12 @@ if one is given use the argument as a filename to write the savegame to."""
    def help_help(self):
        print("Display the help for one of the available commands.")
 
-   def _getConfigOption(self, option):
-      retVal = ""
-      if option["name"] in ValidConfig.validConfigItems:
-         retVal = self.files.getConfigItem(option["name"])
-      return retVal
-
-   def _setConfigOption(self, option, value):
-      if option["name"] in ValidConfig.validConfigItems:
-         if "values" in option and value not in option["values"]:
-            return False
-         self.files.setConfigItem(option["name"], value)
-         self.files.writeConfig()
-         return True
-      return False
-      
    def _booleanPrompt(self, prompt):
       confirmation = input(prompt+" [y/n]:")
       if confirmation in ["y" , "Y" , "Yes" , "yes" , "YES"]:
          return True
       else:
          return False
-
-
-   def _getNextPlayer(self):
-      nextMove = self.gameBoard.getTurnString("pending")
-      currentPlayer = None
-      if "..." in nextMove:
-         currentPlayer = self.blackPlayer
-      else:
-         currentPlayer = self.whitePlayer
-      return currentPlayer
-     
 
 if __name__ == "__main__":
     init()

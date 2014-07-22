@@ -59,10 +59,14 @@ class ChessGame():
       """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n
          In order to perform a castle move, move the king to the final position required for the castle."""
       moves = [firstCoord, secondCoord]
-      if promotionAbbreviation != None and promotionAbbreviation not in Util.invPieces:
-         self.lastError = "A valid piece abbreviation must be given for promotions."
-         return False
-      promotionAbbreviation = Util.invPieces[promotionAbbreviation]
+      if promotionAbbreviation != None: 
+         if promotionAbbreviation not in Util.invPieces:
+            self.lastError = "A valid piece abbreviation must be given for promotions."
+            return False
+         else:
+            promotionAbbreviation = Util.invPieces[promotionAbbreviation]
+      else:
+         promotionAbbreviation = ""
 
       for move in moves:
          if not Util.isCoordValid(move):
@@ -90,10 +94,10 @@ class ChessGame():
       self.lastError = "Move Failed:\n"+currentPlayer.moveResultReason
       return False
       
-   def loadSaveFile(self,fileName=None):
+   def loadSaveFile(self,fileName=""):
       """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
-      if fileName != None:
+      if fileName != "":
          importFileName = fileName
       else:
          importFileName = self._getConfigOption(ValidConfig.ImportFile)
@@ -102,15 +106,17 @@ if one is given use the argument as a filename to read a savegame from."""
          self.lastError = "Cannot read from that file. Please try again."
          return False
       for move in self.files.readMoves():
-         if not self.algebraicMove(move):
-            self.do_restart() 
+         if self.algebraicMove(move):
+            self.commitTurn()
+         else:
+            self.restartGame() 
             return False
       return True
 
-   def writeSaveFile(self,fileName=None):
+   def writeSaveFile(self,fileName=""):
       """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
     if one is given use the argument as a filename to write the savegame to."""
-      if fileName != None:
+      if fileName != "":
          exportFileName = fileName
       else:
          exportFileName = self._getConfigOption(ValidConfig.ExportFile)
@@ -150,11 +156,12 @@ if one is given use the argument as a filename to read a savegame from."""
    The second argument will be saved as the setting.""" 
       if configItem in ValidConfig.configMap:
          if not self._setConfigOption(ValidConfig.configMap[configItem],configValue):
-            self.lastError = "Set Failed. Valid options are:"+ ValidConfig.configMap[configItem]["values"]
+            self.lastError = "Set Failed. Valid options are:" + str(ValidConfig.configMap[configItem]["values"])
             return False
       else:
          self.lastError = "Invalid setting provided"
          return False
+      return True
             
    def runTests(self,verbose=False):
       """Run the unit tests that have been developed for pyChess"""
