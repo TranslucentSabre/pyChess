@@ -97,7 +97,7 @@ if one is given use the argument as a filename to read a savegame from."""
       """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
 if one is given use the argument as a filename to write the savegame to."""
       if self._booleanPrompt("This will erase the contents of the the export file before writing. Continue?"):
-         if not self.game.writeSaveFile():
+         if not self.game.writeSaveFile(arg):
             print(self.game.lastError)
          
    def do_config(self,arg):
