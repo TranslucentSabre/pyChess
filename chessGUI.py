@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask
 from ChessGame import *
+import json
 
 game = ChessGame()
 app = Flask(__name__)
@@ -13,11 +14,11 @@ def hello():
 def showBoard():
    """Display the current board"""
    output = ""
-   output += "Board: "+str(game.getCurrentBoardDictionary())
-   output += "White Captured: "+str(game.getCurrentCapturedStrings(Util.colors.WHITE))
-   output += "White Status: "+str(game.getCurrentCheckMateStatus(Util.colors.WHITE))
-   output += "Black Captured: "+str(game.getCurrentCapturedStrings(Util.colors.BLACK))
-   output += "Black Status: "+str(game.getCurrentCheckMateStatus(Util.colors.BLACK))
+   output += "Board = "+json.dumps(game.getCurrentBoardDictionary())
+   output += "White Captured = "+json.dumps(game.getCurrentCapturedStrings(Util.colors.WHITE))
+   output += "White Status = "+json.dumps(game.getCurrentCheckMateStatus(Util.colors.WHITE))
+   output += "Black Captured = "+json.dumps(game.getCurrentCapturedStrings(Util.colors.BLACK))
+   output += "Black Status = "+json.dumps(game.getCurrentCheckMateStatus(Util.colors.BLACK))
    return output
    
 @app.route("/show/board/pending")
