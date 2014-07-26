@@ -23,6 +23,9 @@ class MoveType(object):
    QUEENSIDECASTLE = Castle.QUEENSIDE
    PROMOTION = "promotion"
 
+class Meta(type):
+   def __str__(self):
+     return self.name
 
 class colors(object):
    """Central holding place for my colors"""
@@ -35,10 +38,9 @@ class colors(object):
       queensideRookMoveFile = "d"
       queensideKingFile = "c"
       
-      def __str__(self):
-         return self.name
 
    class WHITE(CommonColorEnums):
+      __metaclass__ = Meta
       name  = "white"
       pawnRank = "2"
       majorRank = "1"
@@ -47,6 +49,7 @@ class colors(object):
       pawnRankModifier = 1
       
    class BLACK(CommonColorEnums):
+      __metaclass__ = Meta
       name = "black"
       pawnRank = "7"
       majorRank = "8"

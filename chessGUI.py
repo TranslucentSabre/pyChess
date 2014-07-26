@@ -13,8 +13,12 @@ def hello():
 def showBoard():
    """Display the current board"""
    output = ""
-   outuput += "Board: "
-   return game.showCurrentBoard()
+   output += "Board: "+str(game.getCurrentBoardDictionary())
+   output += "White Captured: "+str(game.getCurrentCapturedStrings(Util.colors.WHITE))
+   output += "White Status: "+str(game.getCurrentCheckMateStatus(Util.colors.WHITE))
+   output += "Black Captured: "+str(game.getCurrentCapturedStrings(Util.colors.BLACK))
+   output += "Black Status: "+str(game.getCurrentCheckMateStatus(Util.colors.BLACK))
+   return output
    
 @app.route("/show/board/pending")
 def showPendingBoard():
@@ -44,6 +48,11 @@ def previousMove():
    """Go to the previous move in the game"""
    game.previousMove()
    return "Success"
+
+@app.route("/turn/string/<turnString>")
+def gotoTurn(turnString):
+    game.gotoTurnString(turnString)
+    return "Success"
    
 @app.route("/restart")
 def restart():

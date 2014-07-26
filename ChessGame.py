@@ -22,6 +22,15 @@ class ChessGame():
    def showCurrentBoard(self):
       return str(self.gameBoard)
 
+   def getCurrentBoardDictionary(self):
+       return self.gameBoard.getBoardDictionary()
+
+   def getCurrentCapturedStrings(self,color):
+       return self.gameBoard.getColorCapturedStrings(color)
+
+   def getCurrentCheckMateStatus(self,color):
+       return self.gameBoard.getColorCheckMateStatus(color)
+
    def showPendingBoard(self):
       return self.gameBoard.getPendingMoveString()
       

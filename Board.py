@@ -136,7 +136,7 @@ class DisplayBoard(Board):
    def getBoardDictionary(self):
       """Return a dictionary keyed by the coordinate and valued by the letter of the
          piece on that coordinate"""
-      return { coordinate : self.board[coordinate][1].getPieceLetter() for coordinate in self.board }
+      return { coordinate : [ self.board[coordinate][1].getPieceLetter(), str(self.board[coordinate][1].color) ] for coordinate in self.board }
          
    def setCheckMateStatus(self, player):
       """Take the current check and checkmake status from the player 
@@ -147,7 +147,7 @@ class DisplayBoard(Board):
       else:
          self.blackCheckMateStatus = status
 
-   def getCheckMakeStatus(self, color):
+   def getCheckMateStatus(self, color):
       """Return a tuple containing the check and check mate status for the color
          player passed in."""
       if color == Util.colors.WHITE:
@@ -316,7 +316,7 @@ class GameBoard(object):
       if pending:
          savedTurn = self.currentTurn
          self.gotoTurn(self.pendingTurn)
-      board = self.boards[self.currentTurn].getCapturedStrings()
+      board = self.boards[self.currentTurn].getCapturedStrings(color)
       if pending:
          self.gotoTurn(savedTurn)
       return board
@@ -326,7 +326,7 @@ class GameBoard(object):
       if pending:
          savedTurn = self.currentTurn
          self.gotoTurn(self.pendingTurn)
-      board = self.boards[self.currentTurn].getCheckMateStatus()
+      board = self.boards[self.currentTurn].getCheckMateStatus(color)
       if pending:
          self.gotoTurn(savedTurn)
       return board
