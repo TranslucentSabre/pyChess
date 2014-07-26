@@ -36,6 +36,9 @@ class ChessGame():
       
    def previousMove(self):
       self.gameBoard.previousTurn()
+
+   def gotoTurnString(self,turnString):
+      self.gameBoard.gotoTurnString(turnString)
       
    def restartGame(self):
       self.files.resetWriteString()

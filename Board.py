@@ -2,6 +2,7 @@ from colorama import Style, Fore, Back
 import Util
 from Piece import *
 from math import ceil
+import re
 
 
 class Board(object):
@@ -106,6 +107,20 @@ class DisplayBoard(Board):
       else:
          self.captures[1] = pieces[:]
          
+   def getCaptured(self,color):
+      """Get the array of captured piece objects for the color passed in"""
+      if color == Util.colors.WHITE:
+         return self.captures[0]
+      else:
+         return self.captures[1]
+         
+   def getCapturedStrings(self,color):
+      """Get an array of captured piece strings for the color passed in."""
+      if color == Util.colors.WHITE:
+         index = 0
+      else:
+         index = 1
+      return [ piece.getPieceLetter() for piece in self.captures[index] ]
 
    def placePieces(self,piecesLst):
       """Add the pieces passed in onto the board"""
@@ -117,6 +132,11 @@ class DisplayBoard(Board):
          if the coordinate is not valid"""
       if Util.isCoordValid(coordinate):
          return self.board[coordinate][1]
+
+   def getBoardDictionary(self):
+      """Return a dictionary keyed by the coordinate and valued by the letter of the
+         piece on that coordinate"""
+      return { coordinate : self.board[coordinate][1].getPieceLetter() for coordinate in self.board }
          
    def setCheckMateStatus(self, player):
       """Take the current check and checkmake status from the player 
@@ -126,6 +146,14 @@ class DisplayBoard(Board):
          self.whiteCheckMateStatus = status
       else:
          self.blackCheckMateStatus = status
+
+   def getCheckMakeStatus(self, color):
+      """Return a tuple containing the check and check mate status for the color
+         player passed in."""
+      if color == Util.colors.WHITE:
+         return self.whiteCheckMateStatus
+      else:
+         return self.blackCheckMateStatus
 
 class VerifyBoard(Board):
    """A minimal board that is more suitable for tactical use by the players."""
@@ -203,7 +231,31 @@ class GameBoard(object):
       """Decrement our current turn"""
       if self.currentTurn > self.initialSetup:
          self.currentTurn -= 1
+
+   def gotoTurn(self, turnNumber):
+      """Move our current turn to the number specified"""
+      if turnNumber > self.initialSetup and turnNumber <= self.pendingTurn:
+         self.currentTurn = turnNumber
    
+   def gotoTurnString(self, turnString):
+      """Move our current turn to the turn specified by the string"""
+      if turnString == "0":
+         self.gotoTurn(0)
+      else:
+         turn = r"([0-9]+)(\.{1,3})"
+         regExp = re.compile(turn)
+         turnMatch = regExp.match(turnString)
+         if turnMatch:
+            color = turnMatch.group(3)
+            if color == ".":
+               color = -1
+            elif color == "...":
+               color = 0
+            else:
+               return
+            turnNumber = turnMatch.group(2) * 2 + color
+            self.gotoTurn(turnNumber)
+
    def setTurn(self, whitePlayer, blackPlayer):
       """Takes both players and stores all the necessary information to 
          commit and print the state of the game, call commitTurn to save this turn
@@ -248,3 +300,33 @@ class GameBoard(object):
    def getCurrentBoard(self):
       """Returns the display board for our current turn."""
       return self.boards[self.currentTurn]
+
+   def getBoardDictionary(self,pending=False):
+      """Get the dictionary of coordinates to piece letters for either the current or pending move."""
+      if pending:
+         savedTurn = self.currentTurn
+         self.gotoTurn(self.pendingTurn)
+      board = self.boards[self.currentTurn].getBoardDictionary()
+      if pending:
+         self.gotoTurn(savedTurn)
+      return board
+
+   def getColorCapturedStrings(self, color, pending=False):
+      """Get an array of letters that the color has captured for either the current or pending move."""
+      if pending:
+         savedTurn = self.currentTurn
+         self.gotoTurn(self.pendingTurn)
+      board = self.boards[self.currentTurn].getCapturedStrings()
+      if pending:
+         self.gotoTurn(savedTurn)
+      return board
+
+   def getColorCheckMateStatus(self, color, pending=False):
+      """Get a tuple indicating the check and check mate status for the color in either the current or pending move."""
+      if pending:
+         savedTurn = self.currentTurn
+         self.gotoTurn(self.pendingTurn)
+      board = self.boards[self.currentTurn].getCheckMateStatus()
+      if pending:
+         self.gotoTurn(savedTurn)
+      return board

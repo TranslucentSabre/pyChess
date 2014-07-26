@@ -12,6 +12,8 @@ def hello():
 @app.route("/show/board")
 def showBoard():
    """Display the current board"""
+   output = ""
+   outuput += "Board: "
    return game.showCurrentBoard()
    
 @app.route("/show/board/pending")
