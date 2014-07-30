@@ -148,12 +148,13 @@ class DisplayBoard(Board):
          self.blackCheckMateStatus = status
 
    def getCheckMateStatus(self, color):
-      """Return a tuple containing the check and check mate status for the color
+      """Return a dictionary containing the check and check mate status for the color
          player passed in."""
       if color == Util.colors.WHITE:
-         return self.whiteCheckMateStatus
+         statusTuple = self.whiteCheckMateStatus
       else:
-         return self.blackCheckMateStatus
+         statusTuple = self.blackCheckMateStatus
+      return { "checked" : statusTuple[0], "mated" : statusTuple[1] }
 
 class VerifyBoard(Board):
    """A minimal board that is more suitable for tactical use by the players."""
