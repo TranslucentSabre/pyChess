@@ -17,3 +17,5 @@ colorama modules
    Install using the command `pip install colorama`
 flask modules
    Install using the command `pip install flask`
+flask-restful modules
+   Install using the command `pip install flask-restful`

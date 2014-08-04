@@ -1,14 +1,92 @@
 #!/usr/bin/env python
 from flask import Flask, jsonify, make_response
-import json
+from flask.ext.restful import Api, Resource, reqparse
 from ChessGame import *
 
 game = ChessGame()
 app = Flask(__name__)
+api = Api(app)
 
 @app.route("/")
 def hello():
    return "Hello World!"
+
+class Game(Resource):
+   def delete(self):
+      game.restartGame()
+      result = {}
+      result['result'] = 'Success'
+      return result, 204
+
+api.add_resource(Game, "/game")
+
+class Move(Resource):
+   setupDone = False
+   def setup(self):
+      if not Move.setupDone:
+         Move.parser = reqparse.RequestParser()
+         Move.parser.add_argument("method", required=True, choices=("coordinate","algebra"))
+         Move.parser.add_argument("firstCoord")
+         Move.parser.add_argument("secondCoord")
+         Move.parser.add_argument("promotion")
+         Move.parser.add_argument("algebra")
+         Move.setupDone = True
+
+   def get(self):
+      self.setup()
+      result = {}
+      result['result'] = 'empty'
+      return result
+
+   def post(self):
+      self.setup()
+      result = {}
+      args = Move.parser.parse_args()
+      if args["method"] == "algebra":
+         try:
+            moveString = args["algebra"]
+         except KeyError:
+            result['result'] = 'Failure'
+            result['error'] = 'Missing algebraic move'
+            return result, 400
+         if game.algebraicMove(move):
+            result['result'] = 'Success'
+            return result
+         else:
+            game.cancelTurn()
+            result['result'] = 'Failure'
+            result['error'] = game.lastError
+            return result, 400
+      else:
+         try:
+            firstCoord = args['firstCoord']
+         except KeyError:
+            result['result'] = 'Failure'
+            result['error'] = 'Missing first coordinate'
+            return result, 400
+         try:
+            secondCoord = args['secondCoord']
+         except KeyError:
+            result['result'] = 'Failure'
+            result['error'] = 'Missing second coordinate'
+            return result, 400
+         try:
+            promotion = args['promotion']
+         except KeyError:
+            moveResult = game.twoCoordMove(firstCoord, secondCoord)
+         else:
+            moveResult = game.twoCoordMove(firstCoord, secondCoord, promotion)
+         if moveResult:
+            result['result'] = 'Success'
+            return result
+         else:
+            game.cancelTurn()
+            result['result'] = 'Failure'
+            result['error'] = game.lastError
+            return result, 400
+            
+api.add_resource(Move, "/game/move")
+
 
 @app.route("/show/board")
 def showBoard():
@@ -53,12 +131,6 @@ def gotoTurn(turnString):
     game.gotoTurnString(turnString)
     return jsonify(result="Success")
    
-@app.route("/restart")
-def restart():
-   """Restart our current game"""
-   game.restartGame()
-   return jsonify(result="Success")
-   
 @app.route("/commit")
 def commitMove():
     game.commitTurn()
@@ -69,25 +141,6 @@ def cancelMove():
     game.cancelTurn()
     return jsonify(result="Success")
 
-@app.route("/move/coord/<first>/<second>")
-@app.route("/move/coord/<first>/<second>/<promotion>")
-def coordMovePromotion(first,second,promotion=""):
-   """Move a piece, this function takes two chess coordinates and a Piece letter to use for promotion, the first being the starting square of the piece to move and the second being the ending square of the move. In order to perform a castle move, move the king to the final position required for the castle."""
-   if game.twoCoordMove(first,second,promotion):
-      return jsonify(result="Success")
-   else:
-      game.cancelTurn()
-      return jsonify(result="Error: "+game.lastError)
-
-@app.route("/move/algebra/<move>")
-def algebraMove(move):
-   """Move a piece, this function takes one move in algebraic notation."""
-   if game.algebraicMove(move):
-      return jsonify(result="Success")
-   else:
-      game.cancelTurn()
-      return jsonify(result="Error: "+game.lastError)
-   
 @app.route("/load")
 @app.route("/load/<fileName>")
 def load(fileName=""):
