@@ -66,6 +66,15 @@ class ChessGame():
       currentPlayer = self._getNextPlayer()
       self.gameBoard.cancelCommit()
       currentPlayer.undoLastMove()
+
+   def getTurnString(self, turn="current"):
+      return self.gameBoard.getTurnString(turn)
+
+   def getTurnStringToMoveDictionary(self):
+      turnToMoveMap = { "0" : "Initial" }
+      for index, move in enumerate(self.files.getMoves()):
+         turnToMoveMap[self.gameBoard.getTurnString(index+1)] = move
+      return turnToMoveMap
       
    def twoCoordMove(self,firstCoord,secondCoord,promotionAbbreviation=None):
       """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n

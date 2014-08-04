@@ -67,6 +67,8 @@ class ChessFiles(ConfigFile):
       self.resetWriteString()
       self.moveSeekLocation = 0
 
+      self.moveList = []
+
       
    def __del__(self):
       super(self.__class__, self).__del__()
@@ -109,6 +111,7 @@ class ChessFiles(ConfigFile):
       self.writeString = ""
       self.moveCounter = 0
       self.turnCounter = 1
+      self.moveList = []
 
    def appendMoveForWrite(self, move):
 
@@ -119,6 +122,9 @@ class ChessFiles(ConfigFile):
       else:
          self.writeString += " " + move + "\n"
       self.moveCounter += 1
+      #The move may already be in the list while reading the file and applying the moves
+      if move not in self.moveList:
+         self.moveList.append(move)
 
    def writeGame(self):
       self.outFile.seek(0)
@@ -128,10 +134,14 @@ class ChessFiles(ConfigFile):
 
    def readMoves(self):
       self._seekToMoves()
-      return [move for move in self.getMoves()] 
-
+      self.moveList = [move for move in self._getMovesFromFile()] 
+      return self.moveList
 
    def getMoves(self):
+      return self.moveList
+
+
+   def _getMovesFromFile(self):
       for line in self.inFile:
          if line != "":
             for move in line.split()[1:]:

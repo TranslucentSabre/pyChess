@@ -196,23 +196,24 @@ class GameBoard(object):
    def getTurnString(self,turn="current"):
       """Returns a string informing of the current round and player"""
       turnString = "Invalid"
-      if turn in ("current","initial","pending"):
+      if turn in ("current","first","pending","last"):
          if turn == "current":
             turn = self.currentTurn
          elif turn == "first":
             turn = self.initialSetup
+         elif turn == "last":
+            turn = self.pendingTurn - 1
          else:
             turn = self.pendingTurn
-
-         if turn == self.initialSetup:
-            turnString = "0"
+      if turn == self.initialSetup:
+         turnString = "0"
+      else:
+         numericTurn = int(ceil(turn/float(2)))
+         WHITE = 1
+         if turn & 1 == WHITE:
+            turnString = str(numericTurn)+"."
          else:
-            numericTurn = int(ceil(turn/float(2)))
-            WHITE = 1
-            if turn & 1 == WHITE:
-               turnString = str(numericTurn)+"."
-            else:
-               turnString = str(numericTurn)+"..."
+            turnString = str(numericTurn)+"..."
       return turnString
       
    def firstTurn(self):

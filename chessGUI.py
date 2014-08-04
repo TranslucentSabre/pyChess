@@ -29,13 +29,17 @@ class Move(Resource):
          Move.parser.add_argument("firstCoord")
          Move.parser.add_argument("secondCoord")
          Move.parser.add_argument("promotion")
-         Move.parser.add_argument("algebra")
+         Move.parser.add_argument("algebra", type=str)
          Move.setupDone = True
 
    def get(self):
       self.setup()
       result = {}
-      result['result'] = 'empty'
+      result['result'] = 'Success'
+      result['firstTurn'] = game.getTurnString("first")
+      result['lastTurn'] = game.getTurnString("last")
+      result['currentTurn'] = game.getTurnString()
+      result['turns'] = game.getTurnStringToMoveDictionary()
       return result
 
    def post(self):
@@ -49,7 +53,7 @@ class Move(Resource):
             result['result'] = 'Failure'
             result['error'] = 'Missing algebraic move'
             return result, 400
-         if game.algebraicMove(move):
+         if game.algebraicMove(moveString):
             result['result'] = 'Success'
             return result
          else:
