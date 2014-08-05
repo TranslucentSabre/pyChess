@@ -26,9 +26,9 @@ class Move(Resource):
       if not Move.setupDone:
          Move.parser = reqparse.RequestParser()
          Move.parser.add_argument("method", required=True, choices=("coordinate","algebra"))
-         Move.parser.add_argument("firstCoord")
-         Move.parser.add_argument("secondCoord")
-         Move.parser.add_argument("promotion")
+         Move.parser.add_argument("firstCoord", type=str)
+         Move.parser.add_argument("secondCoord", type=str)
+         Move.parser.add_argument("promotion", type=str)
          Move.parser.add_argument("algebra", type=str)
          Move.setupDone = True
 
@@ -46,9 +46,8 @@ class Move(Resource):
       result = {}
       args = Move.parser.parse_args()
       if args["method"] == "algebra":
-         try:
-            moveString = args["algebra"]
-         except KeyError:
+         moveString = args["algebra"]
+         if moveString == None:
             result['result'] = 'Failure'
             result['error'] = 'Missing algebraic move'
             return result, 400
@@ -62,21 +61,18 @@ class Move(Resource):
             result['error'] = game.lastError
             return result, 400
       else:
-         try:
-            firstCoord = args['firstCoord']
-         except KeyError:
+         firstCoord = args['firstCoord']
+         if firstCoord == None:
             result['result'] = 'Failure'
             result['error'] = 'Missing first coordinate'
             return result, 400
-         try:
-            secondCoord = args['secondCoord']
-         except KeyError:
+         secondCoord = args['secondCoord']
+         if secondCoord == None:
             result['result'] = 'Failure'
             result['error'] = 'Missing second coordinate'
             return result, 400
-         try:
-            promotion = args['promotion']
-         except KeyError:
+         promotion = args['promotion']
+         if promotion == None:
             moveResult = game.twoCoordMove(firstCoord, secondCoord)
          else:
             moveResult = game.twoCoordMove(firstCoord, secondCoord, promotion)
@@ -154,48 +150,114 @@ class MoveInstance(Resource):
 
 api.add_resource(MoveInstance, "/game/move/<instance>")
 
+class Load(Resource):
+   setupDone = False
+   def setup(self):
+      if not Load.setupDone:
+         Load.parser = reqparse.RequestParser()
+         Load.parser.add_argument("fileName", type=str)
+         Load.setupDone = True
 
-@app.route("/load")
-@app.route("/load/<fileName>")
-def load(fileName=""):
-   """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
-if one is given use the argument as a filename to read a savegame from."""
-   if not game.loadSaveFile(fileName):
-      return jsonify(result="Error: "+game.lastError)
-   else:
-      return jsonify(result="Success")
+   def put(self):
+      self.setup()
+      result = {}
+      args = Load.parser.parse_args()
+      game.restartGame()
+      fileName = args['fileName']
+      if fileName == None:
+         loadSuccess = game.loadSaveFile()
+      else:
+         loadSuccess = game.loadSaveFile(fileName)
 
-@app.route("/save")
-@app.route("/save/<fileName>")
-def save(fileName=""):
-   """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
-if one is given use the argument as a filename to write the savegame to."""
-   if not game.writeSaveFile(fileName):
-      return jsonify(result="Error: "+game.lastError)
-   else:
-      return jsonify(result="Success")
-      
+      if loadSuccess:
+         result['result'] = "Success"
+         return result
+      else:
+         result['result'] = "Failure"
+         result['error'] = game.lastError
+         return result, 400
+
+api.add_resource(Load, "/game/load")
+
+class Save(Resource):
+   setupDone = False
+   def setup(self):
+      if not Save.setupDone:
+         Save.parser = reqparse.RequestParser()
+         Save.parser.add_argument("fileName", type=str)
+         Save.setupDone = True
+
+   def put(self):
+      self.setup()
+      result = {}
+      args = Save.parser.parse_args()
+      fileName = args['fileName']
+      if fileName == None:
+         saveSuccess = game.writeSaveFile()
+      else:
+         saveSuccess = game.writeSaveFile(fileName)
+
+      if saveSuccess:
+         result['result'] = "Success"
+         return result
+      else:
+         result['result'] = "Failure"
+         result['error'] = game.lastError
+         return result, 400
+
+api.add_resource(Save, "/game/save")
+
 """Set or read configuration options. The first argument must be one of the following settings:
 import    (read/set default import file)
 export    (read/set default export file)
 name      (read/set the players real name)
 location  (read/set the physical location of the player)
 strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)"""
-@app.route("/config/<item>")
-def getConfig(item):
-   configValue = game.getConfigItem(item)
-   if configValue != None:
-      return jsonify(value=configValue)
-   else:
-      return jsonify(result="Error: "+game.lastError)
+      
+class Config(Resource):
+   def get(self):
+      result = {}
+      result['result'] = "Success"
+      result['config'] = game.getAllConfigItems()
+      return result
+   
+api.add_resource(Config, "/config")
 
-@app.route("/config/<item>/<value>")
-def setConfig(item, value):
-   if not game.setConfigItem(item, value):
-      return jsonify(result="Error: "+game.lastError)
-   else:
-      return jsonify(result="Success")
+class ConfigItem(Resource):
+   setupDone = False
+   def setup(self):
+      if not ConfigItem.setupDone:
+         ConfigItem.parser = reqparse.RequestParser()
+         ConfigItem.parser.add_argument("value", required=True, type=str)
+         ConfigItem.setupDone = True
 
+   def get(self, item):
+      result = {}
+      configValue = game.getConfigItem(item)
+      if configValue != None:
+         result['result'] = "Success"
+         result['value'] = configValue
+         return result
+      else:
+         result['result'] = "Failure"
+         result['error'] = game.lastError
+         return result, 400
+
+
+   def put(self, item):
+      result = {}
+      self.setup()
+      args = ConfigItem.parser.parse_args()
+      value = args["value"]
+      if not game.setConfigItem(item, value):
+         result['result'] = "Failure"
+         result['error'] = game.lastError
+         return result, 400
+      else:
+         result['result'] = "Success"
+         return result
+
+api.add_resource(ConfigItem, "/config/<item>")
 
 if __name__ == "__main__":
     app.run(debug=True)

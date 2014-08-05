@@ -156,6 +156,12 @@ if one is given use the argument as a filename to read a savegame from."""
          return False
       self.files.writeGame()
       return True
+
+   def getAllConfigItems(self):
+      config = {}
+      for configItem in ValidConfig.configMap:
+         config[configItem] = self._getConfigOption(ValidConfig.configMap[configItem])
+      return config
          
    def getConfigItem(self,configItem):
       """Read configuration options. The argument must be one of the following settings:
