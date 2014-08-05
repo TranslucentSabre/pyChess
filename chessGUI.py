@@ -54,6 +54,7 @@ class Move(Resource):
             return result, 400
          if game.algebraicMove(moveString):
             result['result'] = 'Success'
+            result['url'] = '/game/move/'+game.getTurnString("pending")
             return result
          else:
             game.cancelTurn()
@@ -81,6 +82,7 @@ class Move(Resource):
             moveResult = game.twoCoordMove(firstCoord, secondCoord, promotion)
          if moveResult:
             result['result'] = 'Success'
+            result['url'] = '/game/move/'+game.getTurnString("pending")
             return result
          else:
             game.cancelTurn()
@@ -90,59 +92,68 @@ class Move(Resource):
             
 api.add_resource(Move, "/game/move")
 
+class MoveInstance(Resource):
+   def get(self, instance):
+      result = {}
+      if instance in ["first", "last"]: 
+         if instance == "first":
+            result['result'] = "Success"
+            result['value'] = game.getTurnString("first")
+            return result
+         elif instance == "last":
+            result['result'] = "Success"
+            result['value'] = game.getTurnString("last")
+            return result
+      else:
+         if game.gotoTurnString(instance):
+            result['result'] = "Success"
+            result['board'] = game.getCurrentBoardDictionary()
+            result['whiteCaptured'] = game.getCurrentCapturedStrings(Util.colors.WHITE)
+            result['whiteStatus'] = game.getCurrentCheckMateStatus(Util.colors.WHITE)
+            result['blackCaptured'] = game.getCurrentCapturedStrings(Util.colors.BLACK)
+            result['blackStatus'] = game.getCurrentCheckMateStatus(Util.colors.BLACK)
+            return result
+         else:
+            result['result'] = "Failure"
+            result['error'] = "No such move to get."
+            return result, 400
 
-@app.route("/show/board")
-def showBoard():
-   """Display the current board"""
-   return jsonify(board=game.getCurrentBoardDictionary(),
-                  whiteCaptured=game.getCurrentCapturedStrings(Util.colors.WHITE),
-                  whiteStatus=game.getCurrentCheckMateStatus(Util.colors.WHITE),
-                  blackCaptured=game.getCurrentCapturedStrings(Util.colors.BLACK),
-                  blackStatus=game.getCurrentCheckMateStatus(Util.colors.BLACK))
-   
-@app.route("/show/board/pending")
-def showPendingBoard():
-   """Display the pending board"""
-   return game.showPendingBoard()
-   
-@app.route("/turn/first")
-def firstMove():
-   """Go to the first move in the game"""
-   game.firstMove()
-   return jsonify(result="Success")
+   def _checkForPendingTurn(self, instance):
+      return instance == game.getTurnString("pending")
 
-@app.route("/turn/last")
-def lastMove():
-   """Go to the last move in the game"""
-   game.lastMove()
-   return jsonify(result="Success")
-   
-@app.route("/turn/next")
-def nextMove():
-   """Go to the next move in the game"""
-   game.nextMove()
-   return jsonify(result="Success")
-   
-@app.route("/turn/previous")
-def previousMove():
-   """Go to the previous move in the game"""
-   game.previousMove()
-   return jsonify(result="Success")
+   def put(self, instance):
+      result = {}
+      if self._checkForPendingTurn(instance):
+         if game.commitTurn():
+            result['result'] = "Success"
+            return result
+         else:
+            result['result'] = "Failure"
+            result['error'] = "No new move available to commit."
+            return result, 400
+      else:
+         result['result'] = "Failure"
+         result['error'] = "Move "+instance+" is not eligible for commit." 
+         return result, 400
 
-@app.route("/turn/string/<turnString>")
-def gotoTurn(turnString):
-    game.gotoTurnString(turnString)
-    return jsonify(result="Success")
-   
-@app.route("/commit")
-def commitMove():
-    game.commitTurn()
-    return jsonify(result="Success")
 
-@app.route("/cancel")
-def cancelMove():
-    game.cancelTurn()
-    return jsonify(result="Success")
+   def delete(self, instance):
+      result = {}
+      if self._checkForPendingTurn(instance):
+         if game.cancelTurn():
+            result['result'] = "Success"
+            return result
+         else:
+            result['result'] = "Failure"
+            result['error'] = "No new move available to cancel."
+            return result, 400
+      else:
+         result['result'] = "Failure"
+         result['error'] = "Move "+instance+" is not eligible for deletion." 
+         return result, 400
+
+api.add_resource(MoveInstance, "/game/move/<instance>")
+
 
 @app.route("/load")
 @app.route("/load/<fileName>")

@@ -242,7 +242,7 @@ class GameBoard(object):
 
    def gotoTurn(self, turnNumber):
       """Move our current turn to the number specified"""
-      if turnNumber > self.initialSetup and turnNumber <= self.pendingTurn:
+      if turnNumber >= self.initialSetup and turnNumber <= self.pendingTurn:
          self.currentTurn = turnNumber
          return True
       return False
@@ -257,14 +257,14 @@ class GameBoard(object):
          turnMatch = regExp.match(turnString)
          result = False
          if turnMatch:
-            color = turnMatch.group(3)
+            color = turnMatch.group(2)
             if color == ".":
                color = -1
             elif color == "...":
                color = 0
             else:
                return result
-            turnNumber = turnMatch.group(2) * 2 + color
+            turnNumber = int(turnMatch.group(1)) * 2 + color
             result = self.gotoTurn(turnNumber)
          return result
 

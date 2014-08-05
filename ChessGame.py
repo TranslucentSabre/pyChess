@@ -36,19 +36,19 @@ class ChessGame():
       return self.gameBoard.getPendingMoveString()
       
    def firstMove(self):
-      self.gameBoard.firstTurn()
+      return self.gameBoard.firstTurn()
       
    def lastMove(self):
-      self.gameBoard.lastTurn()
+      return self.gameBoard.lastTurn()
       
    def nextMove(self):
-      self.gameBoard.nextTurn()
+      return self.gameBoard.nextTurn()
       
    def previousMove(self):
-      self.gameBoard.previousTurn()
+      return self.gameBoard.previousTurn()
 
    def gotoTurnString(self,turnString):
-      self.gameBoard.gotoTurnString(turnString)
+      return self.gameBoard.gotoTurnString(turnString)
       
    def restartGame(self):
       self.files.resetWriteString()
@@ -63,12 +63,16 @@ class ChessGame():
       currentPlayer = self._getNextPlayer()
       if self.gameBoard.commitTurn():
          self.files.appendMoveForWrite(currentPlayer.lastMoveString)
+         return True
+      return False
 
    def cancelTurn(self):
       currentPlayer = self._getNextPlayer()
       if self.gameBoard.cancelCommit():
          self.moveList = self.moveList[:-1]
          currentPlayer.undoLastMove()
+         return True
+      return False
 
    def getTurnString(self, turn="current"):
       return self.gameBoard.getTurnString(turn)
