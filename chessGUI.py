@@ -38,7 +38,6 @@ class Move(Resource):
       result['result'] = 'Success'
       result['firstTurn'] = game.getTurnString("first")
       result['lastTurn'] = game.getTurnString("last")
-      result['currentTurn'] = game.getTurnString()
       result['turns'] = game.getTurnStringToMoveDictionary()
       return result
 

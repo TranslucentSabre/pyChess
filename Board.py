@@ -219,34 +219,43 @@ class GameBoard(object):
    def firstTurn(self):
       """Move our current turn to the initial setup of the board"""
       self.currentTurn = self.initialSetup
+      return True
       
    def lastTurn(self):
       """Move our current turn to the last commit turn of the board"""
       self.currentTurn = self.pendingTurn - 1
+      return True
       
    def nextTurn(self):
       """Increment our current turn"""
       if self.currentTurn < self.pendingTurn - 1:
          self.currentTurn += 1
+         return True
+      return False
          
    def previousTurn(self):
       """Decrement our current turn"""
       if self.currentTurn > self.initialSetup:
          self.currentTurn -= 1
+         return True
+      return False
 
    def gotoTurn(self, turnNumber):
       """Move our current turn to the number specified"""
       if turnNumber > self.initialSetup and turnNumber <= self.pendingTurn:
          self.currentTurn = turnNumber
+         return True
+      return False
    
    def gotoTurnString(self, turnString):
       """Move our current turn to the turn specified by the string"""
       if turnString == "0":
-         self.gotoTurn(0)
+         return self.gotoTurn(0)
       else:
          turn = r"([0-9]+)(\.{1,3})"
          regExp = re.compile(turn)
          turnMatch = regExp.match(turnString)
+         result = False
          if turnMatch:
             color = turnMatch.group(3)
             if color == ".":
@@ -254,9 +263,10 @@ class GameBoard(object):
             elif color == "...":
                color = 0
             else:
-               return
+               return result
             turnNumber = turnMatch.group(2) * 2 + color
-            self.gotoTurn(turnNumber)
+            result = self.gotoTurn(turnNumber)
+         return result
 
    def setTurn(self, whitePlayer, blackPlayer):
       """Takes both players and stores all the necessary information to 
@@ -290,6 +300,8 @@ class GameBoard(object):
       if self.commitReady == True:
          self.boards[self.pendingTurn] = DisplayBoard()
          self.commitReady = False
+         if self.currentTurn == self.pendingTurn:
+            self.lastTurn()
          return True
       else:
          return False
@@ -303,32 +315,17 @@ class GameBoard(object):
       """Returns the display board for our current turn."""
       return self.boards[self.currentTurn]
 
-   def getBoardDictionary(self,pending=False):
+   def getBoardDictionary(self):
       """Get the dictionary of coordinates to piece letters for either the current or pending move."""
-      if pending:
-         savedTurn = self.currentTurn
-         self.gotoTurn(self.pendingTurn)
-      board = self.boards[self.currentTurn].getBoardDictionary()
-      if pending:
-         self.gotoTurn(savedTurn)
+      board = self.getCurrentBoard().getBoardDictionary()
       return board
 
-   def getColorCapturedStrings(self, color, pending=False):
+   def getColorCapturedStrings(self, color):
       """Get an array of letters that the color has captured for either the current or pending move."""
-      if pending:
-         savedTurn = self.currentTurn
-         self.gotoTurn(self.pendingTurn)
-      board = self.boards[self.currentTurn].getCapturedStrings(color)
-      if pending:
-         self.gotoTurn(savedTurn)
-      return board
+      captured = self.getCurrentBoard().getCapturedStrings(color)
+      return captured
 
-   def getColorCheckMateStatus(self, color, pending=False):
+   def getColorCheckMateStatus(self, color):
       """Get a tuple indicating the check and check mate status for the color in either the current or pending move."""
-      if pending:
-         savedTurn = self.currentTurn
-         self.gotoTurn(self.pendingTurn)
-      board = self.boards[self.currentTurn].getCheckMateStatus(color)
-      if pending:
-         self.gotoTurn(savedTurn)
-      return board
+      status = self.getCurrentBoard().getCheckMateStatus(color)
+      return status

@@ -15,6 +15,7 @@ class ChessGame():
    blackPlayer.setOpponent(whitePlayer)
    gameBoard = GameBoard(whitePlayer, blackPlayer)
    lastError = ""
+   moveList = []
    
    def getLastError(self):
       return self.lastError
@@ -56,23 +57,25 @@ class ChessGame():
       self.whitePlayer.otherPlayer = self.blackPlayer
       self.blackPlayer.otherPlayer = self.whitePlayer
       self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)
+      self.moveList = []
 
    def commitTurn(self):
       currentPlayer = self._getNextPlayer()
-      self.gameBoard.commitTurn()
-      self.files.appendMoveForWrite(currentPlayer.lastMoveString)
+      if self.gameBoard.commitTurn():
+         self.files.appendMoveForWrite(currentPlayer.lastMoveString)
 
    def cancelTurn(self):
       currentPlayer = self._getNextPlayer()
-      self.gameBoard.cancelCommit()
-      currentPlayer.undoLastMove()
+      if self.gameBoard.cancelCommit():
+         self.moveList = self.moveList[:-1]
+         currentPlayer.undoLastMove()
 
    def getTurnString(self, turn="current"):
       return self.gameBoard.getTurnString(turn)
 
    def getTurnStringToMoveDictionary(self):
       turnToMoveMap = { "0" : "Initial" }
-      for index, move in enumerate(self.files.getMoves()):
+      for index, move in enumerate(self.moveList):
          turnToMoveMap[self.gameBoard.getTurnString(index+1)] = move
       return turnToMoveMap
       
@@ -97,6 +100,7 @@ class ChessGame():
       currentPlayer = self._getNextPlayer()
       if currentPlayer.move(moves[0], moves[1], promotionAbbreviation):
          self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
+         self.moveList.append(currentPlayer.lastMoveString)
          return True
       else:
          self.lastError = "Move Failed:\n"+currentPlayer.moveResultReason
@@ -111,6 +115,7 @@ class ChessGame():
             currentPlayer.moveResultReason = "Strict Parsing mode enabled. Input Algebraic move ("+move[0]+") is not the strict move ("+currentPlayer.lastMoveString+")"
          else:
             self.gameBoard.setTurn(self.whitePlayer, self.blackPlayer)
+            self.moveList.append(currentPlayer.lastMoveString)
             return True
       self.lastError = "Move Failed:\n"+currentPlayer.moveResultReason
       return False
