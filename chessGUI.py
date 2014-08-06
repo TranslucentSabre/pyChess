@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, render_template
 from flask.ext.restful import Api, Resource, reqparse
 from ChessGame import *
 
@@ -9,7 +9,7 @@ api = Api(app)
 
 @app.route("/")
 def hello():
-   return "Hello World!"
+   return render_template("chess.html")
 
 class Game(Resource):
    def delete(self):
