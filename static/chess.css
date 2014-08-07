@@ -1,0 +1,52 @@
+
+#chessBoard .chessSquare {
+   width:50px;
+   height:50px;
+}
+
+#chessBoard .blackSquare {
+   background:#000;
+}
+
+#chessBoard .whiteSquare {
+   background:#fff;
+}
+
+#chessBoard .bottom-bordered {
+   border-bottom:2px solid #000;
+}
+
+#chessBoard .top-bordered {
+   border-top:2px solid #000;
+}
+
+#chessBoard .left-bordered {
+   border-left:2px solid #000;
+}
+
+#chessBoard .right-bordered {
+   border-right:2px solid #000;
+}
+
+#chessBoard .horizontal {
+   float:left;
+}
+
+#chessBoard .newLine {
+   clear:left;
+   float:left;
+}
+
+#chessBoard .numbers {
+   text-align:right;
+   vertical-align:center;
+}
+
+#chessBoard .letters {
+   text-align:center;
+}
+
+#chessBoard img {
+   width:48px;
+   height:auto;
+}
