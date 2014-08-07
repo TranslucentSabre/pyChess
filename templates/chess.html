@@ -1,136 +1,139 @@
-<html>
-   <head>
-      <style media="screen" type="text/css">
-         .chessSquare {
-            width:50px;
-            height:50px;
-         }
+<!doctype html>
+<head>
+   <style media="screen" type="text/css">
+      .chessSquare {
+         width:50px;
+         height:50px;
+      }
 
-         .blackSquare {
-            background:#000;
-         }
+      .blackSquare {
+         background:#000;
+      }
 
-         .whiteSquare {
-            background:#fff;
-         }
+      .whiteSquare {
+         background:#fff;
+      }
 
-         .bottom-bordered {
-            border-bottom:2px solid #000;
-         }
+      .bottom-bordered {
+         border-bottom:2px solid #000;
+      }
 
-         .top-bordered {
-            border-top:2px solid #000;
-         }
+      .top-bordered {
+         border-top:2px solid #000;
+      }
 
-         .left-bordered {
-            border-left:2px solid #000;
-         }
+      .left-bordered {
+         border-left:2px solid #000;
+      }
 
-         .right-bordered {
-            border-right:2px solid #000;
-         }
+      .right-bordered {
+         border-right:2px solid #000;
+      }
 
-         .horizontal {
-            float:left;
-         }
+      .horizontal {
+         float:left;
+      }
 
-         .newLine {
-            clear:left;
-            float:left;
-         }
+      .newLine {
+         clear:left;
+         float:left;
+      }
 
-         .numbers {
-            text-align:right;
-            vertical-align:center;
-         }
+      .numbers {
+         text-align:right;
+         vertical-align:center;
+      }
 
-         .letters {
-            text-align:center;
-         }
-      </style>
-   </head>
-   <body>
-      <div id="8" class="chessSquare newLine numbers">8</div>
-      <div id="a8" class="chessSquare whiteSquare horizontal top-bordered left-bordered"></div>
-      <div id="b8" class="chessSquare blackSquare horizontal top-bordered"></div>
-      <div id="c8" class="chessSquare whiteSquare horizontal top-bordered"></div>
-      <div id="d8" class="chessSquare blackSquare horizontal top-bordered"></div>
-      <div id="e8" class="chessSquare whiteSquare horizontal top-bordered"></div>
-      <div id="f8" class="chessSquare blackSquare horizontal top-bordered"></div>
-      <div id="g8" class="chessSquare whiteSquare horizontal top-bordered"></div>
-      <div id="h8" class="chessSquare blackSquare horizontal top-bordered right-bordered"></div>
-      <div id="7" class="chessSquare newLine numbers">7</div>
-      <div id="a7" class="chessSquare blackSquare horizontal left-bordered"></div>
-      <div id="b7" class="chessSquare whiteSquare horizontal"></div>
-      <div id="c7" class="chessSquare blackSquare horizontal"></div>
-      <div id="d7" class="chessSquare whiteSquare horizontal"></div>
-      <div id="e7" class="chessSquare blackSquare horizontal"></div>
-      <div id="f7" class="chessSquare whiteSquare horizontal"></div>
-      <div id="g7" class="chessSquare blackSquare horizontal"></div>
-      <div id="h7" class="chessSquare whiteSquare horizontal right-bordered"></div>
-      <div id="6" class="chessSquare newLine numbers">6</div>
-      <div id="a6" class="chessSquare whiteSquare horizontal left-bordered"></div>
-      <div id="b6" class="chessSquare blackSquare horizontal"></div>
-      <div id="c6" class="chessSquare whiteSquare horizontal"></div>
-      <div id="d6" class="chessSquare blackSquare horizontal"></div>
-      <div id="e6" class="chessSquare whiteSquare horizontal"></div>
-      <div id="f6" class="chessSquare blackSquare horizontal"></div>
-      <div id="g6" class="chessSquare whiteSquare horizontal"></div>
-      <div id="h6" class="chessSquare blackSquare horizontal right-bordered"></div>
-      <div id="5" class="chessSquare newLine numbers">5</div>
-      <div id="a5" class="chessSquare blackSquare horizontal left-bordered"></div>
-      <div id="b5" class="chessSquare whiteSquare horizontal"></div>
-      <div id="c5" class="chessSquare blackSquare horizontal"></div>
-      <div id="d5" class="chessSquare whiteSquare horizontal"></div>
-      <div id="e5" class="chessSquare blackSquare horizontal"></div>
-      <div id="f5" class="chessSquare whiteSquare horizontal"></div>
-      <div id="g5" class="chessSquare blackSquare horizontal"></div>
-      <div id="h5" class="chessSquare whiteSquare horizontal right-bordered"></div>
-      <div id="4" class="chessSquare newLine numbers">4</div>
-      <div id="a4" class="chessSquare whiteSquare horizontal left-bordered"></div>
-      <div id="b4" class="chessSquare blackSquare horizontal"></div>
-      <div id="c4" class="chessSquare whiteSquare horizontal"></div>
-      <div id="d4" class="chessSquare blackSquare horizontal"></div>
-      <div id="e4" class="chessSquare whiteSquare horizontal"></div>
-      <div id="f4" class="chessSquare blackSquare horizontal"></div>
-      <div id="g4" class="chessSquare whiteSquare horizontal"></div>
-      <div id="h4" class="chessSquare blackSquare horizontal right-bordered"></div>
-      <div id="3" class="chessSquare newLine numbers">3</div>
-      <div id="a3" class="chessSquare blackSquare horizontal left-bordered"></div>
-      <div id="b3" class="chessSquare whiteSquare horizontal"></div>
-      <div id="c3" class="chessSquare blackSquare horizontal"></div>
-      <div id="d3" class="chessSquare whiteSquare horizontal"></div>
-      <div id="e3" class="chessSquare blackSquare horizontal"></div>
-      <div id="f3" class="chessSquare whiteSquare horizontal"></div>
-      <div id="g3" class="chessSquare blackSquare horizontal"></div>
-      <div id="h3" class="chessSquare whiteSquare horizontal right-bordered"></div>
-      <div id="2" class="chessSquare newLine numbers">2</div>
-      <div id="a2" class="chessSquare whiteSquare horizontal left-bordered"></div>
-      <div id="b2" class="chessSquare blackSquare horizontal"></div>
-      <div id="c2" class="chessSquare whiteSquare horizontal"></div>
-      <div id="d2" class="chessSquare blackSquare horizontal"></div>
-      <div id="e2" class="chessSquare whiteSquare horizontal"></div>
-      <div id="f2" class="chessSquare blackSquare horizontal"></div>
-      <div id="g2" class="chessSquare whiteSquare horizontal"></div>
-      <div id="h2" class="chessSquare blackSquare horizontal right-bordered"></div>
-      <div id="1" class="chessSquare newLine numbers">1</div>
-      <div id="a1" class="chessSquare blackSquare horizontal bottom-bordered left-bordered"></div>
-      <div id="b1" class="chessSquare whiteSquare horizontal bottom-bordered"></div>
-      <div id="c1" class="chessSquare blackSquare horizontal bottom-bordered"></div>
-      <div id="d1" class="chessSquare whiteSquare horizontal bottom-bordered"></div>
-      <div id="e1" class="chessSquare blackSquare horizontal bottom-bordered"></div>
-      <div id="f1" class="chessSquare whiteSquare horizontal bottom-bordered"></div>
-      <div id="g1" class="chessSquare blackSquare horizontal bottom-bordered"></div>
-      <div id="h1" class="chessSquare whiteSquare horizontal bottom-bordered right-bordered"></div>
-      <div id="blank" class="chessSquare newLine"></div>
-      <div id="a" class="chessSquare horizontal letters">a</div>
-      <div id="b" class="chessSquare horizontal letters">b</div>
-      <div id="c" class="chessSquare horizontal letters">c</div>
-      <div id="d" class="chessSquare horizontal letters">d</div>
-      <div id="e" class="chessSquare horizontal letters">e</div>
-      <div id="f" class="chessSquare horizontal letters">f</div>
-      <div id="g" class="chessSquare horizontal letters">g</div>
-      <div id="h" class="chessSquare horizontal letters">h</div>
+      .letters {
+         text-align:center;
+      }
 
-   </body>
-</html>
+      img {
+         width:48px;
+         height:auto;
+      }
+   </style>
+</head>
+<body>
+   <div id="8" class="chessSquare newLine numbers">8</div>
+   <div id="a8" class="chessSquare whiteSquare horizontal top-bordered left-bordered"><img src="{{ url_for('static', filename='Black R.png') }}" /></div>
+   <div id="b8" class="chessSquare blackSquare horizontal top-bordered"><img src="{{ url_for('static', filename='Black N.png') }}" /></div>
+   <div id="c8" class="chessSquare whiteSquare horizontal top-bordered"><img src="{{ url_for('static', filename='Black B.png') }}" /></div>
+   <div id="d8" class="chessSquare blackSquare horizontal top-bordered"><img src="{{ url_for('static', filename='Black Q.png') }}" /></div>
+   <div id="e8" class="chessSquare whiteSquare horizontal top-bordered"><img src="{{ url_for('static', filename='Black K.png') }}" /></div>
+   <div id="f8" class="chessSquare blackSquare horizontal top-bordered"><img src="{{ url_for('static', filename='Black B.png') }}" /></div>
+   <div id="g8" class="chessSquare whiteSquare horizontal top-bordered"><img src="{{ url_for('static', filename='Black N.png') }}" /></div>
+   <div id="h8" class="chessSquare blackSquare horizontal top-bordered right-bordered"><img src="{{ url_for('static', filename='Black R.png') }}" /></div>
+   <div id="7" class="chessSquare newLine numbers">7</div>
+   <div id="a7" class="chessSquare blackSquare horizontal left-bordered"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="b7" class="chessSquare whiteSquare horizontal"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="c7" class="chessSquare blackSquare horizontal"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="d7" class="chessSquare whiteSquare horizontal"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="e7" class="chessSquare blackSquare horizontal"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="f7" class="chessSquare whiteSquare horizontal"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="g7" class="chessSquare blackSquare horizontal"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="h7" class="chessSquare whiteSquare horizontal right-bordered"><img src="{{ url_for('static', filename='Black P.png') }}" /></div>
+   <div id="6" class="chessSquare newLine numbers">6</div>
+   <div id="a6" class="chessSquare whiteSquare horizontal left-bordered"></div>
+   <div id="b6" class="chessSquare blackSquare horizontal"></div>
+   <div id="c6" class="chessSquare whiteSquare horizontal"></div>
+   <div id="d6" class="chessSquare blackSquare horizontal"></div>
+   <div id="e6" class="chessSquare whiteSquare horizontal"></div>
+   <div id="f6" class="chessSquare blackSquare horizontal"></div>
+   <div id="g6" class="chessSquare whiteSquare horizontal"></div>
+   <div id="h6" class="chessSquare blackSquare horizontal right-bordered"></div>
+   <div id="5" class="chessSquare newLine numbers">5</div>
+   <div id="a5" class="chessSquare blackSquare horizontal left-bordered"></div>
+   <div id="b5" class="chessSquare whiteSquare horizontal"></div>
+   <div id="c5" class="chessSquare blackSquare horizontal"></div>
+   <div id="d5" class="chessSquare whiteSquare horizontal"></div>
+   <div id="e5" class="chessSquare blackSquare horizontal"></div>
+   <div id="f5" class="chessSquare whiteSquare horizontal"></div>
+   <div id="g5" class="chessSquare blackSquare horizontal"></div>
+   <div id="h5" class="chessSquare whiteSquare horizontal right-bordered"></div>
+   <div id="4" class="chessSquare newLine numbers">4</div>
+   <div id="a4" class="chessSquare whiteSquare horizontal left-bordered"></div>
+   <div id="b4" class="chessSquare blackSquare horizontal"></div>
+   <div id="c4" class="chessSquare whiteSquare horizontal"></div>
+   <div id="d4" class="chessSquare blackSquare horizontal"></div>
+   <div id="e4" class="chessSquare whiteSquare horizontal"></div>
+   <div id="f4" class="chessSquare blackSquare horizontal"></div>
+   <div id="g4" class="chessSquare whiteSquare horizontal"></div>
+   <div id="h4" class="chessSquare blackSquare horizontal right-bordered"></div>
+   <div id="3" class="chessSquare newLine numbers">3</div>
+   <div id="a3" class="chessSquare blackSquare horizontal left-bordered"></div>
+   <div id="b3" class="chessSquare whiteSquare horizontal"></div>
+   <div id="c3" class="chessSquare blackSquare horizontal"></div>
+   <div id="d3" class="chessSquare whiteSquare horizontal"></div>
+   <div id="e3" class="chessSquare blackSquare horizontal"></div>
+   <div id="f3" class="chessSquare whiteSquare horizontal"></div>
+   <div id="g3" class="chessSquare blackSquare horizontal"></div>
+   <div id="h3" class="chessSquare whiteSquare horizontal right-bordered"></div>
+   <div id="2" class="chessSquare newLine numbers">2</div>
+   <div id="a2" class="chessSquare whiteSquare horizontal left-bordered"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="b2" class="chessSquare blackSquare horizontal"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="c2" class="chessSquare whiteSquare horizontal"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="d2" class="chessSquare blackSquare horizontal"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="e2" class="chessSquare whiteSquare horizontal"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="f2" class="chessSquare blackSquare horizontal"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="g2" class="chessSquare whiteSquare horizontal"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="h2" class="chessSquare blackSquare horizontal right-bordered"><img src="{{ url_for('static', filename='White P.png') }}" /></div>
+   <div id="1" class="chessSquare newLine numbers">1</div>
+   <div id="a1" class="chessSquare blackSquare horizontal bottom-bordered left-bordered"><img src="{{ url_for('static', filename='White R.png') }}" /></div>
+   <div id="b1" class="chessSquare whiteSquare horizontal bottom-bordered"><img src="{{ url_for('static', filename='White N.png') }}" /></div>
+   <div id="c1" class="chessSquare blackSquare horizontal bottom-bordered"><img src="{{ url_for('static', filename='White B.png') }}" /></div>
+   <div id="d1" class="chessSquare whiteSquare horizontal bottom-bordered"><img src="{{ url_for('static', filename='White K.png') }}" /></div>
+   <div id="e1" class="chessSquare blackSquare horizontal bottom-bordered"><img src="{{ url_for('static', filename='White Q.png') }}" /></div>
+   <div id="f1" class="chessSquare whiteSquare horizontal bottom-bordered"><img src="{{ url_for('static', filename='White B.png') }}" /></div>
+   <div id="g1" class="chessSquare blackSquare horizontal bottom-bordered"><img src="{{ url_for('static', filename='White N.png') }}" /></div>
+   <div id="h1" class="chessSquare whiteSquare horizontal bottom-bordered right-bordered"><img src="{{ url_for('static', filename='White R.png') }}" /></div>
+   <div id="blank" class="chessSquare newLine"></div>
+   <div id="a" class="chessSquare horizontal letters">a</div>
+   <div id="b" class="chessSquare horizontal letters">b</div>
+   <div id="c" class="chessSquare horizontal letters">c</div>
+   <div id="d" class="chessSquare horizontal letters">d</div>
+   <div id="e" class="chessSquare horizontal letters">e</div>
+   <div id="f" class="chessSquare horizontal letters">f</div>
+   <div id="g" class="chessSquare horizontal letters">g</div>
+   <div id="h" class="chessSquare horizontal letters">h</div>
+</body>

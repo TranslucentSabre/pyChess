@@ -19,3 +19,6 @@ flask modules
    Install using the command `pip install flask`
 flask-restful modules
    Install using the command `pip install flask-restful`
+
+
+This uses Piece images created by Peter Wong of www.virtualPieces.net
