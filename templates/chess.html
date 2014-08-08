@@ -3,8 +3,9 @@
    <link rel="stylesheet" type="text/css"  href="{{ url_for('static', filename='chess.css') }}" />
 </head>
 <body>
-   <script src="{{ url_for('static', filename='chess.js') }}" ></script>
    <script src="{{ url_for('static', filename='jquery-1.11.1.min.js') }}" ></script>
+   <script src="{{ url_for('static', filename='chess.js') }}" ></script>
+   <!--
    <div id="chessBoard">
       <div id="8" class="chessSquare newLine numbers">8</div>
       <div id="a8" class="chessSquare whiteSquare horizontal top-bordered left-bordered"><img src="{{ url_for('static', filename='Black R.png') }}" /></div>
@@ -87,5 +88,8 @@
       <div id="f" class="chessSquare horizontal letters">f</div>
       <div id="g" class="chessSquare horizontal letters">g</div>
       <div id="h" class="chessSquare horizontal letters">h</div>
+   </div>
+   -->
+   <div id="chessBoard">
    </div>
 </body>
