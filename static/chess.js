@@ -1,6 +1,7 @@
+boardSelector = "#chessBoard"
 
-
-function generateBoard(jQueryDiv) {
+function generateBoard() {
+   jQueryDiv = $(boardSelector)
    htmlString = "";
    columnArray = ["a", "b", "c", "d", "e", "f", "g", "h"];
    blackSquares = ["#a1","#c1","#e1","#g1","#b2","#d2","#f2","#h2","#a3","#c3","#e3","#g3","#b4","#d4","#f4","#h4",
@@ -35,7 +36,26 @@ function generateBoard(jQueryDiv) {
    $('.chessSquare[id$="1"]').addClass("bottom-bordered");
 }
 
+function capatilize(string) {
+   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function showTurnBoard(turnString){
+   $.ajax( {
+      url: "/game/move/"+turnString, 
+      dataType: "json",
+      success: function(data, textStatus) {
+         $.each( data.board, function(key, value) {
+            if (value[0] != " ") {
+               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" >');
+            }
+         } );
+      }
+   });
+}
+
 $(document).ready(function(){
-  generateBoard($("#chessBoard")); 
+  generateBoard(); 
+  showTurnBoard("0");
 });
    
