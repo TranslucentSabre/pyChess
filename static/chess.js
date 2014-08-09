@@ -45,6 +45,7 @@ function showTurnBoard(turnString){
       url: "/game/move/"+turnString, 
       dataType: "json",
       success: function(data, textStatus) {
+         $(".chessSquare").html("");
          $.each( data.board, function(key, value) {
             if (value[0] != " ") {
                $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" >');
@@ -54,8 +55,43 @@ function showTurnBoard(turnString){
    });
 }
 
+function loadGameFile(file){
+   if (file != "") {
+      data = { fileName : file };
+   }
+   else {
+      data = {}
+   }
+   $.ajax( {
+      url: "/game/load",
+      dataType: "json",
+      type: "PUT",
+      data: data,
+      success: function(data, textStatus) {
+         $("#leftPanel").html(data.result);
+      }
+   } );
+}
+
+function getGameMoves(){
+   $.ajax( {
+      url: "/game/move",
+      dataType: "json",
+      success: function(data, textStatus) {
+         selectString = '<select id="moveSelect">';
+         $.each(data.turns, function(key, value) {
+            selectString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
+         } );
+         selectString += "</select>";
+         $("#rightPanel").html(selectString);
+         showTurnBoard(data.lastTurn);
+      }
+   } );
+}
+
 $(document).ready(function(){
   generateBoard(); 
-  showTurnBoard("0");
+  loadGameFile("timMaggie.dat");
+  getGameMoves();
 });
    

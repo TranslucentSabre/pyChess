@@ -1,6 +1,6 @@
 #chessBoard {
    margin: 0 auto;
-   width:50%;
+   width:75%;
 }
 #chessBoard .square {
    width:50px;
