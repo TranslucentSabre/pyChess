@@ -24,10 +24,10 @@
 #chessBoard .right-bordered {
    border-right:2px solid #000;
 }
-#chessBoard .horizontal {
+.horizontal {
    float:left;
 }
-#chessBoard .newLine {
+.newLine {
    clear:left;
    float:left;
 }

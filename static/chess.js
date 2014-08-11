@@ -1,5 +1,21 @@
 boardSelector = "#chessBoard"
 
+function buildLeftPanel(){
+   htmlString = "";
+   htmlString += '<div id="SaveLoad"><div class="label newLine">File Name:</div><input type="text" class="horizontal" id="fileName"></input>';
+   htmlString += '<input type="button" class="newLine" id="loadButton" value="Load" onclick="loadButtonClick();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="saveButton" value="Save" onclick="saveButtonClick();"></input>';
+   htmlString += '</div>';
+   $("#leftPanel").html(htmlString);
+}
+
+function buildRightPanel(){
+   htmlString = "";
+   htmlString += '<div id="results"></div>';
+   htmlString += '<select id="moveSelect" onchange="moveSelectChanged()"></select>';
+   $("#rightPanel").html(htmlString);
+}
+
 function generateBoard() {
    jQueryDiv = $(boardSelector)
    htmlString = "";
@@ -36,11 +52,21 @@ function generateBoard() {
    $('.chessSquare[id$="1"]').addClass("bottom-bordered");
 }
 
+function buildStartingHtml() {
+   buildLeftPanel();
+   generateBoard();
+   buildRightPanel();
+}
+
 function capatilize(string) {
    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function showTurnBoard(turnString){
+function moveSelectChanged() {
+   showTurnBoard($("#moveSelect").val());
+}
+
+function showTurnBoard(turnString) {
    $.ajax( {
       url: "/game/move/"+turnString, 
       dataType: "json",
@@ -55,7 +81,7 @@ function showTurnBoard(turnString){
    });
 }
 
-function loadGameFile(file){
+function loadGameFile(file) {
    if (file != "") {
       data = { fileName : file };
    }
@@ -68,30 +94,60 @@ function loadGameFile(file){
       type: "PUT",
       data: data,
       success: function(data, textStatus) {
-         $("#leftPanel").html(data.result);
+         $("#results").html(data.result);
       }
    } );
 }
 
-function getGameMoves(){
+function loadButtonClick() {
+   loadGameFile($("#fileName").val());
+   getGameMoves();
+}
+
+function saveGameFile(file) {
+   if (file != "") {
+      data = { fileName : file };
+   }
+   else {
+      data = {}
+   }
+   $.ajax( {
+      url: "/game/save",
+      dataType: "json",
+      type: "PUT",
+      data: data,
+      success: function(data, textStatus) {
+         $("#results").html(data.result);
+      }
+   } );
+}
+
+function saveButtonClick() {
+   saveGameFile($("fileName").val());
+   getGameMoves();
+}
+
+
+function getGameMoves() {
    $.ajax( {
       url: "/game/move",
       dataType: "json",
       success: function(data, textStatus) {
-         selectString = '<select id="moveSelect">';
+         $("#results").html(data.result);
+         optionsString = '';
          $.each(data.turns, function(key, value) {
-            selectString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
+            optionsString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
          } );
-         selectString += "</select>";
-         $("#rightPanel").html(selectString);
+         $("#moveSelect").html(optionsString);
+         $("#moveSelect").val(data.lastTurn);
          showTurnBoard(data.lastTurn);
       }
    } );
 }
 
-$(document).ready(function(){
-  generateBoard(); 
-  loadGameFile("timMaggie.dat");
-  getGameMoves();
+
+$(document).ready(function() {
+   buildStartingHtml();
+   getGameMoves();
 });
    
