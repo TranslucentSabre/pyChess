@@ -21,9 +21,12 @@ function generateBoard() {
    htmlString = "";
    columnArray = ["a", "b", "c", "d", "e", "f", "g", "h"];
    blackSquares = ["#a1","#c1","#e1","#g1","#b2","#d2","#f2","#h2","#a3","#c3","#e3","#g3","#b4","#d4","#f4","#h4",
-                   "#a5","#c5","#e5","#g5","#b6","#d6","#f6","#h6","#a7","#c7","#e7","#g7","#b8","#d8","#f8","#h8"] 
+                   "#a5","#c5","#e5","#g5","#b6","#d6","#f6","#h6","#a7","#c7","#e7","#g7","#b8","#d8","#f8","#h8"];
    whiteSquares = ["#b1","#d1","#f1","#h1","#a2","#c2","#e2","#g2","#b3","#d3","#f3","#h3","#a4","#c4","#e4","#g4",
-                   "#b5","#d5","#f5","#h5","#a6","#c6","#e6","#g6","#b7","#d7","#f7","#h7","#a8","#c8","#e8","#g8"] 
+                   "#b5","#d5","#f5","#h5","#a6","#c6","#e6","#g6","#b7","#d7","#f7","#h7","#a8","#c8","#e8","#g8"];
+   //Black status bar
+   htmlString += '<div class="label newLine">Status for Black Player:</div><div class="horizontal" id="blackStatus"></div>';
+   htmlString += '<div class="label newLine">Captured by Black Player:</div><div class="horizontal" id="blackCaptured"></div>';
    for ( row = 8; row >= 0; row--) {
       for ( column = -1; column <= 7; column++) {
          if (column == -1) {
@@ -43,6 +46,9 @@ function generateBoard() {
          }
       }
    }
+   //White status bar
+   htmlString += '<div class="label newLine">Status for White Player:</div><div class="horizontal" id="whiteStatus"></div>';
+   htmlString += '<div class="label newLine">Captured by White Player:</div><div class="horizontal" id="whiteCaptured"></div>';
    jQueryDiv.html(htmlString);
    $(whiteSquares.join(",")).addClass("whiteSquare");
    $(blackSquares.join(",")).addClass("blackSquare");
@@ -77,6 +83,34 @@ function showTurnBoard(turnString) {
                $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" >');
             }
          } );
+         //Black metadata
+         htmlString = "";
+         $.each( data.blackCaptured, function(_, value) {
+            htmlString += '<img class="horizontal" src="/static/White '+value+'.png" >';
+         } );
+         $("#blackCaptured").html(htmlString);
+         jQueryStatus = $("#blackStatus");
+         jQueryStatus.html("Normal").css("color","black");
+         if (data.blackStatus.checked && !data.blackStatus.mated) {
+            jQueryStatus.html("Checked").css("color","green");
+         }
+         else if (data.blackStatus.mated) {
+            jQueryStatus.html("Check Mate").css("color", "red");
+         }
+         //White metadata
+         htmlString = "";
+         $.each( data.whiteCaptured, function(_, value) {
+            htmlString += '<img class="horizontal" src="/static/Black '+value+'.png" >';
+         } );
+         $("#whiteCaptured").html(htmlString);
+         jQueryStatus = $("#whiteStatus");
+         jQueryStatus.html("Normal").css("color","black");
+         if (data.whiteStatus.checked && !data.whiteStatus.mated) {
+            jQueryStatus.html("Checked").css("color","green");
+         }
+         else if (data.whiteStatus.mated) {
+            jQueryStatus.html("Check Mate").css("color", "red");
+         }
       }
    });
 }
@@ -123,7 +157,7 @@ function saveGameFile(file) {
 }
 
 function saveButtonClick() {
-   saveGameFile($("fileName").val());
+   saveGameFile($("#fileName").val());
    getGameMoves();
 }
 
