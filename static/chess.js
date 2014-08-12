@@ -80,7 +80,7 @@ function showTurnBoard(turnString) {
          $(".chessSquare").html("");
          $.each( data.board, function(key, value) {
             if (value[0] != " ") {
-               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" >');
+               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" draggable="true" >');
             }
          } );
          //Black metadata
@@ -111,6 +111,8 @@ function showTurnBoard(turnString) {
          else if (data.whiteStatus.mated) {
             jQueryStatus.html("Check Mate").css("color", "red");
          }
+         $(".chessSquare img").on("dragstart",Drag.dragStart);
+         $(".chessSquare img").on("drop",Drag.dragDrop);
       }
    });
 }
@@ -178,6 +180,27 @@ function getGameMoves() {
       }
    } );
 }
+
+Drag = {
+   jQuerySource : null,
+   jQueryDest : null,
+
+   dragStart : function(evt) {
+      Drag.jQuerySource = $(evt.target);
+      evt.originalEvent.dataTransfer.effectAllowed = "move";
+      evt.originalEvent.dataTransfer.setData('text/html', Drag.jQuerySource.html());
+      Drag.jQuerySource.html(""); 
+   },
+
+   dragDrop : function(evt) {
+      Drag.jQueryDest = $(evt.target);
+      if (evt.stopPropagation) {
+         evt.stopPropagation();
+      }
+
+      Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
+   }
+},
 
 
 $(document).ready(function() {
