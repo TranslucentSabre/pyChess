@@ -112,7 +112,8 @@ function showTurnBoard(turnString) {
             jQueryStatus.html("Check Mate").css("color", "red");
          }
          $(".chessSquare img").on("dragstart",Drag.dragStart);
-         $(".chessSquare img").on("drop",Drag.dragDrop);
+         $(".chessSquare").on("drop",Drag.dragDrop);
+         $(".chessSquare").on("dragover",Drag.dragOver);
       }
    });
 }
@@ -185,20 +186,32 @@ Drag = {
    jQuerySource : null,
    jQueryDest : null,
 
+   //This is run on the img itself, hence the getting of the parent
    dragStart : function(evt) {
-      Drag.jQuerySource = $(evt.target);
+      Drag.jQuerySource = $(evt.target).parent();
       evt.originalEvent.dataTransfer.effectAllowed = "move";
       evt.originalEvent.dataTransfer.setData('text/html', Drag.jQuerySource.html());
-      Drag.jQuerySource.html(""); 
    },
 
+   //These are run on the divs
    dragDrop : function(evt) {
       Drag.jQueryDest = $(evt.target);
-      if (evt.stopPropagation) {
-         evt.stopPropagation();
-      }
+      if (Drag.jQuerySource[0] !== Drag.jQueryDest[0]) {
+         if (evt.originalEvent.stopPropagation) {
+            evt.originalEvent.stopPropagation();
+         }
 
-      Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
+         Drag.jQuerySource.html(""); 
+         Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
+      }
+      Drag.jQuerySource = null;
+      Drag.jQueryDest = null;
+   },
+
+   dragOver : function(evt) {
+      if (evt.originalEvent.preventDefault) {
+         evt.originalEvent.preventDefault(); // Necessary. Allows us to drop.
+      }
    }
 },
 
