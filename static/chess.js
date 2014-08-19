@@ -72,15 +72,35 @@ function moveSelectChanged() {
    showTurnBoard($("#moveSelect").val());
 }
 
+function enableDragFunctionality() {
+   $(boardSelector).on("dragstart", ".chessSquare img", Drag.dragStart);
+   $(boardSelector).on("drop", ".chessSquare", Drag.dragDrop);
+   $(boardSelector).on("dragover", ".chessSquare", Drag.dragOver);
+}
+
+function disableDragFunctionality() {
+   $(boardSelector).off("dragstart", ".chessSquare img", Drag.dragStart);
+   $(boardSelector).off("drop", ".chessSquare", Drag.dragDrop);
+   $(boardSelector).off("dragover", ".chessSquare", Drag.dragOver);
+}
+
 function showTurnBoard(turnString) {
    $.ajax( {
       url: "/game/move/"+turnString, 
       dataType: "json",
       success: function(data, textStatus) {
          $(".chessSquare").html("");
+         if (Game.lastTurnSaved == turnString) {
+            lastTurnOption = 'draggable="true"';
+            enableDragFunctionality();
+         }
+         else {
+            lastTurnOption = 'draggable="false"';
+            disableDragFunctionality();
+         }
          $.each( data.board, function(key, value) {
             if (value[0] != " ") {
-               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" draggable="true" >');
+               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" '+lastTurnOption+' >');
             }
          } );
          //Black metadata
@@ -111,11 +131,26 @@ function showTurnBoard(turnString) {
          else if (data.whiteStatus.mated) {
             jQueryStatus.html("Check Mate").css("color", "red");
          }
-         $(".chessSquare img").on("dragstart",Drag.dragStart);
-         $(".chessSquare").on("drop",Drag.dragDrop);
-         $(".chessSquare").on("dragover",Drag.dragOver);
       }
    });
+}
+
+function getGameMoves() {
+   $.ajax( {
+      url: "/game/move",
+      dataType: "json",
+      success: function(data, textStatus) {
+         $("#results").html(data.result);
+         optionsString = '';
+         $.each(data.turns, function(key, value) {
+            optionsString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
+         } );
+         $("#moveSelect").html(optionsString);
+         $("#moveSelect").val(data.lastTurn);
+         Game.lastTurnSaved = data.lastTurn;
+         showTurnBoard(data.lastTurn);
+      }
+   } );
 }
 
 function loadGameFile(file) {
@@ -165,22 +200,10 @@ function saveButtonClick() {
 }
 
 
-function getGameMoves() {
-   $.ajax( {
-      url: "/game/move",
-      dataType: "json",
-      success: function(data, textStatus) {
-         $("#results").html(data.result);
-         optionsString = '';
-         $.each(data.turns, function(key, value) {
-            optionsString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
-         } );
-         $("#moveSelect").html(optionsString);
-         $("#moveSelect").val(data.lastTurn);
-         showTurnBoard(data.lastTurn);
-      }
-   } );
-}
+
+Game = {
+   lastTurnSaved : "0"
+};
 
 Drag = {
    jQuerySource : null,
@@ -195,10 +218,10 @@ Drag = {
 
    //These are run on the divs
    dragDrop : function(evt) {
-      Drag.jQueryDest = $(evt.target);
+      Drag.jQueryDest = $(evt.currentTarget);
       if (Drag.jQuerySource[0] !== Drag.jQueryDest[0]) {
-         if (evt.originalEvent.stopPropagation) {
-            evt.originalEvent.stopPropagation();
+         if (evt.stopPropagation) {
+            evt.stopPropagation();
          }
 
          Drag.jQuerySource.html(""); 
@@ -209,8 +232,8 @@ Drag = {
    },
 
    dragOver : function(evt) {
-      if (evt.originalEvent.preventDefault) {
-         evt.originalEvent.preventDefault(); // Necessary. Allows us to drop.
+      if (evt.preventDefault) {
+         evt.preventDefault(); // Necessary. Allows us to drop.
       }
    }
 },
