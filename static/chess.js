@@ -212,8 +212,9 @@ Drag = {
    //This is run on the img itself, hence the getting of the parent
    dragStart : function(evt) {
       Drag.jQuerySource = $(evt.target).parent();
+      var transferHTML = Drag.jQuerySource.html();
       evt.originalEvent.dataTransfer.effectAllowed = "move";
-      evt.originalEvent.dataTransfer.setData('text/html', Drag.jQuerySource.html());
+      evt.originalEvent.dataTransfer.setData('text/html', transferHTML);
    },
 
    //These are run on the divs
@@ -223,6 +224,7 @@ Drag = {
          if (evt.stopPropagation) {
             evt.stopPropagation();
          }
+         Drag.dragOver(evt); //Stop the propogation of the event
 
          Drag.jQuerySource.html(""); 
          Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
