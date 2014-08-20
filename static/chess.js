@@ -142,8 +142,10 @@ function getGameMoves() {
       success: function(data, textStatus) {
          $("#results").html(data.result);
          optionsString = '';
-         $.each(data.turns, function(key, value) {
-            optionsString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
+         $.each(data.turns, function(_,dict) {
+            $.each(dict, function(key, value) {
+               optionsString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
+            } );
          } );
          $("#moveSelect").html(optionsString);
          $("#moveSelect").val(data.lastTurn);

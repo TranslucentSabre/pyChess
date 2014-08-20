@@ -38,7 +38,7 @@ class Move(Resource):
       result['result'] = 'Success'
       result['firstTurn'] = game.getTurnString("first")
       result['lastTurn'] = game.getTurnString("last")
-      result['turns'] = game.getTurnStringToMoveDictionary()
+      result['turns'] = game.getTurnStringArray()
       return result
 
    def post(self):

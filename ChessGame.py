@@ -77,11 +77,11 @@ class ChessGame():
    def getTurnString(self, turn="current"):
       return self.gameBoard.getTurnString(turn)
 
-   def getTurnStringToMoveDictionary(self):
-      turnToMoveMap = { "0" : "Initial" }
+   def getTurnStringArray(self):
+      turnArray = [ { "0" : "Initial" } ]
       for index, move in enumerate(self.moveList):
-         turnToMoveMap[self.gameBoard.getTurnString(index+1)] = move
-      return turnToMoveMap
+         turnArray.append({self.gameBoard.getTurnString(index+1) : move })
+      return turnArray
       
    def twoCoordMove(self,firstCoord,secondCoord,promotionAbbreviation=None):
       """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n
