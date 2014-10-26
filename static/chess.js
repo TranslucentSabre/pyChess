@@ -1,7 +1,7 @@
-boardSelector = "#chessBoard"
+var boardSelector = "#chessBoard";
 
 function buildLeftPanel(){
-   htmlString = "";
+   var htmlString = "";
    htmlString += '<div id="SaveLoad"><div class="label newLine">File Name:</div><input type="text" class="horizontal" id="fileName"></input>';
    htmlString += '<input type="button" class="newLine" id="loadButton" value="Load" onclick="loadButtonClick();"></input>';
    htmlString += '<input type="button" class="horizontal" id="saveButton" value="Save" onclick="saveButtonClick();"></input>';
@@ -10,33 +10,33 @@ function buildLeftPanel(){
 }
 
 function buildRightPanel(){
-   htmlString = "";
+   var htmlString = "";
    htmlString += '<div id="results"></div>';
    htmlString += '<select id="moveSelect" onchange="moveSelectChanged()"></select>';
    $("#rightPanel").html(htmlString);
 }
 
 function generateBoard() {
-   jQueryDiv = $(boardSelector)
-   htmlString = "";
-   columnArray = ["a", "b", "c", "d", "e", "f", "g", "h"];
-   blackSquares = ["#a1","#c1","#e1","#g1","#b2","#d2","#f2","#h2","#a3","#c3","#e3","#g3","#b4","#d4","#f4","#h4",
+   var jQueryDiv = $(boardSelector)
+   var htmlString = "";
+   var columnArray = ["a", "b", "c", "d", "e", "f", "g", "h"];
+   var blackSquares = ["#a1","#c1","#e1","#g1","#b2","#d2","#f2","#h2","#a3","#c3","#e3","#g3","#b4","#d4","#f4","#h4",
                    "#a5","#c5","#e5","#g5","#b6","#d6","#f6","#h6","#a7","#c7","#e7","#g7","#b8","#d8","#f8","#h8"];
-   whiteSquares = ["#b1","#d1","#f1","#h1","#a2","#c2","#e2","#g2","#b3","#d3","#f3","#h3","#a4","#c4","#e4","#g4",
+   var whiteSquares = ["#b1","#d1","#f1","#h1","#a2","#c2","#e2","#g2","#b3","#d3","#f3","#h3","#a4","#c4","#e4","#g4",
                    "#b5","#d5","#f5","#h5","#a6","#c6","#e6","#g6","#b7","#d7","#f7","#h7","#a8","#c8","#e8","#g8"];
    //Black status bar
    htmlString += '<div class="label newLine">Status for Black Player:</div><div class="horizontal" id="blackStatus"></div>';
    htmlString += '<div class="label newLine">Captured by Black Player:</div><div class="horizontal" id="blackCaptured"></div>';
-   for ( row = 8; row >= 0; row--) {
-      for ( column = -1; column <= 7; column++) {
+   for ( var row = 8; row >= 0; row--) {
+      for ( var column = -1; column <= 7; column++) {
          if (column == -1) {
-            id = row;
-            if (row == 0) {
+            var id = row;
+            if (row === 0) {
                id = "";
             }
             htmlString += '<div id="'+id+'" class="square newLine numbers">'+id+'</div>';
          }
-         else if (row == 0) {
+         else if (row === 0) {
             id = columnArray[column];
             htmlString += '<div id="'+id+'" class="square horizontal letters">'+id+'</div>';
          }
@@ -86,12 +86,12 @@ function disableDragFunctionality() {
 
 function showTurnBoard(turnString) {
    $.ajax( {
-      url: "/game/move/"+turnString, 
+      url: "/game/move/"+turnString,
       dataType: "json",
       success: function(data, textStatus) {
          $(".chessSquare").html("");
          if (Game.lastTurnSaved == turnString) {
-            lastTurnOption = 'draggable="true"';
+            var lastTurnOption = 'draggable="true"';
             enableDragFunctionality();
          }
          else {
@@ -104,12 +104,12 @@ function showTurnBoard(turnString) {
             }
          } );
          //Black metadata
-         htmlString = "";
+         var htmlString = "";
          $.each( data.blackCaptured, function(_, value) {
             htmlString += '<img class="horizontal" src="/static/White '+value+'.png" >';
          } );
          $("#blackCaptured").html(htmlString);
-         jQueryStatus = $("#blackStatus");
+         var jQueryStatus = $("#blackStatus");
          jQueryStatus.html("Normal").css("color","black");
          if (data.blackStatus.checked && !data.blackStatus.mated) {
             jQueryStatus.html("Checked").css("color","green");
@@ -141,7 +141,7 @@ function getGameMoves() {
       dataType: "json",
       success: function(data, textStatus) {
          $("#results").html(data.result);
-         optionsString = '';
+         var optionsString = '';
          $.each(data.turns, function(_,dict) {
             $.each(dict, function(key, value) {
                optionsString += '<option id="'+key+'" value="'+key+'">'+key+': '+value+'</option>';
@@ -156,8 +156,8 @@ function getGameMoves() {
 }
 
 function loadGameFile(file) {
-   if (file != "") {
-      data = { fileName : file };
+   if (file !== "") {
+      var data = { fileName : file };
    }
    else {
       data = {}
@@ -179,8 +179,8 @@ function loadButtonClick() {
 }
 
 function saveGameFile(file) {
-   if (file != "") {
-      data = { fileName : file };
+   if (file !== "") {
+      var data = { fileName : file };
    }
    else {
       data = {}
@@ -203,11 +203,11 @@ function saveButtonClick() {
 
 
 
-Game = {
+var Game = {
    lastTurnSaved : "0"
 };
 
-Drag = {
+var Drag = {
    jQuerySource : null,
    jQueryDest : null,
 
@@ -228,7 +228,7 @@ Drag = {
          }
          Drag.dragOver(evt); //Stop the propogation of the event
 
-         Drag.jQuerySource.html(""); 
+         Drag.jQuerySource.html("");
          Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
       }
       Drag.jQuerySource = null;
@@ -240,11 +240,10 @@ Drag = {
          evt.preventDefault(); // Necessary. Allows us to drop.
       }
    }
-},
+};
 
 
 $(document).ready(function() {
    buildStartingHtml();
    getGameMoves();
 });
-   
