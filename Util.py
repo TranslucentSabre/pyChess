@@ -30,16 +30,16 @@ class Meta(type):
 class colors(object):
    """Central holding place for my colors"""
 
-   class CommonColorEnums(object):
+   class CommonColor(metaclass=Meta):
       kingsideRookFile = "h"
       kingsideRookMoveFile = "f"
       kingsideKingFile = "g"
       queensideRookFile = "a"
       queensideRookMoveFile = "d"
       queensideKingFile = "c"
-      
 
-   class WHITE(CommonColorEnums):
+
+   class WHITE(CommonColor):
       __metaclass__ = Meta
       name  = "white"
       pawnRank = "2"
@@ -47,8 +47,8 @@ class colors(object):
       promotionRank = "8"
       pawnChargeRank = "4"
       pawnRankModifier = 1
-      
-   class BLACK(CommonColorEnums):
+
+   class BLACK(CommonColor):
       __metaclass__ = Meta
       name = "black"
       pawnRank = "7"
@@ -56,5 +56,3 @@ class colors(object):
       promotionRank = "1"
       pawnChargeRank = "5"
       pawnRankModifier = -1
-
-

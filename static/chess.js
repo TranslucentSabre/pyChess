@@ -221,12 +221,13 @@ var Drag = {
 
    //These are run on the divs
    dragDrop : function(evt) {
+      if (evt.stopPropagation) {
+         evt.stopPropagation();
+      }
+      Drag.dragOver(evt); //Stop the propogation of the event
+      
       Drag.jQueryDest = $(evt.currentTarget);
       if (Drag.jQuerySource[0] !== Drag.jQueryDest[0]) {
-         if (evt.stopPropagation) {
-            evt.stopPropagation();
-         }
-         Drag.dragOver(evt); //Stop the propogation of the event
 
          Drag.jQuerySource.html("");
          Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
