@@ -85,13 +85,13 @@ class Move(Resource):
             result['result'] = 'Failure'
             result['error'] = game.lastError
             return result, 400
-            
+
 api.add_resource(Move, "/game/move")
 
 class MoveInstance(Resource):
    def get(self, instance):
       result = {}
-      if instance in ["first", "last"]: 
+      if instance in ["first", "last"]:
          if instance == "first":
             result['result'] = "Success"
             result['value'] = game.getTurnString("first")
@@ -129,7 +129,7 @@ class MoveInstance(Resource):
             return result, 400
       else:
          result['result'] = "Failure"
-         result['error'] = "Move "+instance+" is not eligible for commit." 
+         result['error'] = "Move "+instance+" is not eligible for commit."
          return result, 400
 
 
@@ -145,7 +145,7 @@ class MoveInstance(Resource):
             return result, 400
       else:
          result['result'] = "Failure"
-         result['error'] = "Move "+instance+" is not eligible for deletion." 
+         result['error'] = "Move "+instance+" is not eligible for deletion."
          return result, 400
 
 api.add_resource(MoveInstance, "/game/move/<instance>")
@@ -213,14 +213,14 @@ export    (read/set default export file)
 name      (read/set the players real name)
 location  (read/set the physical location of the player)
 strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)"""
-      
+
 class Config(Resource):
    def get(self):
       result = {}
       result['result'] = "Success"
       result['config'] = game.getAllConfigItems()
       return result
-   
+
 api.add_resource(Config, "/config")
 
 class ConfigItem(Resource):

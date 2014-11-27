@@ -12,7 +12,10 @@ function buildLeftPanel(){
 function buildRightPanel(){
    var htmlString = "";
    htmlString += '<div id="results"></div>';
-   htmlString += '<select id="moveSelect" onchange="moveSelectChanged()"></select>';
+   htmlString += '<select class="newLine" id="moveSelect" onchange="moveSelectChanged()"></select>';
+   htmlString += '<div class="label newLine">Algebraic Notation: </div>';
+   htmlString += '<input type="text" class="horizontal" id="algebraicMove"></input>';
+   htmlString += '<input type="button" class="newLine" id="submitAlgebraicMove" value="Move" onclick="submitAlgebraicMove();"></input>';
    $("#rightPanel").html(htmlString);
 }
 
@@ -84,22 +87,52 @@ function disableDragFunctionality() {
    $(boardSelector).off("dragover", ".chessSquare", Drag.dragOver);
 }
 
+function WhiteGoesNext(turnString) {
+    if (turnString === "0" || turnString.indexOf("...") > 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 function showTurnBoard(turnString) {
    $.ajax( {
       url: "/game/move/"+turnString,
       dataType: "json",
       success: function(data, textStatus) {
          $(".chessSquare").html("");
+         var piecesDraggable = 'draggable="true"';
+         var piecesNotDraggable = 'draggable="false"';
+         var whiteDraggable = piecesNotDraggable;
+         var blackDraggable = piecesNotDraggable;
          if (Game.lastTurnSaved == turnString) {
-            var lastTurnOption = 'draggable="true"';
+            if (WhiteGoesNext(turnString)) {
+                whiteDraggable = piecesDraggable;
+            }
+            else {
+                blackDraggable = piecesDraggable;
+            }
             enableDragFunctionality();
+            $("#algebraicMove").attr("disabled",false);
+            $("#submitAlgebraicMove").attr("disabled", false);
          }
          else {
-            lastTurnOption = 'draggable="false"';
             disableDragFunctionality();
+            $("#algebraicMove").attr("disabled",true);
+            $("#submitAlgebraicMove").attr("disabled",true);
          }
+         var lastTurnOption = "";
          $.each( data.board, function(key, value) {
             if (value[0] != " ") {
+               if (value[1] === "white")
+               {
+                   lastTurnOption = whiteDraggable;
+               }
+               else
+               {
+                   lastTurnOption = blackDraggable;
+               }
                $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" '+lastTurnOption+' >');
             }
          } );
@@ -225,7 +258,7 @@ var Drag = {
          evt.stopPropagation();
       }
       Drag.dragOver(evt); //Stop the propogation of the event
-      
+
       Drag.jQueryDest = $(evt.currentTarget);
       if (Drag.jQuerySource[0] !== Drag.jQueryDest[0]) {
 

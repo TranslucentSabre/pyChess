@@ -16,7 +16,7 @@ class ChessGame():
    gameBoard = GameBoard(whitePlayer, blackPlayer)
    lastError = ""
    moveList = []
-   
+
    def getLastError(self):
       return self.lastError
 
@@ -34,22 +34,22 @@ class ChessGame():
 
    def showPendingBoard(self):
       return self.gameBoard.getPendingMoveString()
-      
+
    def firstMove(self):
       return self.gameBoard.firstTurn()
-      
+
    def lastMove(self):
       return self.gameBoard.lastTurn()
-      
+
    def nextMove(self):
       return self.gameBoard.nextTurn()
-      
+
    def previousMove(self):
       return self.gameBoard.previousTurn()
 
    def gotoTurnString(self,turnString):
       return self.gameBoard.gotoTurnString(turnString)
-      
+
    def restartGame(self):
       self.files.resetWriteString()
       self.whitePlayer = WhitePlayer()
@@ -82,12 +82,12 @@ class ChessGame():
       for index, move in enumerate(self.moveList):
          turnArray.append({self.gameBoard.getTurnString(index+1) : move })
       return turnArray
-      
+
    def twoCoordMove(self,firstCoord,secondCoord,promotionAbbreviation=None):
       """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n
          In order to perform a castle move, move the king to the final position required for the castle."""
       moves = [firstCoord, secondCoord]
-      if promotionAbbreviation != None: 
+      if promotionAbbreviation != None:
          if promotionAbbreviation not in Util.invPieces:
             self.lastError = "A valid piece abbreviation must be given for promotions."
             return False
@@ -109,7 +109,7 @@ class ChessGame():
       else:
          self.lastError = "Move Failed:\n"+currentPlayer.moveResultReason
          return False
-         
+
    def algebraicMove(self,move):
       """Move a piece, this function takes one move in algebraic notation."""
       currentPlayer = self._getNextPlayer()
@@ -123,7 +123,7 @@ class ChessGame():
             return True
       self.lastError = "Move Failed:\n"+currentPlayer.moveResultReason
       return False
-      
+
    def loadSaveFile(self,fileName=""):
       """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
@@ -139,7 +139,7 @@ if one is given use the argument as a filename to read a savegame from."""
          if self.algebraicMove(move):
             self.commitTurn()
          else:
-            self.restartGame() 
+            self.restartGame()
             return False
       return True
 
@@ -162,7 +162,7 @@ if one is given use the argument as a filename to read a savegame from."""
       for configItem in ValidConfig.configMap:
          config[configItem] = self._getConfigOption(ValidConfig.configMap[configItem])
       return config
-         
+
    def getConfigItem(self,configItem):
       """Read configuration options. The argument must be one of the following settings:
       import    (read/set default import file)
@@ -170,7 +170,7 @@ if one is given use the argument as a filename to read a savegame from."""
       name      (read/set the players real name)
       location  (read/set the physical location of the player)
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
-   The current value of the setting is printed to the screen.""" 
+   The current value of the setting is printed to the screen."""
       if configItem in ValidConfig.configMap:
          config = self._getConfigOption(ValidConfig.configMap[configItem])
          if config == "":
@@ -189,7 +189,7 @@ if one is given use the argument as a filename to read a savegame from."""
       name      (read/set the players real name)
       location  (read/set the physical location of the player)
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
-   The second argument will be saved as the setting.""" 
+   The second argument will be saved as the setting."""
       if configItem in ValidConfig.configMap:
          if not self._setConfigOption(ValidConfig.configMap[configItem],configValue):
             self.lastError = "Set Failed. Valid options are:" + str(ValidConfig.configMap[configItem]["values"])
@@ -198,7 +198,7 @@ if one is given use the argument as a filename to read a savegame from."""
          self.lastError = "Invalid setting provided"
          return False
       return True
-            
+
    def runTests(self,verbose=False):
       """Run the unit tests that have been developed for pyChess"""
       if(verbose):
@@ -229,5 +229,3 @@ if one is given use the argument as a filename to read a savegame from."""
       else:
          currentPlayer = self.whitePlayer
       return currentPlayer
-     
-
