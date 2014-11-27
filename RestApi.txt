@@ -1,0 +1,136 @@
+Resource URL:
+    /game
+    Operations:
+        Delete : Restart the currently in progress game
+            Input  :
+                None
+            Output :
+                None
+
+    /game/move
+    Operations:
+        Get : Return a list of all moves in the current game
+            Input  :
+                None
+            Output :
+                result    : String indicating success or failure
+                firstTurn : Turn string indicating the first turn of the game
+                lastTurn  : Turn string indicating the last committed turn of the current game
+                turns     : Json array of all of the turn strings in the game
+
+        Post : Move a piece and create a new temporary turn
+            Input :
+                method      : String, either 'algebra' or 'coordinate' specifies which further inputs are required to describe a move
+                algebra     : String, required for method 'algebra', a chess move in valid algebraic notation
+                firstCoord  : String, required for method 'coordinate', the chess coordinate specifying where the piece originates from
+                secondCoord : String, required for method 'coordinate', the chess coordinate specifying where the piece lands
+                promotion   : String, required for method 'coordinate', the letter of the piece to promote the pawn to if moving a pawn to the far rank
+            Output:
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+                url    : String that gives the url of the newely created move
+
+
+    /game/move/first
+    Operations :
+        Get : Get the turn string for the first move in the current game.
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                value  : Turn string indicating the first turn in the current game
+
+    /game/move/last
+    Operations :
+        Get : Get the turn string for the last committed move in the current game
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                value  : Turn string indicating the last committed turn in the current game
+
+
+    /game/move/<turnString>
+    Operations :
+        Get : Returns a representation of the game board after the move represented by the turnString has been played.
+            Input :
+                None
+            Output :
+                result        : String indicating success or failure
+                error         : String indicating the type of error if there was a failure
+                board         : Json Object keyed by chess coordinates with values as arrays containing piece letter and color.
+                whiteCaptured : Json array of piece letters indicating which black pieces white has captured
+                blackCaptured : Json array of piece letters indicating which white pieces black has captured
+                whiteStatus   : String giving check/check mate status of white
+                blackStatus   : String giving check/check mate status of black
+
+
+        Put : Commits an uncommitted turn
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+
+        Delete : Deletes an uncommitted turn
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+
+
+    /game/load
+    Operations :
+        Put : Load a saved game from the file system
+            Input :
+                fileName : String, the filename of the file to load from the filesystem on the server, if this is left out, the default file from config will be loaded
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+
+    /game/save
+    Operations :
+        Put : Save the current game to the file system
+            Input :
+                fileName : String, the filename of the file to save the current game into on the filesystem on the server, if this is left out, the default file from config will be saved
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+
+
+"""Set or read configuration options. The first argument must be one of the following settings:
+import    (read/set default import file)
+export    (read/set default export file)
+name      (read/set the players real name)
+location  (read/set the physical location of the player)
+strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)"""
+
+
+    /game/config
+    Operations :
+        Get : Returns the values of all configuration settings
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                config : Json object keyed by config item name with the appropriate values
+
+
+    /game/config/<configItem>
+    Operations :
+        Get : Return the value of the specific config item
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+                value  : The value of the requested config item.
+
+        Put : Set the value of the specific config item
+            Input :
+                value : The value to set for the config item
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+

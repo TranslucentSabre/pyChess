@@ -75,6 +75,15 @@ function moveSelectChanged() {
    showTurnBoard($("#moveSelect").val());
 }
 
+function displaySuccessOrError(data) {
+    if (data.result != "Success") {
+        $("#results").html(data.error);
+    }
+    else {
+        $("#results").html(data.result);
+    }
+}
+
 function enableDragFunctionality() {
    $(boardSelector).on("dragstart", ".chessSquare img", Drag.dragStart);
    $(boardSelector).on("drop", ".chessSquare", Drag.dragDrop);
@@ -168,12 +177,12 @@ function showTurnBoard(turnString) {
    });
 }
 
-function getGameMoves() {
+function getGameMoves(callback) {
    $.ajax( {
       url: "/game/move",
       dataType: "json",
       success: function(data, textStatus) {
-         $("#results").html(data.result);
+         displaySuccessOrError(data);
          var optionsString = '';
          $.each(data.turns, function(_,dict) {
             $.each(dict, function(key, value) {
@@ -184,6 +193,9 @@ function getGameMoves() {
          $("#moveSelect").val(data.lastTurn);
          Game.lastTurnSaved = data.lastTurn;
          showTurnBoard(data.lastTurn);
+         if (typeof callback === "function") {
+             callback();
+         }
       }
    } );
 }
@@ -201,7 +213,7 @@ function loadGameFile(file) {
       type: "PUT",
       data: data,
       success: function(data, textStatus) {
-         $("#results").html(data.result);
+         displaySuccessOrError(data);
       }
    } );
 }
@@ -224,7 +236,7 @@ function saveGameFile(file) {
       type: "PUT",
       data: data,
       success: function(data, textStatus) {
-         $("#results").html(data.result);
+         displaySuccessOrError(data);
       }
    } );
 }
@@ -232,6 +244,78 @@ function saveGameFile(file) {
 function saveButtonClick() {
    saveGameFile($("#fileName").val());
    getGameMoves();
+}
+
+var Move = {
+  ALGEBRAIC : "algebra",
+  COORDINATE : "coordinate",
+
+  method : "",
+  algebraString : "",
+  firstCoord : "",
+  secondCoord : "",
+  promotion : "",
+
+  clear : function() {
+      Move.method = "";
+      Move.algebraString = "";
+      Move.firstCoord = "";
+      Move.secondCoord = "";
+      Move.promotion = "";
+  }
+};
+
+function submitCoordinateMove(firstCoord, secondCoord, promotion="") {
+    Move.clear();
+    Move.method = Move.COORDINATE;
+    Move.firstCoord = firstCoord;
+    Move.secondCoord = secondCoord;
+    Move.promotion = promotion;
+    makeMove(Move);
+}
+
+function submitAlgebraicMove() {
+    Move.clear();
+    Move.method = Move.ALGEBRAIC;
+    Move.algebraString = $("#algebraicMove").val();
+    makeMove(Move);
+}
+
+function makeMove(move) {
+    var data = { method : move.method };
+    if (move.method === Move.ALGEBRAIC) {
+        data.algebra = move.algebraString;
+    }
+    else if (move.method === Move.COORDINATE) {
+        data.firstCoord = move.firstCoord;
+        data.secondCoord = move.secondCoord;
+        if (move.promotion != "") {
+            data.promotion = move.promotion;
+        }
+    }
+    var printReturnAndGetMoves = function(data, textStatus) {
+        getGameMoves(function(){displaySuccessOrError(data)});
+    }
+    $.ajax( {
+        url: "/game/move",
+        dataType: "json",
+        type: "POST",
+        data: data,
+        success: function(data, textStatus) {
+            if (data.result != "Success") {
+                printReturnAndGetMoves(data);
+            }
+            else {
+                $.ajax( {
+                    url: data.url,
+                    dataType: "json",
+                    type: "PUT",
+                    data: {},
+                    success: printReturnAndGetMoves
+                });
+            }
+        }
+    });
 }
 
 

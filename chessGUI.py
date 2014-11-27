@@ -50,7 +50,7 @@ class Move(Resource):
          if moveString == None:
             result['result'] = 'Failure'
             result['error'] = 'Missing algebraic move'
-            return result, 400
+            return result
          if game.algebraicMove(moveString):
             result['result'] = 'Success'
             result['url'] = '/game/move/'+game.getTurnString("pending")
@@ -59,18 +59,18 @@ class Move(Resource):
             game.cancelTurn()
             result['result'] = 'Failure'
             result['error'] = game.lastError
-            return result, 400
+            return result
       else:
          firstCoord = args['firstCoord']
          if firstCoord == None:
             result['result'] = 'Failure'
             result['error'] = 'Missing first coordinate'
-            return result, 400
+            return result
          secondCoord = args['secondCoord']
          if secondCoord == None:
             result['result'] = 'Failure'
             result['error'] = 'Missing second coordinate'
-            return result, 400
+            return result
          promotion = args['promotion']
          if promotion == None:
             moveResult = game.twoCoordMove(firstCoord, secondCoord)
@@ -84,7 +84,7 @@ class Move(Resource):
             game.cancelTurn()
             result['result'] = 'Failure'
             result['error'] = game.lastError
-            return result, 400
+            return result
 
 api.add_resource(Move, "/game/move")
 
@@ -112,7 +112,7 @@ class MoveInstance(Resource):
          else:
             result['result'] = "Failure"
             result['error'] = "No such move to get."
-            return result, 400
+            return result
 
    def _checkForPendingTurn(self, instance):
       return instance == game.getTurnString("pending")
@@ -126,11 +126,11 @@ class MoveInstance(Resource):
          else:
             result['result'] = "Failure"
             result['error'] = "No new move available to commit."
-            return result, 400
+            return result
       else:
          result['result'] = "Failure"
          result['error'] = "Move "+instance+" is not eligible for commit."
-         return result, 400
+         return result
 
 
    def delete(self, instance):
@@ -142,11 +142,11 @@ class MoveInstance(Resource):
          else:
             result['result'] = "Failure"
             result['error'] = "No new move available to cancel."
-            return result, 400
+            return result
       else:
          result['result'] = "Failure"
          result['error'] = "Move "+instance+" is not eligible for deletion."
-         return result, 400
+         return result
 
 api.add_resource(MoveInstance, "/game/move/<instance>")
 
@@ -175,7 +175,7 @@ class Load(Resource):
       else:
          result['result'] = "Failure"
          result['error'] = game.lastError
-         return result, 400
+         return result
 
 api.add_resource(Load, "/game/load")
 
@@ -203,7 +203,7 @@ class Save(Resource):
       else:
          result['result'] = "Failure"
          result['error'] = game.lastError
-         return result, 400
+         return result
 
 api.add_resource(Save, "/game/save")
 
@@ -241,7 +241,7 @@ class ConfigItem(Resource):
       else:
          result['result'] = "Failure"
          result['error'] = game.lastError
-         return result, 400
+         return result
 
 
    def put(self, item):
@@ -252,7 +252,7 @@ class ConfigItem(Resource):
       if not game.setConfigItem(item, value):
          result['result'] = "Failure"
          result['error'] = game.lastError
-         return result, 400
+         return result
       else:
          result['result'] = "Success"
          return result
