@@ -265,7 +265,10 @@ var Move = {
   }
 };
 
-function submitCoordinateMove(firstCoord, secondCoord, promotion="") {
+function submitCoordinateMove(firstCoord, secondCoord, promotion) {
+    if (typeof promotion === 'undefined') {
+        promotion = "";
+    }
     Move.clear();
     Move.method = Move.COORDINATE;
     Move.firstCoord = firstCoord;
@@ -348,6 +351,7 @@ var Drag = {
 
          Drag.jQuerySource.html("");
          Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
+         submitCoordinateMove(Drag.jQuerySource.attr("id"), Drag.jQueryDest.attr("id"));
       }
       Drag.jQuerySource = null;
       Drag.jQueryDest = null;
