@@ -5,6 +5,7 @@ function buildLeftPanel(){
    htmlString += '<div id="SaveLoad"><div class="label newLine">File Name:</div><input type="text" class="horizontal" id="fileName"></input>';
    htmlString += '<input type="button" class="newLine" id="loadButton" value="Load" onclick="loadButtonClick();"></input>';
    htmlString += '<input type="button" class="horizontal" id="saveButton" value="Save" onclick="saveButtonClick();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="resetButton" value="Restart Game" onclick="resetGame();"></input>';
    htmlString += '</div>';
    $("#leftPanel").html(htmlString);
 }
@@ -246,6 +247,18 @@ function saveButtonClick() {
    getGameMoves();
 }
 
+function resetGame() {
+   $.ajax( {
+      url: "/game",
+      dataType: "json",
+      type: "DELETE",
+      data: {},
+      success: function(data, textStatus) {
+         getGameMoves();
+      }
+   } );
+}
+
 var Move = {
   ALGEBRAIC : "algebra",
   COORDINATE : "coordinate",
@@ -292,7 +305,7 @@ function makeMove(move) {
     else if (move.method === Move.COORDINATE) {
         data.firstCoord = move.firstCoord;
         data.secondCoord = move.secondCoord;
-        if (move.promotion != "") {
+        if (move.promotion !== "") {
             data.promotion = move.promotion;
         }
     }
