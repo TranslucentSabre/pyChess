@@ -6,7 +6,7 @@ import Util
 
 class PlayerLastMove(object):
    """Class used to hold the previous move of a player"""
-   
+
    def __init__(self, pieceMoved, pieceCaptured=None, piecePromoted=None, rookCastled=None ):
       self.pieceMoved = pieceMoved
       self.pieceCaptured = pieceCaptured
@@ -15,13 +15,13 @@ class PlayerLastMove(object):
 
 class Player(object):
    """Base player class"""
-   
+
    def __init__(self):
       """Create all our pieces in their initial locations"""
-      
+
       self.checked = False
       self.mated = False
-      
+
       self.lastMove = None
       self.captured = []
 
@@ -32,14 +32,14 @@ class Player(object):
       rookFiles = "ah"
       knightFiles = "bg"
       bishopFiles = "cf"
-      
+
       self.parser = AlgebraicParser()
       self.algebraicMoveClass = AlgebraicMove()
       self.parsedAlgebraicMoveClass = AlgebraicMove()
       self.updateMoveValues = False
-      
+
       self.debug = Debug()
-      
+
       self.pawns = [Pawn(self.color,file+self.color.pawnRank) for file in Util.files]
       self.rooks = [Rook(self.color,file+self.color.majorRank) for file in rookFiles]
       self.knights = [Knight(self.color,file+self.color.majorRank) for file in knightFiles]
@@ -47,30 +47,30 @@ class Player(object):
       self.queens = [Queen(self.color,"d"+self.color.majorRank)]
       self.king = King(self.color,"e"+self.color.majorRank)
       #This is a lookup table that is primarily used for captures and un-captures
-      self.pieceMap = { "Pawn" : self.pawns, 
-                        "Rook" : self.rooks, 
-                        "Knight" : self.knights, 
-                        "Bishop" : self.bishops, 
-                        "Queen" : self.queens, 
+      self.pieceMap = { "Pawn" : self.pawns,
+                        "Rook" : self.rooks,
+                        "Knight" : self.knights,
+                        "Bishop" : self.bishops,
+                        "Queen" : self.queens,
                         "King" : [self.king]}
-   
+
    def setOpponent(self, player):
       self.otherPlayer = player
-       
+
    def getAllPieces(self):
       """Return an array of all of my current pieces"""
       return self.pawns + self.rooks + self.knights + self.bishops + self.queens + [self.king]
-      
+
    def mateCheck(self):
       mated = False
       if self.mated or self.otherPlayer.mated:
          self.moveResultReason = "The game is over."
          mated = True
       return mated
-      
+
    def generatedAlgebraicMoveIsEqualToGiven(self):
       return self.parsedAlgebraicMoveClass == self.algebraicMoveClass
-      
+
    def move(self, startCoord, endCoord, promotion=""):
       """Attempt to make a move and return whether the move was possible or not, if this returns false
          the reason for the failure will be in my moveResultReason member"""
@@ -92,7 +92,7 @@ class Player(object):
          self.debug.dprint("Algebraic move string:", self.lastMoveString)
       self.debug.endSection()
       return moveValid
-      
+
    def algebraicMove(self, move):
       """Take in a string in algebraic notation and attempt that move"""
       self.debug.startSection("algebraicMove")
@@ -116,17 +116,17 @@ class Player(object):
             if algebraicMove.kingside:
                pieceDestination = self.color.kingsideKingFile + self.color.majorRank
             else:
-               pieceDestination = self.color.queensideKingFile + self.color.majorRank 
+               pieceDestination = self.color.queensideKingFile + self.color.majorRank
          else:
             potentialPieces = self.getPiecesThatCanMoveToLocation(algebraicMove.piece, algebraicMove.destination, algebraicMove.disambiguation)
             self.debug.dprint("Pieces that can move: ", potentialPieces)
             if len(potentialPieces) == 0:
                self.moveResultReason = "No pieces of that type may move to the selected location"
-               self.debug.endSection()   
+               self.debug.endSection()
                return moveValid
             elif len(potentialPieces) > 1:
                self.moveResultReason = "More than one piece may move based upon your selection"
-               self.debug.endSection()   
+               self.debug.endSection()
                return moveValid
             else:
                 currentPieceLocation = potentialPieces[0].position
@@ -142,15 +142,15 @@ class Player(object):
             self.debug.dprint("Output Algebraic move class:\n", self.algebraicMoveClass)
             self.lastMoveString = self.parser.getAlgebraicMoveString()
             self.debug.dprint("Algebraic move string:", self.lastMoveString)
-            
-         self.debug.endSection()   
+
+         self.debug.endSection()
          return moveValid
       else:
          self.debug.dprint("Invalid Algebraic move string.")
          self.moveResultReason = "Invalid algebraic notation given."
          self.debug.endSection()
          return False
-   
+
    def getPiecesThatCanMoveToLocation(self, pieceType, location, disambiguation):
       """Return a list of my pieces that can move to given location, filtered by disambiguation"""
       self.debug.startSection("getPiecesThatCanMoveToLocation")
@@ -169,7 +169,7 @@ class Player(object):
       pieceList = list(filter(canPieceMoveToLocation, self.pieceMap[pieceType]))
       self.debug.endSection()
       return pieceList
-      
+
    def getValidMovesForPieceAtCoord(self, coord):
       """Return a map of available moves for the piece at the coordinate, move mapped to move type"""
       self.debug.startSection("getValidMovesForPieceAtCoord")
@@ -181,7 +181,7 @@ class Player(object):
          validMap = self.getValidMovesForPiece(piece)
       self.debug.endSection()
       return validMap
-      
+
    def getValidMovesForPiece(self, piece):
       """Return a map of available moves for the piece, move mapped to move type"""
       self.debug.startSection("getValidMovesForPiece")
@@ -204,6 +204,9 @@ class Player(object):
             capturables = piece.getCaptureCoords()
             for move in capturables:
                if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
+                  if move not in validMap:
+                      self.debug.dprint("Adding new move for pawn for En Passant: ", move)
+                      validMap[move] = set(Util.MoveType.CAPTURE);
                   self.debug.dprint("Set move as En Passant: ", move)
                   validMap[move].add(Util.MoveType.EN_PASSANT)
             for move in validMap:
@@ -226,15 +229,15 @@ class Player(object):
                   validMap[move].add(Util.MoveType.QUEENSIDECASTLE)
       self.debug.endSection()
       return validMap
-      
+
    def kingsideCastleIsValid(self, king):
       castleDirection = Util.Castle.KINGSIDE
       return self.castleIsValid(king, castleDirection)
-       
+
    def queensideCastleIsValid(self, king):
       castleDirection = Util.Castle.QUEENSIDE
       return self.castleIsValid(king, castleDirection)
-      
+
    def castleIsValid(self, king, direction):
       self.debug.startSection("getValidMovesForPiece")
       self.debug.dprint("Checking "+direction+".")
@@ -271,7 +274,7 @@ class Player(object):
                   king.undoLastMove()
       self.debug.endSection()
       return result
-      
+
    def findCastlingRook(self, castleDirection):
       foundRook = None
       for rook in self.rooks:
@@ -279,14 +282,14 @@ class Player(object):
             foundRook = rook
             break
       return foundRook
-      
+
    def canPawnCaptureEnPassantAtCoord(self, pawn, coord):
       """Determine if the destination coordinate is an En Passant capture for the given pawn"""
       if type(pawn) == Pawn:
          possibleEnemyPosition = coord[0] + pawn.position[1]
          vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
          enemyPiece = vBoard.getPiece(possibleEnemyPosition)
-         if type(enemyPiece) == Pawn:
+         if type(enemyPiece) == Pawn and enemyPiece.color != pawn.color:
             if enemyPiece.enPassantCapturable:
                return True
             else:
@@ -294,11 +297,11 @@ class Player(object):
          else:
             return False
       return False
-      
+
    def _generateLocator(self,coord):
       """Returns a function that only accepts pieces that are at the specificed coordinate"""
       return lambda piece: piece.position == coord
-      
+
    def enemyPieceIsAtLocation(self,coord, vBoard):
       """This checks to see if there is an enemy piece at the position given"""
       result = False
@@ -306,18 +309,18 @@ class Player(object):
       if otherPiece != None and otherPiece.color != self.color:
          result = True
       return result
-      
+
    def _movePiece(self, startCoord, endCoord, promotionPieceStr=""):
-      """This checks a number of things, it makes sure that we do have a piece at the start location, it makes sure that the requested 
-         end location is in the physical move set of the peice, it captures an opponent piece at the end location if necessary, and it 
-         makes sure that the requested move does not expose or leave our king in check. If any of these problem areas arise, it leaves both 
+      """This checks a number of things, it makes sure that we do have a piece at the start location, it makes sure that the requested
+         end location is in the physical move set of the peice, it captures an opponent piece at the end location if necessary, and it
+         makes sure that the requested move does not expose or leave our king in check. If any of these problem areas arise, it leaves both
          players in their initial state."""
       self.debug.startSection("_movePiece")
       if self.updateMoveValues:
          self.algebraicMoveClass = AlgebraicMove()
          self.algebraicMoveClass.valid = False
          moveClass = self.algebraicMoveClass
- 
+
       currPieces = filter(self._generateLocator(startCoord), self.getAllPieces())
       self.moveResultReason = "Success"
       previousCheckStatus = self.checked
@@ -399,7 +402,7 @@ class Player(object):
       self.moveResultReason = "No piece found at that start square."
       self.debug.endSection()
       return False
-      
+
    def _testMove(self, startCoord, endCoord):
       """We are just testing to see if a move is valid, we do not care if it affects the other player,
          and we want it to have no lasting impact on the board"""
@@ -415,7 +418,7 @@ class Player(object):
       self.debug.dprint("Algebraic move generation restored to: ", self.updateMoveValues)
       self.debug.endSection()
       return testMoveValid
-      
+
    def _postMoveChecks(self):
       """Run and checks after a move is completed successfully"""
       self.debug.startSection("_postMoveChecks")
@@ -424,7 +427,7 @@ class Player(object):
       self.otherPlayer.verifyMate()
       self.generateCheckMate(self.otherPlayer.checked, self.otherPlayer.mated)
       self.debug.endSection()
-      
+
    def generateDisambiguation(self, piece, destination):
       """If required, based upon instance variable, generate the disambiguation string"""
       if self.updateMoveValues:
@@ -469,7 +472,7 @@ class Player(object):
       if self.updateMoveValues:
          self.algebraicMoveClass.check = checkStatus
          self.algebraicMoveClass.mate = mateStatus
-         
+
    def generatePromotion(self, promotion):
       """If required, generate the promotion piece for the move"""
       if self.updateMoveValues:
@@ -479,13 +482,13 @@ class Player(object):
             self.algebraicMoveClass.promotion = Util.invPieces[promotion]
          else:
             self.algebraicMoveClass.promotion = ""
-            
+
    def generateCastle(self, direction):
       if self.updateMoveValues:
          self.algebraicMoveClass.castle = True
          self.algebraicMoveClass.kingside = direction == Util.Castle.KINGSIDE
-      
-   
+
+
    def undoLastMove(self):
       """Undo the previous move"""
       self.debug.startSection("undoLastMove")
@@ -512,7 +515,7 @@ class Player(object):
          return True
       self.debug.endSection()
       return False
-      
+
    def capture(self, coord):
       """Capture the piece from the other player at the given coordinate"""
       self.debug.startSection("capture")
@@ -525,7 +528,7 @@ class Player(object):
       self.debug.dprint("New capture list: ", getIds(self.captured))
       self.debug.endSection()
       return capturePiece
-      
+
    def giveCapturedPiece(self, piece):
       """Remove the selected piece from our list and return it"""
       self.debug.startSection("capture")
@@ -538,13 +541,13 @@ class Player(object):
       self.debug.dprint("New piece list: ", getIds(pieceList))
       self.debug.endSection()
       return capturedPiece
-      
+
    def returnPiece(self, piece):
       """Add the given piece to our lists"""
       #I cannot simply use the all pieces API because that returns a new list
       #and I need to get these pieces where they live"""
       self.pieceMap[piece.piece].append(piece)
-      
+
    def getPiecesThatThreatenLocation(self, location):
       """Return a list of my pieces that can capture the piece at the given location"""
       def canPieceAttackLocation(piece):
@@ -552,7 +555,7 @@ class Player(object):
          if location in moves and Util.MoveType.CAPTURE in moves[location]:
             return True
       return list(filter(canPieceAttackLocation, self.getAllPieces()))
-   
+
    def verifyCheck(self):
       """Check to see if I am checked, and update my flag as appropriate"""
       self.debug.startSection("verifyCheck")
@@ -565,9 +568,9 @@ class Player(object):
       self.debug.dprint("Our checked status: ", self.checked)
       self.debug.endSection()
       return self.checked
-      
+
    def verifyMate(self):
-      """Check to see if I am mated, and update my flag as appropriate""" 
+      """Check to see if I am mated, and update my flag as appropriate"""
       self.debug.startSection("verifyMate")
       if self.checked:
          #Get the attacking pieces to start off with"""
@@ -590,7 +593,7 @@ class Player(object):
                      kingCanMove = True
                      self.mated = False
                      break
-                  
+
             if numberOfAttackers == 1 and not kingCanMove:
                #We only check other pieces to see if they can interfere if there is only one attacker,
                #I believe that there are no cases where two or more attacking pieces can be stopped by
@@ -599,7 +602,7 @@ class Player(object):
                attacker = attackingPieces[0]
                vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
                pathToKing = attacker.getPath(self.king.position, vBoard)
-               
+
                #Now get all of my pieces minus the king, we have already taken care of his movements
                myPieces = self.getAllPieces()
                myPieces.pop() #here we use the fact that the king is added last as a quick way of removing him
@@ -621,13 +624,12 @@ class WhitePlayer(Player):
    def __init__(self):
       self.color = Util.colors.WHITE
       super(WhitePlayer,self).__init__()
-      
+
 class BlackPlayer(Player):
    """The Player of the Black Pieces"""
    def __init__(self):
       self.color = Util.colors.BLACK
       super(BlackPlayer,self).__init__()
-      
+
 def getIds(lst):
    return [id(val) for val in lst]
-

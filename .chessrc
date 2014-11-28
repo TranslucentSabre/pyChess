@@ -1,6 +1,6 @@
-playerName:Tim Myers
-strict:False
 location:Huntsville
 debug:False
-defExportFile:savegame.dat
+playerName:Tim Myers
 defImportFile:savegame.dat
+defExportFile:savegame.dat
+strict:False
