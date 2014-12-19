@@ -1,6 +1,6 @@
 #chessBoard {
    margin: 0 auto;
-   width:75%;
+   width:460%;
 }
 #chessBoard .square {
    width:50px;
@@ -49,7 +49,7 @@
    float:left;
 }
 #centerPanel {
-   width:50%;
+   width:461%;
    float:left;
 }
 #rightPanel {
