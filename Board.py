@@ -32,11 +32,11 @@ class DisplayBoard(Board):
             else:
                color = Util.colors.WHITE
       self.placePieces(pieces)
-   
+
    def __str__(self):
       """Returns the nice printable form of the board"""
       rep = ""
-      rank = -1 
+      rank = -1
       numberOfCoordinates = len(Util.allCoords)
       if self.blackCheckMateStatus[0]:
          if self.blackCheckMateStatus[1]:
@@ -98,22 +98,22 @@ class DisplayBoard(Board):
          rep += "None"
       rep += Style.RESET_ALL + "\n"
       return rep
-      
+
    def setCaptured(self, color, pieces):
-      """Take the list of currently captures pieces from the player 
-         and save them off for display"""      
+      """Take the list of currently captures pieces from the player
+         and save them off for display"""
       if color == Util.colors.WHITE:
          self.captures[0] = pieces[:]
       else:
          self.captures[1] = pieces[:]
-         
+
    def getCaptured(self,color):
       """Get the array of captured piece objects for the color passed in"""
       if color == Util.colors.WHITE:
          return self.captures[0]
       else:
          return self.captures[1]
-         
+
    def getCapturedStrings(self,color):
       """Get an array of captured piece strings for the color passed in."""
       if color == Util.colors.WHITE:
@@ -126,7 +126,7 @@ class DisplayBoard(Board):
       """Add the pieces passed in onto the board"""
       for piece in piecesLst:
          self.board[piece.position][1] = piece
-         
+
    def getPiece(self, coordinate):
       """Return the piece found at the coordinate or None
          if the coordinate is not valid"""
@@ -136,10 +136,10 @@ class DisplayBoard(Board):
    def getBoardDictionary(self):
       """Return a dictionary keyed by the coordinate and valued by the letter of the
          piece on that coordinate"""
-      return { coordinate : [ self.board[coordinate][1].getPieceLetter(), str(self.board[coordinate][1].color) ] for coordinate in self.board }
-         
+      return { coordinate : [ self.board[coordinate][1].getPieceLetter(), self.board[coordinate][1].color.name ] for coordinate in self.board }
+
    def setCheckMateStatus(self, player):
-      """Take the current check and checkmake status from the player 
+      """Take the current check and checkmake status from the player
          and save them off for display"""
       status = (player.checked, player.mated)
       if player.color == Util.colors.WHITE:
@@ -158,12 +158,12 @@ class DisplayBoard(Board):
 
 class VerifyBoard(Board):
    """A minimal board that is more suitable for tactical use by the players."""
-   
+
    def __init__(self, pieces = []):
       """Create our board and fill it with pieces if they are given"""
       self.board = {}
       self.placePieces(pieces)
-      
+
    def placePieces(self, piecesLst):
       """Add the pieces passed in onto the board"""
       for piece in piecesLst:
@@ -178,7 +178,7 @@ class VerifyBoard(Board):
 
 class GameBoard(object):
    """The board that holds all of the turns in the game"""
-   
+
    def __init__(self, whitePlayer, blackPlayer):
       """Sets up the game, with the initial positions being the positions as given by the players at this time."""
       self.boards = []
@@ -188,11 +188,11 @@ class GameBoard(object):
       self.initialSetup = 0
       self.pendingTurn = 1
       self.commitReady = False
-      
+
    def __str__(self):
       """Returns a nice string representation of the current turn"""
       return "Turn: " + self.getTurnString() + "\n" + str(self.boards[self.currentTurn])
-      
+
    def getTurnString(self,turn="current"):
       """Returns a string informing of the current round and player"""
       turnString = "Invalid"
@@ -215,24 +215,24 @@ class GameBoard(object):
          else:
             turnString = str(numericTurn)+"..."
       return turnString
-      
+
    def firstTurn(self):
       """Move our current turn to the initial setup of the board"""
       self.currentTurn = self.initialSetup
       return True
-      
+
    def lastTurn(self):
       """Move our current turn to the last commit turn of the board"""
       self.currentTurn = self.pendingTurn - 1
       return True
-      
+
    def nextTurn(self):
       """Increment our current turn"""
       if self.currentTurn < self.pendingTurn - 1:
          self.currentTurn += 1
          return True
       return False
-         
+
    def previousTurn(self):
       """Decrement our current turn"""
       if self.currentTurn > self.initialSetup:
@@ -246,7 +246,7 @@ class GameBoard(object):
          self.currentTurn = turnNumber
          return True
       return False
-   
+
    def gotoTurnString(self, turnString):
       """Move our current turn to the turn specified by the string"""
       if turnString == "0":
@@ -269,7 +269,7 @@ class GameBoard(object):
          return result
 
    def setTurn(self, whitePlayer, blackPlayer):
-      """Takes both players and stores all the necessary information to 
+      """Takes both players and stores all the necessary information to
          commit and print the state of the game, call commitTurn to save this turn
          or cancelCommit to cancel it."""
       if self.commitReady == False:
@@ -282,7 +282,7 @@ class GameBoard(object):
          return True
       else:
          return False
-   
+
    def commitTurn(self):
       """Commits the turn given by setTurn, this adds a turn and moves our current turn
          to the newly added turn."""
@@ -294,7 +294,7 @@ class GameBoard(object):
          return True
       else:
          return False
-         
+
    def cancelCommit(self):
       """This cancels a turn given by setTurn"""
       if self.commitReady == True:
@@ -305,12 +305,12 @@ class GameBoard(object):
          return True
       else:
          return False
-         
+
    def getPendingMoveString(self):
       """This returns a nice printable string of the state of the game considering the
          pending move given by setTurn."""
       return "Pending Move\n" + "Turn: " + self.getTurnString("pending") + "\n" + str(self.boards[self.pendingTurn])
-      
+
    def getCurrentBoard(self):
       """Returns the display board for our current turn."""
       return self.boards[self.currentTurn]

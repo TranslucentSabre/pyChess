@@ -1,10 +1,10 @@
 import Util
 
 class Piece(object):
-   """Base Piece Class""" 
+   """Base Piece Class"""
    def __init__(self,piece="",color="",position=""):
       self.position = ""
-      self.color = ""
+      self.color = Util.colors.NONE
       self.piece = ""
       self.placed = False
       self.moved = False
@@ -17,14 +17,14 @@ class Piece(object):
          self.color = color
       if piece in Util.pieces:
          self.piece = piece
-            
+
    def getPieceLetter(self):
       """Returns the letter used to represent this chess piece"""
       if self.piece != "":
          return Util.pieces[self.piece]
       else:
          return " "
-            
+
    def __str__(self):
       """Return the name of this chess piece"""
       returnValue = self.piece
@@ -47,19 +47,19 @@ class Piece(object):
          return False
       self.moveResultReason = "Piece has not been placed on the board."
       return False
-      
+
    def undoLastMove(self):
       """Undo the last move performed by this piece"""
       if len(self.lastMove) == 2:
          self.position = self.lastMove[0]
          self.moved = self.lastMove[1]
          self.lastMove = ()
-      
-         
+
+
    def getPath(self, coord, vBoard):
-      """This function returns a list of contiguous valid moves between this piece 
+      """This function returns a list of contiguous valid moves between this piece
          and the coordinate given, exclusive of the destination, inclusive of this piece.
-         Please note that if the piece is right next to the target eg Pawn, or jumps to it's 
+         Please note that if the piece is right next to the target eg Pawn, or jumps to it's
          target eg Knight, the path will contain only the location of the piece"""
       self.getValidMoves(vBoard)
       pathToCoord = [self.position]
@@ -68,7 +68,7 @@ class Piece(object):
             if coord in path:
                pathToCoord += path[:path.index(coord)]
       return pathToCoord
-         
+
    def _getMoveValidityAndTermination(self, vBoard, coord):
       """Returns whether or not the move is valid, and if we should stop looking"""
       stopLooking = True
@@ -86,15 +86,15 @@ class Piece(object):
       else:
          valid = False
       return valid, stopLooking
-         
-         
+
+
 class Knight(Piece):
    """A Knight"""
-   
+
    def __init__(self, color, position):
       super(Knight,self).__init__("Knight", color, position)
-      
-      
+
+
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Knight"""
       currentPosition = self.position
@@ -176,8 +176,8 @@ class Bishop(Piece):
 
    def __init__(self, color, position):
       super(Bishop,self).__init__("Bishop", color, position)
-      
-   
+
+
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Bishop"""
       currentPosition = self.position
@@ -230,8 +230,8 @@ class Queen(Piece):
    """A Queen"""
    def __init__(self, color, position):
       super(Queen,self).__init__("Queen", color, position)
-      
-   
+
+
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Queen"""
       currentPosition = self.position
@@ -316,8 +316,8 @@ class King(Piece):
    """The King"""
    def __init__(self, color, position):
       super(King,self).__init__("King", color, position)
-      
-      
+
+
    def getValidMoves(self, vBoard):
       """Get the valid moves for the King"""
       currentPosition = self.position
@@ -331,7 +331,7 @@ class King(Piece):
             if (valid):
                validMoves.append(move)
          return validMoves
-         
+
    def getCastleCoords(self):
       return { Util.Castle.KINGSIDE : self.color.kingsideKingFile + self.color.majorRank, Util.Castle.QUEENSIDE : self.color.queensideKingFile + self.color.majorRank }
 
@@ -340,7 +340,7 @@ class Pawn(Piece):
    def __init__(self, color, position):
       super(Pawn,self).__init__("Pawn", color, position)
       self.enPassantCapturable = False
-      
+
    def move(self,coord):
       """Attempt to move this piece, it will fail if the movement places it outside the
          board or if it does not have an initial position"""
@@ -359,7 +359,7 @@ class Pawn(Piece):
          return False
       self.moveResultReason = "Piece has not been placed on the board."
       return False
-      
+
    def undoLastMove(self):
       """Undo the last move performed by this piece"""
       if len(self.lastState) == 3:
@@ -367,7 +367,7 @@ class Pawn(Piece):
          self.moved = self.lastState[1]
          self.enPassantCapturable = self.lastState[2]
          self.lastState = ()
-         
+
    def getCaptureCoords(self):
       fileNum = ord(self.position[0])
       rankNum = int(self.position[1])
@@ -395,7 +395,7 @@ class Pawn(Piece):
                if piece == None:
                   validMoves.append(move)
                else:
-                  #If there is a piece in our regular move path do not continue to the 
+                  #If there is a piece in our regular move path do not continue to the
                   #(possbily) next move
                   break
          return validMoves
