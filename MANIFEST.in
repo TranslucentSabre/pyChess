@@ -1,0 +1,6 @@
+include README.rst
+
+include pychess/test/*
+include pychess/doc/*
+include pychess/app/static/*
+include pychess/app/templates/*

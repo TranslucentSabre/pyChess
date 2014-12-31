@@ -24,4 +24,4 @@ or
 
 
 This uses Piece images created by `Peter Wong
-<www.virtualPieces.net>`_.
+<http://www.virtualPieces.net>`_.
