@@ -23,4 +23,4 @@ or
     chessGUI.py
 
 
-This uses Piece images created by `Peter Wong<www.virtualPieces.net?`_.
+This uses Piece images created by `Peter Wong<www.virtualPieces.net?>`_.
