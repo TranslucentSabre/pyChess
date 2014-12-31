@@ -2,7 +2,7 @@
 from Board import *
 from Player import *
 from ChessFile import *
-from TestPyChess import *
+from pychess.test.TestPyChess import *
 import Piece
 import Util
 

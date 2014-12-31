@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import unittest
-from Board import *
-from Piece import *
+from pychess.app.Board import *
+from pychess.app.Piece import *
 
 class VerifyBasePiece(unittest.TestCase):
 
@@ -13,7 +13,7 @@ class VerifyBasePiece(unittest.TestCase):
       self.assertEqual(piece.getPieceLetter(), " ")
       piece = Piece("", Util.colors.WHITE, "a1")
       self.assertEqual(piece.getPieceLetter(), " ")
-      
+
    def test_PieceNameString(self):
       for pieceName in Util.pieces:
          piece = Piece(pieceName, Util.colors.WHITE, "a1")
@@ -22,7 +22,7 @@ class VerifyBasePiece(unittest.TestCase):
       self.assertEqual(str(piece), "None")
       piece = Piece("", Util.colors.WHITE, "a1")
       self.assertEqual(str(piece), "None")
-      
+
    def test_PieceStartingCoordinate(self):
       black = Util.colors.BLACK
       invalidCoords = ["tom", "bob", "j2", "a9", "14", "bf"]
@@ -99,7 +99,7 @@ class VerifyKnight(VerifySpecificPiece):
 
       self.assertEqual(knight.getPieceLetter(), "N")
       self.assertEqual(str(knight), "Knight")
-      
+
    def test_KnightGetMovesOnEmptyBoard(self):
       moveDict = { "a1" : ["b3", "c2"],
                    "c3" : ["b1", "d1", "a2", "a4", "b5", "d5", "e2", "e4"],
@@ -135,4 +135,3 @@ class VerifyKnight(VerifySpecificPiece):
 
 if __name__ == "__main__":
     unittest.main()
-

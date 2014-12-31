@@ -13,7 +13,7 @@ setup(  name='pychess',
         author_email='temyers240@gmail.com',
         license='MIT',
         packages=['pychess'],
-        install_required=[
+        install_requires=[
             'colorama',
             'flask',
             'flask-restful',
