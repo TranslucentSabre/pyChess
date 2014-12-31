@@ -1,6 +1,5 @@
 include README.rst
 
-include pychess/test/*
-include pychess/doc/*
+recursive-include pychess *.py *.txt
 include pychess/app/static/*
 include pychess/app/templates/*

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from colorama import init
-from ChessGame import *
+from pychess.app.ChessGame import *
 import cmd
 
 """This tries to make raw_input look like input for python 2.7
@@ -14,34 +14,34 @@ class Chess(cmd.Cmd):
    intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.0.0\n"
    prompt = "pyChess# "
    game = ChessGame()
-   
+
    def emptyline(self):
        return
-   
+
    def do_show(self,arg):
       """Display the current board"""
       print(self.game.showCurrentBoard())
-      
+
    def do_first(self,arg):
       """Go to the first move in the game"""
       self.game.firstMove()
-      
+
    def do_last(self,arg):
       """Go to the last move in the game"""
       self.game.lastMove()
-      
+
    def do_next(self,arg):
       """Go to the next move in the game"""
       self.game.nextMove()
-      
+
    def do_previous(self,arg):
       """Go to the previous move in the game"""
       self.game.previousMove()
-      
+
    def do_restart(self,arg):
       """Restart our current game"""
       self.game.restartGame()
-      
+
    def do_move(self,arg):
       """Move a piece, this function takes two chess coordinates and an optional Piece to use for promotion if necessary, the first being the starting square of the piece to move and the second being the ending square of the move.\n
          In order to perform a castle move, move the king to the final position required for the castle.
@@ -67,7 +67,7 @@ class Chess(cmd.Cmd):
       else:
          print(self.game.lastError)
          self.game.cancelTurn()
-         
+
    def do_algebra(self,arg):
       """Move a piece, this function takes one move in algebraic notation.\n
          Ex. algebra Nf3\n
@@ -85,7 +85,7 @@ class Chess(cmd.Cmd):
       else:
          print(self.game.lastError)
          self.game.cancelTurn()
-      
+
    def do_load(self,arg):
       """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
@@ -99,7 +99,7 @@ if one is given use the argument as a filename to write the savegame to."""
       if self._booleanPrompt("This will erase the contents of the the export file before writing. Continue?"):
          if not self.game.writeSaveFile(arg):
             print(self.game.lastError)
-         
+
    def do_config(self,arg):
       """Set or read configuration options. The first argument must be one of the following settings:
       import    (read/set default import file)
@@ -108,7 +108,7 @@ if one is given use the argument as a filename to write the savegame to."""
       location  (read/set the physical location of the player)
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
-   the current value of the setting is printed to the screen.""" 
+   the current value of the setting is printed to the screen."""
       #Only split once, this allows the user to supply items with spaces in them
       args = arg.split(None,1)
       numOfArgs = len(args)
@@ -126,7 +126,7 @@ if one is given use the argument as a filename to write the savegame to."""
          else:
             if not self.game.setConfigItem(args[0], args[1]):
                print(self.game.lastError)
-            
+
    def do_test(self,arg):
       """Run the unit tests that have been developed for pyChess"""
       if(arg == "-v" or arg == "--verbose"):
@@ -138,9 +138,9 @@ if one is given use the argument as a filename to write the savegame to."""
    def do_quit(self,arg):
       """Stop playing chess"""
       return True
-      
+
    do_exit = do_quit
-   
+
    def help_help(self):
        print("Display the help for one of the available commands.")
 

@@ -15,17 +15,17 @@ class ValidConfig(object):
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""
-   
+
    def __init__(self):
       try:
          self.configFile = open(".chessrc", "r+")
       except (OSError,IOError):
-         self.configFile = open(".chessrc", "w")
+         self.configFile = open(".chessrc", "w+")
       self.readConfig()
-      
+
    def __del__(self):
       self.configFile.close()
-      
+
    def readConfig(self):
       self.configDict = {}
       for line in self.configFile:
@@ -34,20 +34,20 @@ class ConfigFile(object):
          value = configItem[1].rstrip("\n")
          if key in ValidConfig.validConfigItems:
             self.configDict[key] = value
-         
+
    def writeConfig(self):
       self.configFile.seek(0)
       self.configFile.truncate(0)
       for item in self.configDict:
          self.configFile.write(item+":"+self.configDict[item]+"\n")
       self.configFile.flush()
-      
+
    def getConfigItem(self,key):
       if key in self.configDict:
          return self.configDict[key]
       else:
          return ""
-      
+
    def setConfigItem(self,key,item):
       if key in ValidConfig.validConfigItems:
          self.configDict[key] = item
@@ -67,7 +67,7 @@ class ChessFiles(ConfigFile):
       self.resetWriteString()
       self.moveSeekLocation = 0
 
-      
+
    def __del__(self):
       super(self.__class__, self).__del__()
       self.closeInFile()
@@ -128,7 +128,7 @@ class ChessFiles(ConfigFile):
 
    def readMoves(self):
       self._seekToMoves()
-      return [move for move in self._getMovesFromFile()] 
+      return [move for move in self._getMovesFromFile()]
 
 
    def _getMovesFromFile(self):
@@ -140,14 +140,14 @@ class ChessFiles(ConfigFile):
    def _seekToMoves(self):
       self.inFile.seek(self.moveSeekLocation)
 
-         
+
 def isDebugEnabled():
    config = ConfigFile()
    debug = config.getConfigItem(ValidConfig.Debug["name"])
    debug = booleanConfigItemIsTrue(debug)
    del config
    return debug
- 
+
 def booleanConfigItemIsTrue(configValue):
    """This is necessary because config items are stored as strings"""
    if configValue == "True":
