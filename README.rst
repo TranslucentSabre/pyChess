@@ -1,5 +1,8 @@
+pyChess
+=======
+
 This is the pyChess project by Timothy Myers.
-The goal of the project is to create a chess engine that imports and exports 
+The goal of the project is to create a chess engine that imports and exports
 partial games in the Portable Game Notation file format so that chess games may be
 played over email.
 
@@ -9,16 +12,15 @@ as that is my primary development platform.
 This is stalled slightly right now. The game engine is fully functional and so is
 the save game io. It is still not in in fully compatible PGN format however.
 
+To Install:
+    python setup.py install
+
+This installation will install the required dependencies
+
 To Run:
-./chess.py
-
-Requires:
-colorama modules
-   Install using the command `pip install colorama`
-flask modules
-   Install using the command `pip install flask`
-flask-restful modules
-   Install using the command `pip install flask-restful`
+    chess.py
+or
+    chessGUI.py
 
 
-This uses Piece images created by Peter Wong of www.virtualPieces.net
+This uses Piece images created by `Peter Wong<www.virtualPieces.net?`_.
