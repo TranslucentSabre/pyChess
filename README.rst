@@ -19,9 +19,9 @@ This installation will install the required dependencies
 
 To Run:
     chess.py
-or
-    chessGUI.py
 
+Also included is the pychess.wsgi file required for hooking the Web UI up to an apache 
+server. The apache site file is left up to the consumer.
 
 This uses Piece images created by `Peter Wong
 <http://www.virtualPieces.net>`_.
