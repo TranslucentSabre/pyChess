@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import re
-import Piece
-import Util
+import pychess.app.Piece
+from pychess.app import Util
 
 
 class AlgebraicMove(object):
-   
+
    def __init__(self, destination="a1", piece="Pawn", disambiguation="", capture=False, promotion="", check=False, mate=False, castle=False, kingside=False):
       self.destination = destination
       self.piece = piece
@@ -17,7 +17,7 @@ class AlgebraicMove(object):
 
       self.castle = castle
       self.kingside = kingside
-      
+
    def __str__(self):
       retString = ""
       for item in dir(self):
@@ -105,13 +105,13 @@ class AlgebraicParser(object):
          self.setAlgebraicMoveUsingClass(AlgebraicMove())
          self.valid = False
       return self.valid
-      
+
    def isKingsideCastleFromMatch(self, matchValue):
       if matchValue != None:
          return False
       else:
          return True
-         
+
    def getPieceStringFromMatch(self, matchValue, pawnPossible=False):
       piece = ""
       if matchValue != None:
@@ -120,7 +120,7 @@ class AlgebraicParser(object):
          if not pawnPossible:
             piece = "Pawn"
       return piece
-      
+
    def getDisambiguationFromMatches(self, fileValue, rankValue):
       disambiguation = ""
       if fileValue != None:
@@ -128,34 +128,34 @@ class AlgebraicParser(object):
       if rankValue != None:
          disambiguation += rankValue
       return disambiguation
-      
+
    def isCaptureFromMatch(self, matchValue):
       capture = False
       if matchValue != None:
          capture = True
       return capture
-      
+
    def isCheckFromMatch(self, matchValue):
       check = False
       #If we are mated then we are also checked
       if matchValue != None and matchValue == "+" or matchValue == "#":
          check = True
       return check
-      
+
    def isMateFromMatch(self, matchValue):
       mate = False
       if matchValue != None and matchValue == "#":
          mate = True
       return mate
-         
+
    def setAlgebraicMoveUsingClass(self, move):
       """Set the passed in move class and generate our move string based upon it"""
       self.moveClass = move
-      
+
       if self.moveClass.castle == True:
          self.valid = True
          self.moveString = self.getCastleStringFromClass(self.moveClass.kingside)
-         
+
       else:
          self.valid = True
          self.moveString = ""
@@ -165,16 +165,16 @@ class AlgebraicParser(object):
          self.moveString += self.getDestinationStringFromClassAndValidate(self.moveClass.destination)
          self.moveString += self.getPromotionStringFromClassAndValidate(self.moveClass.promotion, self.moveClass.piece)
          self.moveString += self.getCheckMateStringFromClassAndValidate(self.moveClass.check, self.moveClass.mate)
-    
+
       return self.valid
-         
+
    def getCastleStringFromClass(self, classValue):
       castleStr = "O-"
       if classValue == False:
          castleStr += "O-"
       castleStr += "O"
       return castleStr
-         
+
    def getPieceStringFromClassAndValidate(self, classValue):
       pieceStr = ""
       if classValue != "Pawn":
@@ -184,7 +184,7 @@ class AlgebraicParser(object):
             self.valid = False
             pieceStr = classValue
       return pieceStr
-      
+
    def getDisambiguationStringFromClassAndValidate(self, classValue):
       disambigLen = len(classValue)
       if disambigLen > 2:
@@ -194,13 +194,13 @@ class AlgebraicParser(object):
       elif disambigLen == 1 and not (classValue in Util.ranks or classValue in Util.files):
          self.valid = False
       return classValue
-      
+
    def getCaptureStringFromClass(self, classValue):
       captureStr = ""
       if classValue:
          captureStr += "x"
       return captureStr
-      
+
    def getDestinationStringFromClassAndValidate(self, classValue):
       destLen = len(classValue)
       if destLen > 2 or destLen == 0:
@@ -208,7 +208,7 @@ class AlgebraicParser(object):
       elif destLen == 2 and not Util.isCoordValid(classValue):
          self.valid = False
       return classValue
-      
+
    def getPromotionStringFromClassAndValidate(self, classPromoteValue, classPieceValue):
       promotionStr = ""
       if classPieceValue != "Pawn" and classPromoteValue != "":
@@ -220,7 +220,7 @@ class AlgebraicParser(object):
             self.valid = False
             promotionStr += "="+classPromoteValue
       return promotionStr
-      
+
    def getCheckMateStringFromClassAndValidate(self, classCheckValue, classMateValue):
       checkOrMate = ""
       #If we are mated then we are also checked, so make sure that both flags are true before signalling mate
@@ -232,14 +232,14 @@ class AlgebraicParser(object):
       elif classCheckValue:
          checkOrMate += "+"
       return checkOrMate
-         
-  
-      
+
+
+
 
 
 if __name__ == "__main__":
-   print("Algebraic Notation Module") 
-   
+   print("Algebraic Notation Module")
+
    parser = AlgebraicParser()
    print(parser.move.pattern)
    print(parser.castle.pattern)
@@ -267,21 +267,21 @@ if __name__ == "__main__":
    setAndDisplay("0-0")
    setAndDisplay("0-0-0")
 
-   
-   #def destination, 
-   #piece="Pawn", 
-   #disambiguation="", 
-   #capture=False, 
-   #promotion="", 
-   #check=False, 
-   #mate=False, 
-   #castle=False, 
+
+   #def destination,
+   #piece="Pawn",
+   #disambiguation="",
+   #capture=False,
+   #promotion="",
+   #check=False,
+   #mate=False,
+   #castle=False,
    #kingside=False):
    setAndDisplay(AlgebraicMove("h8", "Pawn", "g", True, "Rook", False, False))
    setAndDisplay(AlgebraicMove("e2", "King", "", False, "", False, False))
    setAndDisplay(AlgebraicMove("a6", "Queen", "", True, "", True, True))
    setAndDisplay(AlgebraicMove(castle=True, kingside=False))
-   
+
    areMovesTheSame(AlgebraicMove("a1", "Bishop", "", False, "", False, False, False, False), \
                    AlgebraicMove("a1", "Bishop", "", False, "", False, False, False, False))
    areMovesTheSame(AlgebraicMove("f3", "Rook", "e", False, "", True, False, True, False), \

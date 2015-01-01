@@ -1,4 +1,4 @@
-import Util
+from pychess.app import Util
 
 class Piece(object):
    """Base Piece Class"""

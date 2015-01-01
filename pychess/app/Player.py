@@ -1,8 +1,8 @@
-from Piece import *
-from Board import *
-from Algebra import *
-from Debug import *
-import Util
+from pychess.app.Piece import *
+from pychess.app.Board import *
+from pychess.app.Algebra import *
+from pychess.app.Debug import *
+from pychess.app import Util
 
 class PlayerLastMove(object):
    """Class used to hold the previous move of a player"""

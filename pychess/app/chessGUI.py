@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask, jsonify, make_response, render_template
 from flask.ext.restful import Api, Resource, reqparse
-from ChessGame import *
+from pychess.app.ChessGame import *
 
 game = ChessGame()
 app = Flask(__name__)

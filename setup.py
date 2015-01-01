@@ -18,6 +18,6 @@ setup(  name='pychess',
             'flask',
             'flask-restful',
         ],
-        scripts=['pychess/app/chess.py'],
+        #scripts=['pychess/app/chess.py'],
         include_package_data=True,
         zip_safe=False )

@@ -1,6 +1,6 @@
 from colorama import Style, Fore, Back
-import Util
-from Piece import *
+from pychess.app import Util
+from pychess.app.Piece import *
 from math import ceil
 import re
 

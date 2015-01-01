@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-from Board import *
-from Player import *
-from ChessFile import *
+from pychess.app.Board import *
+from pychess.app.Player import *
+from pychess.app.ChessFile import *
 from pychess.test.TestPyChess import *
-import Piece
-import Util
+from pychess.app import Piece
+from pychess.app import Util
 
 
 class ChessGame():
