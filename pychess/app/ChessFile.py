@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import io
+import io, os
 
 
 class ValidConfig(object):
@@ -17,10 +17,11 @@ class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""
 
    def __init__(self):
+      configFileName = os.path.join(os.path.dirname(__file__), '.chessrc')
       try:
-         self.configFile = open(".chessrc", "r+")
+         self.configFile = open(configFileName, "r+")
       except (OSError,IOError):
-         self.configFile = open(".chessrc", "w+")
+         self.configFile = open(configFileName, "w")
       self.readConfig()
 
    def __del__(self):
@@ -75,6 +76,9 @@ class ChessFiles(ConfigFile):
 
    def attemptInputFileOpen(self, filename):
       self.inFileStatus = "Ready"
+      currentDir = os.path.dirname(__file__)
+      filename = os.path.join(currentDir, filename)
+      print(filename)
       try:
          self.inFile = open(filename)
       except (OSError,IOError):
@@ -87,6 +91,8 @@ class ChessFiles(ConfigFile):
 
    def attemptOutputFileOpen(self, filename):
       self.outFileStatus = "Ready"
+      currentDir = os.path.dirname(__file__)
+      filename = os.path.join(currentDir, filename)
       try:
          self.outFile = open(filename, "a");
       except (OSError,IOError):
