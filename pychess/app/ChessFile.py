@@ -78,7 +78,6 @@ class ChessFiles(ConfigFile):
       self.inFileStatus = "Ready"
       currentDir = os.path.dirname(__file__)
       filename = os.path.join(currentDir, filename)
-      print(filename)
       try:
          self.inFile = open(filename)
       except (OSError,IOError):

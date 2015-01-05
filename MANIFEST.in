@@ -1,7 +1,7 @@
 include README.rst
 
-recursive-include pychess *.py *.txt
 include pychess/app/.chessrc
 include pychess/app/static/*
 include pychess/app/templates/*
+include pychess/doc/*
 include pychess/*.wsgi
