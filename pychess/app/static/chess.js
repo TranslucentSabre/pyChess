@@ -76,12 +76,18 @@ function moveSelectChanged() {
    showTurnBoard($("#moveSelect").val());
 }
 
-function displaySuccessOrError(data) {
+function displaySuccessOrError(data,successCallback,errorCallback) {
     if (data.result != "Success") {
         $("#results").html(data.error);
+        if (typeof errorCallback === "function") {
+           errorCallback();
+        }
     }
     else {
         $("#results").html(data.result);
+        if (typeof successCallback === "function") {
+           successCallback();
+        }
     }
 }
 
@@ -214,14 +220,13 @@ function loadGameFile(file) {
       type: "PUT",
       data: data,
       success: function(data, textStatus) {
-         displaySuccessOrError(data);
+         displaySuccessOrError(data,getGameMoves);
       }
    } );
 }
 
 function loadButtonClick() {
    loadGameFile($("#fileName").val());
-   getGameMoves();
 }
 
 function saveGameFile(file) {
@@ -244,7 +249,6 @@ function saveGameFile(file) {
 
 function saveButtonClick() {
    saveGameFile($("#fileName").val());
-   getGameMoves();
 }
 
 function resetGame() {
