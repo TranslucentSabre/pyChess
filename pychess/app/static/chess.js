@@ -1,4 +1,6 @@
 var boardSelector = "#chessBoard";
+var intervalID = 0;
+var refreshTimerInMs = 10000;
 
 function buildLeftPanel(){
    var htmlString = "";
@@ -28,9 +30,6 @@ function generateBoard() {
                    "#a5","#c5","#e5","#g5","#b6","#d6","#f6","#h6","#a7","#c7","#e7","#g7","#b8","#d8","#f8","#h8"];
    var whiteSquares = ["#b1","#d1","#f1","#h1","#a2","#c2","#e2","#g2","#b3","#d3","#f3","#h3","#a4","#c4","#e4","#g4",
                    "#b5","#d5","#f5","#h5","#a6","#c6","#e6","#g6","#b7","#d7","#f7","#h7","#a8","#c8","#e8","#g8"];
-   //Black status bar
-   htmlString += '<div class="label newLine">Status for Black Player:</div><div class="horizontal" id="blackStatus"></div>';
-   htmlString += '<div class="label newLine">Captured by Black Player:</div><div class="horizontal" id="blackCaptured"></div>';
    for ( var row = 8; row >= 0; row--) {
       for ( var column = -1; column <= 7; column++) {
          if (column == -1) {
@@ -50,6 +49,9 @@ function generateBoard() {
          }
       }
    }
+   //Black status bar
+   htmlString += '<div class="label newLine">Status for Black Player:</div><div class="horizontal" id="blackStatus"></div>';
+   htmlString += '<div class="label newLine">Captured by Black Player:</div><div class="horizontal" id="blackCaptured"></div>';
    //White status bar
    htmlString += '<div class="label newLine">Status for White Player:</div><div class="horizontal" id="whiteStatus"></div>';
    htmlString += '<div class="label newLine">Captured by White Player:</div><div class="horizontal" id="whiteCaptured"></div>';
@@ -385,4 +387,5 @@ var Drag = {
 $(document).ready(function() {
    buildStartingHtml();
    getGameMoves();
+   intervalID = window.setInterval(getGameMoves, refreshTimerInMs);
 });
