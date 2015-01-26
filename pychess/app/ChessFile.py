@@ -4,12 +4,12 @@ import io, os
 
 class ValidConfig(object):
       validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict"]
-      ImportFile       = {"name" : validConfigItems[0]}
-      ExportFile       = {"name" : validConfigItems[1]}
-      PlayerName       = {"name" : validConfigItems[2]}
-      Location         = {"name" : validConfigItems[3]}
-      Debug            = {"name" : validConfigItems[4], "values" : ["True", "False"]}
-      StrictParse      = {"name" : validConfigItems[5], "values" : ["True", "False"]}
+      ImportFile       = {"name" : validConfigItems[0], "default" : "savegame.dat"}
+      ExportFile       = {"name" : validConfigItems[1], "default" : "savegame.dat"}
+      PlayerName       = {"name" : validConfigItems[2], "default" : "Unknown"}
+      Location         = {"name" : validConfigItems[3], "default" : "Unknown"}
+      Debug            = {"name" : validConfigItems[4], "default" : "False", "values" : ["True", "False"]}
+      StrictParse      = {"name" : validConfigItems[5], "default" : "False", "values" : ["True", "False"]}
       configMap = {"import":ImportFile, "export":ExportFile, "name":PlayerName, \
                    "location":Location, "debug":Debug, "strict":StrictParse}
 
