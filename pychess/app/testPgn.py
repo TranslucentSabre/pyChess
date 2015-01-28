@@ -7,10 +7,11 @@ class pgnTest(unittest.TestCase):
     def setUpClass(cls):
         cls.parser = pgn.PgnParser()
 
-    def tagParseTest(self, tagString, tagClass):
+    def tagParseTest(self, tagString, *tagClasses):
 
-        self.parser.parseTags(tagString)
-        self.assertEqual(self.parser.tags[tagClass.name], tagClass)
+        self.assertTrue(self.parser.parseTags(tagString))
+        for tagClass in tagClasses:
+            self.assertEqual(self.parser.tags[tagClass.name], tagClass)
 
     def test_ImportFormatTagParseV1(self):
         tagString = '[ site  "The Internet" ]'
@@ -35,9 +36,13 @@ class pgnTest(unittest.TestCase):
         goldenTag1 = pgn.Tag("site", "My House")
         goldenTag2 = pgn.Tag("Date", "2015.01.28")
 
-        self.parser.parseTags(tagString)
-        self.assertEqual(self.parser.tags[goldenTag1.name], goldenTag1)
-        self.assertEqual(self.parser.tags[goldenTag2.name], goldenTag2)
+        self.tagParseTest(tagString, goldenTag1, goldenTag2)
+
+    def test_ImportFormatTagParseV5(self):
+        tagString = '[event "The best \\"Game\\" In the place"]'
+        goldenTag = pgn.Tag('event', 'The best "Game" In the place')
+
+        self.tagParseTest(tagString, goldenTag)
 
 
 

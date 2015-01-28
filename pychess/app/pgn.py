@@ -28,6 +28,8 @@ class PgnParser(object):
     tagEnd = "]"
     stringStartEnd = '"'
 
+    escapeChar = "\\"
+
 
     def __init__(self):
         self.tags = {}
@@ -40,6 +42,7 @@ class PgnParser(object):
         inValue = False
         foundName = False
         foundValue = False
+        valueEscape = False
         name = ""
         value = ""
         for char in tagString:
@@ -77,12 +80,20 @@ class PgnParser(object):
                     return returnVal
             elif not foundValue:
                 if inValue:
+                    if valueEscape:
+                        value += char
+                        valueEscape = False
+                        continue
                     if char == self.stringStartEnd:
                         foundValue = True
                         inValue = False
                         continue
+                    if char == self.escapeChar:
+                        valueEscape = True
+                        continue
                     else:
                         value += char
+                        continue
                 elif char == self.stringStartEnd:
                     inValue = True
                     continue
