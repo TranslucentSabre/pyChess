@@ -7,7 +7,7 @@ class pgnTest(unittest.TestCase):
     def setUpClass(cls):
         cls.parser = pgn.PgnParser()
 
-    def test_ImportFormatTagParse():
+    def test_ImportFormatTagParseV1(self):
         tagString = '[ site  "The Internet" ]'
         goldenTag = pgn.Tag("site", "The Internet", "string")
 
