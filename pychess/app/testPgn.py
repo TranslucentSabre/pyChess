@@ -7,9 +7,17 @@ class pgnTest(unittest.TestCase):
     def setUpClass(cls):
         cls.parser = pgn.PgnParser()
 
-    def test_ImportFormatTagParse():
+    def test_ImportFormatTagParseV1(self):
         tagString = '[ site  "The Internet" ]'
-        goldenTag = pgn.Tag("site", "The Internet", "string")
+        goldenTag = pgn.Tag("site", "The Internet")
+
+        tagClass = self.parser.parseTag(tagString)
+        self.assertEqual(goldenTag, tagClass)
+
+
+    def test_ImportFormatTagParseV2(self):
+        tagString = '[site "The  Internet"]'
+        goldenTag = pgn.Tag("site", "The  Internet")
 
         tagClass = self.parser.parseTag(tagString)
         self.assertEqual(goldenTag, tagClass)
