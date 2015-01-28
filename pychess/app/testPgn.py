@@ -9,7 +9,7 @@ class pgnTest(unittest.TestCase):
 
     def test_ImportFormatTagParseV1(self):
         tagString = '[ site  "The Internet" ]'
-        goldenTag = pgn.Tag("site", "The Internet", "string")
+        goldenTag = pgn.Tag("site", "The Internet")
 
         tagClass = self.parser.parseTag(tagString)
         self.assertEqual(goldenTag, tagClass)
