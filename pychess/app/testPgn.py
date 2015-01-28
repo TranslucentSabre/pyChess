@@ -15,5 +15,13 @@ class pgnTest(unittest.TestCase):
         self.assertEqual(goldenTag, tagClass)
 
 
+    def test_ImportFormatTagParseV2(self):
+        tagString = '[site "The  Internet"]'
+        goldenTag = pgn.Tag("site", "The  Internet")
+
+        tagClass = self.parser.parseTag(tagString)
+        self.assertEqual(goldenTag, tagClass)
+
+
 if __name__ == "__main__":
     unittest.main()
