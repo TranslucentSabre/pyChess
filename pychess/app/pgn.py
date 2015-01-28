@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #File for PGN parser and exporter
-import string
+import string, Debug
 
 class Tag(object):
 
@@ -21,15 +21,19 @@ class Tag(object):
 class PgnParser(object):
 
     symbolStart = string.ascii_letters + string.digits
-    symbolAllowed = symbolStart + "_" + "+" + "#" + "=" + "-"
+    tagNameAllowed = symbolStart + "_"
+    symbolAllowed = tagNameAllowed + "+" + "#" + "=" + "-"
 
+    tagStart = "["
+    tagEnd = "]"
     stringStartEnd = '"'
 
 
     def __init__(self):
-        pass
+        self.tags = {}
+        self.debug = Debug.Debug()
 
-    def parseTag(self, tagString):
+    def parseTags(self, tagString):
         returnVal = False
         inTag = False
         inSymbol = False
@@ -40,7 +44,7 @@ class PgnParser(object):
         value = ""
         for char in tagString:
             if not inTag:
-                if char == "[":
+                if char == self.tagStart:
                     inTag = True
                     continue
                 elif char in string.whitespace:
@@ -49,12 +53,20 @@ class PgnParser(object):
                     return returnVal
             elif not foundName:
                 if inSymbol:
-                    if char in self.symbolAllowed:
+                    if char in self.tagNameAllowed:
                         name += char
                         continue
                     elif char in string.whitespace:
                         foundName = True
+                        inSymbol = False
                         continue
+                    elif char in self.stringStartEnd:
+                        foundName = True
+                        inValue = True
+                        inSymbol = False
+                        continue
+                    else:
+                        return returnVal
                 elif char in self.symbolStart:
                     inSymbol = True
                     name += char
@@ -65,25 +77,31 @@ class PgnParser(object):
                     return returnVal
             elif not foundValue:
                 if inValue:
-                    if char == '"':
+                    if char == self.stringStartEnd:
                         foundValue = True
+                        inValue = False
                         continue
                     else:
                         value += char
-                elif char == '"':
+                elif char == self.stringStartEnd:
                     inValue = True
                     continue
                 elif char in string.whitespace:
                     continue
                 else:
                     return returnVal
-            elif char == "]":
+            elif char == self.tagEnd:
                 inTag = False
-                returnVal = Tag(name, value)
-                break
+                foundName = False
+                foundValue = False
+                self.debug.dprint(name, value)
+                self.tags[name] = Tag(name, value)
+                name = ""
+                value = ""
+                continue
             elif char in string.whitespace:
                 continue
             else:
                 return returnVal
-        print(returnVal.name, returnVal.value)
+        returnVal = True
         return returnVal
