@@ -7,6 +7,9 @@ class pgnTest(unittest.TestCase):
     def setUpClass(cls):
         cls.parser = pgn.PgnParser()
 
+    def setUp(self):
+        self.parser.reset()
+
     def tagParseTest(self, tagStrings, tagClasses):
 
         for tagString in tagStrings:
