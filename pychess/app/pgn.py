@@ -34,81 +34,82 @@ class PgnParser(object):
     def __init__(self):
         self.tags = {}
         self.debug = Debug.Debug()
+        self.tagName = ""
+        self.tagValue = ""
+
+        self.inTag = False
+        self.inSymbol = False
+        self.inValue = False
+        self.foundName = False
+        self.foundValue = False
+        self.valueEscape = False
 
     def parseTags(self, tagString):
         returnVal = False
-        inTag = False
-        inSymbol = False
-        inValue = False
-        foundName = False
-        foundValue = False
-        valueEscape = False
-        name = ""
-        value = ""
         for char in tagString:
-            if not inTag:
+            if not self.inTag:
                 if char == self.tagStart:
-                    inTag = True
+                    self.inTag = True
                     continue
                 elif char in string.whitespace:
                     continue
                 else:
                     return returnVal
-            elif not foundName:
-                if inSymbol:
+            elif not self.foundName:
+                if self.inSymbol:
                     if char in self.tagNameAllowed:
-                        name += char
+                        self.tagName+= char
                         continue
                     elif char in string.whitespace:
-                        foundName = True
-                        inSymbol = False
+                        self.foundName = True
+                        self.inSymbol = False
                         continue
                     elif char in self.stringStartEnd:
-                        foundName = True
-                        inValue = True
-                        inSymbol = False
+                        self.foundName = True
+                        self.inValue = True
+                        self.inSymbol = False
                         continue
                     else:
                         return returnVal
                 elif char in self.symbolStart:
-                    inSymbol = True
-                    name += char
+                    self.inSymbol = True
+                    self.tagName += char
                     continue
                 elif char in string.whitespace:
                     continue
                 else:
                     return returnVal
-            elif not foundValue:
-                if inValue:
-                    if valueEscape:
-                        value += char
-                        valueEscape = False
+            elif not self.foundValue:
+                if self.inValue:
+                    if self.valueEscape:
+                        self.tagValue += char
+                        self.valueEscape = False
                         continue
                     if char == self.stringStartEnd:
-                        foundValue = True
-                        inValue = False
+                        self.foundValue = True
+                        self.inValue = False
                         continue
                     if char == self.escapeChar:
-                        valueEscape = True
+                        self.valueEscape = True
                         continue
                     else:
-                        value += char
+                        self.tagValue += char
                         continue
                 elif char == self.stringStartEnd:
-                    inValue = True
+                    self.inValue = True
                     continue
                 elif char in string.whitespace:
                     continue
                 else:
                     return returnVal
             elif char == self.tagEnd:
-                inTag = False
-                foundName = False
-                foundValue = False
-                self.debug.dprint(name, value)
-                self.tags[name] = Tag(name, value)
-                name = ""
-                value = ""
+                self.inTag = False
+                self.foundName = False
+                self.foundValue = False
+                self.debug.dprint(self.tagName, self.tagValue)
+                self.tags[self.tagName] = Tag(self.tagName, self.tagValue)
+                self.tagName = ""
+                self.tagValue = ""
                 continue
             elif char in string.whitespace:
                 continue
