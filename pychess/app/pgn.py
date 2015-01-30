@@ -17,28 +17,12 @@ class Tag(object):
         else:
             return False
 
-class State:
-    def run(self,input):
-        assert 0, "run not implemented"
+    def __str__(self):
+        value1 = self.value.replace('\\', '\\\\')
+        value2 = value1.replace('"', '\\"')
+        return "["+self.name+' "'+value2+'"]'
 
-class StateMachine:
-    def __init__(self, initialState):
-        self.initialState = initialState
-        self.currentState = initialState
-        self.debug = Debug.Debug()
 
-    def reset(self):
-        self.currentState = self.initialState
-
-    ErrorState = False
-
-    def run(self, input):
-        for i in input:
-            self.currentState = self.currentState.run(i)
-            self.debug.dprint(i, self.currentState)
-            if self.currentState == StateMachine.ErrorState:
-                return StateMachine.ErrorState
-        return True
 
 
 class PgnParser(object):
@@ -53,53 +37,57 @@ class PgnParser(object):
 
     escapeChar = "\\"
 
-    class NotInTag(State):
-        def run(self, char):
+    class ParserState(object):
+        def run(self, input, parser):
+            assert 0, "run not implemented"
+
+    class NotInTag(ParserState):
+        def run(self, char, parser):
             if char in string.whitespace:
                 return self
             elif char in PgnParser.tagStart:
-                return PgnParser.ParsingSM.inTag
+                return PgnParser.ParsingStateMachine.inTag
             else:
-                return PgnParser.ParsingSM.ErrorState
+                return PgnParser.ParsingStateMachine.ErrorState
 
-    class InTag(State):
-        def run(self, char):
+    class InTag(ParserState):
+        def run(self, char, parser):
             if char in string.whitespace:
                 return self
             elif char in PgnParser.symbolStart:
-                PgnParser.tagName = char
-                return PgnParser.ParsingSM.tagName
+                parser.tagName = char
+                return PgnParser.ParsingStateMachine.tagName
             else:
-                return PgnParser.ParsingSM.ErrorState
+                return PgnParser.ParsingStateMachine.ErrorState
 
-    class TagName(State):
-        def run(self, char):
+    class TagName(ParserState):
+        def run(self, char, parser):
             if char in PgnParser.tagNameAllowed:
-                PgnParser.tagName += char
+                parser.tagName += char
                 return self
             elif char in string.whitespace:
-                return PgnParser.ParsingSM.tagWaitForStringValue
+                return PgnParser.ParsingStateMachine.tagWaitForStringValue
             elif char in PgnParser.stringStartEnd:
-                return PgnParser.ParsingSM.tagStringValue
+                return PgnParser.ParsingStateMachine.tagStringValue
             else:
-                return PgnParser.ParsingSM.ErrorState
+                return PgnParser.ParsingStateMachine.ErrorState
 
-    class TagWaitForStringValue(State):
-        def run(self, char):
+    class TagWaitForStringValue(ParserState):
+        def run(self, char, parser):
             if char in string.whitespace:
                 return self
             elif char in PgnParser.stringStartEnd:
-                return PgnParser.ParsingSM.tagStringValue
+                return PgnParser.ParsingStateMachine.tagStringValue
             else:
-                return PgnParser.ParsingSM.ErrorState
+                return PgnParser.ParsingStateMachine.ErrorState
 
-    class TagStringValue(State):
+    class TagStringValue(ParserState):
         def __init__(self):
             self.escape = False
 
-        def run(self, char):
+        def run(self, char, parser):
             if self.escape:
-                PgnParser.tagValue += char
+                parser.tagValue += char
                 self.escape = False
                 return self
             else:
@@ -107,52 +95,71 @@ class PgnParser(object):
                     self.escape = True
                     return self
                 elif char in PgnParser.stringStartEnd:
-                    return PgnParser.ParsingSM.tagWaitForEnd
+                    return PgnParser.ParsingStateMachine.tagWaitForEnd
                 else:
-                    PgnParser.tagValue += char
+                    parser.tagValue += char
                     return self
 
-    class TagWaitForEnd(State):
-        def run(self, char):
+    class TagWaitForEnd(ParserState):
+        def run(self, char, parser):
             if char in string.whitespace:
                 return self
             elif char in PgnParser.tagEnd:
-                #PgnParser.debug.dprint(self.tagName, self.tagValue)
-                PgnParser.tags[PgnParser.tagName] = Tag(PgnParser.tagName, PgnParser.tagValue)
-                PgnParser.tagName = ""
-                PgnParser.tagValue = ""
-                return PgnParser.ParsingSM.notInTag
+                parser.saveTag()
+                return PgnParser.ParsingStateMachine.notInTag
             else:
-                return PgnParser.ParsingSM.ErrorState
+                return PgnParser.ParsingStateMachine.ErrorState
 
-    class ParsingSM(StateMachine):
-        def __init__(self, initialState):
-            StateMachine.__init__(self, initialState)
+    class ParsingStateMachine(object):
+        def __init__(self, initialState, parser):
+            self.initialState = initialState
+            self.currentState = initialState
+            self.parser = parser
+            self.debug = Debug.Debug()
 
-    ParsingSM.notInTag = NotInTag()
-    ParsingSM.inTag = InTag()
-    ParsingSM.tagName = TagName()
-    ParsingSM.tagWaitForStringValue = TagWaitForStringValue()
-    ParsingSM.tagStringValue = TagStringValue()
-    ParsingSM.tagWaitForEnd = TagWaitForEnd()
+        def reset(self):
+            self.currentState = self.initialState
+
+        ErrorState = False
+
+        def run(self, input):
+            for i in input:
+                self.currentState = self.currentState.run(i, self.parser)
+                self.debug.dprint(i, self.currentState)
+                if self.currentState == PgnParser.ParsingStateMachine.ErrorState:
+                    return PgnParser.ParsingStateMachine.ErrorState
+            return True
 
 
-    tags = {}
-    tagName = ""
-    tagValue = ""
+    ParsingStateMachine.notInTag = NotInTag()
+    ParsingStateMachine.inTag = InTag()
+    ParsingStateMachine.tagName = TagName()
+    ParsingStateMachine.tagWaitForStringValue = TagWaitForStringValue()
+    ParsingStateMachine.tagStringValue = TagStringValue()
+    ParsingStateMachine.tagWaitForEnd = TagWaitForEnd()
+
+
+
 
 
     def __init__(self):
+        self.tags = {}
+        self.tagName = ""
+        self.tagValue = ""
         self.debug = Debug.Debug()
-        self.SM = PgnParser.ParsingSM(PgnParser.ParsingSM.notInTag)
+        self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.notInTag, self)
 
     def reset(self):
-        PgnParser.tags = {}
-        PgnParser.tagName = ""
-        PgnParser.tagValue = ""
+        self.tags = {}
+        self.tagName = ""
+        self.tagValue = ""
         self.SM.reset()
-
-
 
     def parseTags(self, tagString):
         return self.SM.run(tagString)
+
+    def saveTag(self):
+        self.tags[self.tagName] = Tag(self.tagName, self.tagValue)
+        self.debug.dprint(self.tags[self.tagName])
+        self.tagName = ""
+        self.tagValue = ""

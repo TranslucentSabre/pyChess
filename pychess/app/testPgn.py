@@ -61,6 +61,12 @@ class pgnTest(unittest.TestCase):
 
         self.tagParseTest((tagString,), (goldenTag,))
 
+    def test_ImportFormatTagParse_BackslashAndQuotesInString(self):
+        tagString = '[site "The Network\\\\The \\"White\\" House"]'
+        goldenTag = pgn.Tag('site', 'The Network\The "White" House')
+
+        self.tagParseTest((tagString,), (goldenTag,))
+
 
 
 
