@@ -68,6 +68,15 @@ class pgnTest(unittest.TestCase):
         self.tagParseTest((tagString,), (goldenTag,))
 
 
+    def test_ImportFormatMoveParse_TwoMovesNoMoveNumber(self):
+        moveString = "e4 e6 "
+
+        self.assertTrue(self.parser.parseMoves(moveString))
+        self.assertEqual("e4", self.parser.moves[0])
+        self.assertEqual("e6", self.parser.moves[1])
+
+
+
 
 
 

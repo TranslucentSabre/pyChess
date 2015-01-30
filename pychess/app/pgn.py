@@ -41,12 +41,15 @@ class PgnParser(object):
         def run(self, input, parser):
             assert 0, "run not implemented"
 
-    class NotInTag(ParserState):
+    class WaitForSymbol(ParserState):
         def run(self, char, parser):
             if char in string.whitespace:
                 return self
             elif char in PgnParser.tagStart:
                 return PgnParser.ParsingStateMachine.inTag
+            elif char in string.ascii_letters:
+                parser.moveSan = char
+                return PgnParser.ParsingStateMachine.moveSan
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
 
@@ -106,9 +109,21 @@ class PgnParser(object):
                 return self
             elif char in PgnParser.tagEnd:
                 parser.saveTag()
-                return PgnParser.ParsingStateMachine.notInTag
+                return PgnParser.ParsingStateMachine.waitForSymbol
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
+
+    class MoveSan(ParserState):
+        def run(self, char, parser):
+            if char in PgnParser.symbolAllowed:
+                parser.moveSan += char
+                return self
+            elif char in string.whitespace:
+                parser.saveMove()
+                return PgnParser.ParsingStateMachine.waitForSymbol
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
+
 
     class ParsingStateMachine(object):
         def __init__(self, initialState, parser):
@@ -131,12 +146,14 @@ class PgnParser(object):
             return True
 
 
-    ParsingStateMachine.notInTag = NotInTag()
+    ParsingStateMachine.waitForSymbol = WaitForSymbol()
     ParsingStateMachine.inTag = InTag()
     ParsingStateMachine.tagName = TagName()
     ParsingStateMachine.tagWaitForStringValue = TagWaitForStringValue()
     ParsingStateMachine.tagStringValue = TagStringValue()
     ParsingStateMachine.tagWaitForEnd = TagWaitForEnd()
+
+    ParsingStateMachine.moveSan = MoveSan()
 
 
 
@@ -144,22 +161,33 @@ class PgnParser(object):
 
     def __init__(self):
         self.tags = {}
+        self.moves = []
         self.tagName = ""
         self.tagValue = ""
+        self.moveSan = ""
         self.debug = Debug.Debug()
-        self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.notInTag, self)
+        self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
 
     def reset(self):
         self.tags = {}
+        self.moves = []
         self.tagName = ""
         self.tagValue = ""
+        self.moveSan = ""
         self.SM.reset()
 
     def parseTags(self, tagString):
         return self.SM.run(tagString)
+
+    def parseMoves(self, moveString):
+        return self.SM.run(moveString)
 
     def saveTag(self):
         self.tags[self.tagName] = Tag(self.tagName, self.tagValue)
         self.debug.dprint(self.tags[self.tagName])
         self.tagName = ""
         self.tagValue = ""
+
+    def saveMove(self):
+        self.moves.append(self.moveSan)
+        self.moveSan = ""
