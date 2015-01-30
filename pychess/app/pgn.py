@@ -176,11 +176,9 @@ class PgnParser(object):
         self.moveSan = ""
         self.SM.reset()
 
-    def parseTags(self, tagString):
-        return self.SM.run(tagString)
+    def parseString(self, inString):
+        return self.SM.run(inString)
 
-    def parseMoves(self, moveString):
-        return self.SM.run(moveString)
 
     def saveTag(self):
         self.tags[self.tagName] = Tag(self.tagName, self.tagValue)
