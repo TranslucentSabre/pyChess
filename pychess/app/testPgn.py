@@ -69,14 +69,14 @@ class pgnTest(unittest.TestCase):
 
 
     def test_ImportFormatMoveParse_TwoMovesNoMoveNumber(self):
-        moveString = "e4 e6 "
+        moveString = "e4 e6\n"
 
         self.assertTrue(self.parser.parseString(moveString))
         self.assertEqual("e4", self.parser.moves[0])
         self.assertEqual("e6", self.parser.moves[1])
 
     def test_ImportFormatMoveParse_TwoMovesTwoMoveNumbers_NoDots(self):
-        moveString = "1 e4  e6  Nf3 2 Kb5 "
+        moveString = "1 e4  e6  Nf3 2 Kb5\n"
 
         self.assertTrue(self.parser.parseString(moveString))
         self.assertEqual("e4", self.parser.moves[0])
@@ -85,7 +85,7 @@ class pgnTest(unittest.TestCase):
         self.assertEqual("Kb5", self.parser.moves[3])
 
     def test_ImportFormatMoveParse_TwoMovesTwoMoveNumbers_WithDots(self):
-        moveString = "e4 1... e6  2 . Nf3  Kb5 "
+        moveString = "e4 1... e6  2 . Nf3  Kb5\n"
 
         self.assertTrue(self.parser.parseString(moveString))
         self.assertEqual("e4", self.parser.moves[0])
