@@ -75,6 +75,13 @@ class pgnTest(unittest.TestCase):
         self.assertEqual("e4", self.parser.moves[0])
         self.assertEqual("e6", self.parser.moves[1])
 
+    def test_ImportFormatMoveParse_TwoMovesTwoMoveNumbers_NoDots(self):
+        moveString = "1 e4  e6  Nf3 2 Kb5 "
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0])
+        self.assertEqual("e6", self.parser.moves[1])
+
 
 
 

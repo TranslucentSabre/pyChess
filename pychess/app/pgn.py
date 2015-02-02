@@ -50,6 +50,9 @@ class PgnParser(object):
             elif char in string.ascii_letters:
                 parser.moveSan = char
                 return PgnParser.ParsingStateMachine.moveSan
+            elif char in string.digits:
+                parser.parsedNumber = char
+                return PgnParser.ParsingStateMachine.moveNumber
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
 
@@ -113,6 +116,27 @@ class PgnParser(object):
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
 
+    class MoveNumber(ParserState):
+        def run(self, char, parser):
+            if char in string.digits:
+                parser.parsedNumber += char
+                return self
+            elif char in string.whitespace:
+                if parser.checkMoveNumber():
+                    return PgnParser.ParsingStateMachine.moveWaitForSan
+                else:
+                    return PgnParser.ParsingStateMachine.ErrorState
+
+    class MoveWaitForSan(ParserState):
+        def run(self, char, parser):
+            if char in string.whitespace:
+                return self
+            elif char in string.ascii_letters:
+                parser.moveSan = char
+                return PgnParser.ParsingStateMachine.moveSan
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
+
     class MoveSan(ParserState):
         def run(self, char, parser):
             if char in PgnParser.symbolAllowed:
@@ -153,6 +177,8 @@ class PgnParser(object):
     ParsingStateMachine.tagStringValue = TagStringValue()
     ParsingStateMachine.tagWaitForEnd = TagWaitForEnd()
 
+    ParsingStateMachine.moveNumber = MoveNumber()
+    ParsingStateMachine.moveWaitForSan = MoveWaitForSan()
     ParsingStateMachine.moveSan = MoveSan()
 
 
@@ -164,6 +190,9 @@ class PgnParser(object):
         self.moves = []
         self.tagName = ""
         self.tagValue = ""
+        self.parsedNumber = ""
+        self.currentMoveNumber = 1
+        self.incrementMoveNumber = False
         self.moveSan = ""
         self.debug = Debug.Debug()
         self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
@@ -173,6 +202,9 @@ class PgnParser(object):
         self.moves = []
         self.tagName = ""
         self.tagValue = ""
+        self.parsedNumber = ""
+        self.currentMoveNumber = 1
+        self.incrementMoveNumber = False
         self.moveSan = ""
         self.SM.reset()
 
@@ -186,6 +218,14 @@ class PgnParser(object):
         self.tagName = ""
         self.tagValue = ""
 
+    def checkMoveNumber(self):
+        returnVal = str(self.currentMoveNumber) == self.parsedNumber
+        self.parsedNumber = ""
+        return returnVal
+
     def saveMove(self):
         self.moves.append(self.moveSan)
         self.moveSan = ""
+        if self.incrementMoveNumber:
+            self.currentMoveNumber += 1
+        self.incrementMoveNumber =  not self.incrementMoveNumber
