@@ -123,9 +123,37 @@ class PgnParser(object):
                 return self
             elif char in string.whitespace:
                 if parser.checkMoveNumber():
-                    return PgnParser.ParsingStateMachine.moveWaitForSan
+                    return PgnParser.ParsingStateMachine.moveWaitForSanOrDots
                 else:
                     return PgnParser.ParsingStateMachine.ErrorState
+            elif char in ".":
+                if parser.checkMoveNumber():
+                    return PgnParser.ParsingStateMachine.moveConsumeDots
+                else:
+                    return PgnParser.ParsingStateMachine.ErrorState
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
+
+    class MoveWaitForSanOrDots(ParserState):
+        def run(self, char, parser):
+            if char in string.whitespace:
+                return self
+            elif char in ".":
+                return PgnParser.ParsingStateMachine.moveConsumeDots
+            elif char in string.ascii_letters:
+                parser.moveSan = char
+                return PgnParser.ParsingStateMachine.moveSan
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
+
+    class MoveConsumeDots(ParserState):
+        def run(self, char, parser):
+            if char in ".":
+                return self
+            elif char in string.whitespace:
+                return PgnParser.ParsingStateMachine.moveWaitForSan
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForSan(ParserState):
         def run(self, char, parser):
@@ -178,6 +206,8 @@ class PgnParser(object):
     ParsingStateMachine.tagWaitForEnd = TagWaitForEnd()
 
     ParsingStateMachine.moveNumber = MoveNumber()
+    ParsingStateMachine.moveWaitForSanOrDots = MoveWaitForSanOrDots()
+    ParsingStateMachine.moveConsumeDots = MoveConsumeDots()
     ParsingStateMachine.moveWaitForSan = MoveWaitForSan()
     ParsingStateMachine.moveSan = MoveSan()
 
