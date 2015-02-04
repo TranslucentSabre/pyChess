@@ -22,6 +22,20 @@ class Tag(object):
         value2 = value1.replace('"', '\\"')
         return "["+self.name+' "'+value2+'"]'
 
+class Move(object):
+
+    def __init__(self, moveSan = ""):
+        self.san = moveSan
+        self.nag = 0
+
+    def setSuffixNag(self, suffixString):
+        allowedSuffixes = { "!" : 1, "?" : 2, "!!" : 3, "??" : 4, "!?" : 5, "?!" : 6 }
+        if suffixString in allowedSuffixes:
+            self.nag = allowedSuffixes[suffixString]
+            return True
+        else:
+            return False
+
 
 
 
@@ -36,6 +50,7 @@ class PgnParser(object):
     stringStartEnd = '"'
 
     escapeChar = "\\"
+    moveSuffixAllowed = "!?"
 
     class ParserState(object):
         def run(self, input, parser):
@@ -173,8 +188,25 @@ class PgnParser(object):
             elif char in string.whitespace:
                 parser.saveMove()
                 return PgnParser.ParsingStateMachine.waitForSymbol
+            elif char in PgnParser.moveSuffixAllowed:
+                parser.saveMove()
+                parser.moveSuffix = char
+                return PgnParser.ParsingStateMachine.moveSuffixAnnotation
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
+
+    class MoveSuffixAnnotation(ParserState):
+        def run(self, char, parser):
+            if char in PgnParser.moveSuffixAllowed:
+                parser.moveSuffix += char
+                return self
+            elif char in string.whitespace:
+                if parser.saveMoveSuffix():
+                    return PgnParser.ParsingStateMachine.waitForSymbol
+                else:
+                    return PgnParser.ParsingStateMachine.ErrorState
+            else:
+                PgnParser.ParsingStateMachine.ErrorState
 
 
     class ParsingStateMachine(object):
@@ -210,6 +242,7 @@ class PgnParser(object):
     ParsingStateMachine.moveConsumeDots = MoveConsumeDots()
     ParsingStateMachine.moveWaitForSan = MoveWaitForSan()
     ParsingStateMachine.moveSan = MoveSan()
+    ParsingStateMachine.moveSuffixAnnotation = MoveSuffixAnnotation()
 
 
 
@@ -218,24 +251,28 @@ class PgnParser(object):
     def __init__(self):
         self.tags = {}
         self.moves = []
+        self.lastMove = Move()
         self.tagName = ""
         self.tagValue = ""
         self.parsedNumber = ""
         self.currentMoveNumber = 1
         self.incrementMoveNumber = False
         self.moveSan = ""
+        self.moveSuffix = ""
         self.debug = Debug.Debug()
         self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
 
     def reset(self):
         self.tags = {}
         self.moves = []
+        self.lastMove = Move()
         self.tagName = ""
         self.tagValue = ""
         self.parsedNumber = ""
         self.currentMoveNumber = 1
         self.incrementMoveNumber = False
         self.moveSan = ""
+        self.moveSuffix = ""
         self.SM.reset()
 
     def parseString(self, inString):
@@ -254,8 +291,12 @@ class PgnParser(object):
         return returnVal
 
     def saveMove(self):
-        self.moves.append(self.moveSan)
+        self.lastMove = Move(self.moveSan)
+        self.moves.append(self.lastMove)
         self.moveSan = ""
         if self.incrementMoveNumber:
             self.currentMoveNumber += 1
         self.incrementMoveNumber =  not self.incrementMoveNumber
+
+    def saveMoveSuffix(self):
+        return self.lastMove.setSuffixNag(self.moveSuffix)

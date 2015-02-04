@@ -72,26 +72,37 @@ class pgnTest(unittest.TestCase):
         moveString = "e4 e6\n"
 
         self.assertTrue(self.parser.parseString(moveString))
-        self.assertEqual("e4", self.parser.moves[0])
-        self.assertEqual("e6", self.parser.moves[1])
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
 
     def test_ImportFormatMoveParse_TwoMovesTwoMoveNumbers_NoDots(self):
         moveString = "1 e4  e6  Nf3 2 Kb5\n"
 
         self.assertTrue(self.parser.parseString(moveString))
-        self.assertEqual("e4", self.parser.moves[0])
-        self.assertEqual("e6", self.parser.moves[1])
-        self.assertEqual("Nf3", self.parser.moves[2])
-        self.assertEqual("Kb5", self.parser.moves[3])
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
 
     def test_ImportFormatMoveParse_TwoMovesTwoMoveNumbers_WithDots(self):
         moveString = "e4 1... e6  2 . Nf3  Kb5\n"
 
         self.assertTrue(self.parser.parseString(moveString))
-        self.assertEqual("e4", self.parser.moves[0])
-        self.assertEqual("e6", self.parser.moves[1])
-        self.assertEqual("Nf3", self.parser.moves[2])
-        self.assertEqual("Kb5", self.parser.moves[3])
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+
+    def test_ImportFormatMoveParse_MovesWithSuffixAnnotations(self):
+        moveString = "e4? 1... e6  2. Nf3!!  Kb5\n"
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual(2, self.parser.moves[0].nag)
+        self.assertEqual(3, self.parser.moves[2].nag)
 
 
 
