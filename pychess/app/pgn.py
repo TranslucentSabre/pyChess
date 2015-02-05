@@ -51,6 +51,7 @@ class PgnParser(object):
 
     escapeChar = "\\"
     moveSuffixAllowed = "!?"
+    nagStart = "$"
 
     class ParserState(object):
         def run(self, input, parser):
@@ -187,7 +188,7 @@ class PgnParser(object):
                 return self
             elif char in string.whitespace:
                 parser.saveMove()
-                return PgnParser.ParsingStateMachine.waitForSymbol
+                return PgnParser.ParsingStateMachine.moveWaitForNagOrSymbol
             elif char in PgnParser.moveSuffixAllowed:
                 parser.saveMove()
                 parser.moveSuffix = char
@@ -206,7 +207,22 @@ class PgnParser(object):
                 else:
                     return PgnParser.ParsingStateMachine.ErrorState
             else:
-                PgnParser.ParsingStateMachine.ErrorState
+                return PgnParser.ParsingStateMachine.ErrorState
+
+    class MoveWaitForNagOrSymbol(ParserState):
+        def run(self, char, parser):
+            if char in string.whitespace:
+                return self
+            elif char in PgnParser.nagStart:
+                return PgnParser.ParsingStateMachine.moveNagDigits
+            elif char in string.ascii_letters:
+                parser.moveSan = char
+                return PgnParser.ParsingStateMachine.moveSan
+            elif char in string.digits:
+                parser.parsedNumber = char
+                return PgnParser.ParsingStateMachine.moveNumber
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
 
 
     class ParsingStateMachine(object):
@@ -243,6 +259,7 @@ class PgnParser(object):
     ParsingStateMachine.moveWaitForSan = MoveWaitForSan()
     ParsingStateMachine.moveSan = MoveSan()
     ParsingStateMachine.moveSuffixAnnotation = MoveSuffixAnnotation()
+    ParsingStateMachine.moveWaitForNagOrSymbol = MoveWaitForNagOrSymbol()
 
 
 
