@@ -36,6 +36,13 @@ class Move(object):
         else:
             return False
 
+    def setNag(self, nagInt):
+        if type(nagInt) is int and nagInt >= 0 and nagInt <= 255:
+            self.nag = nagInt
+            return True
+        else:
+            return False
+
 
 
 
@@ -224,6 +231,19 @@ class PgnParser(object):
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
 
+    class MoveNagDigits(ParserState):
+        def run(self, char, parser):
+            if char in string.digits:
+                parser.moveNag += char
+                return self
+            elif char in string.whitespace:
+                if parser.saveNag():
+                    return PgnParser.ParsingStateMachine.waitForSymbol
+                else:
+                    return PgnParser.ParsingStateMachine.ErrorState
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
+
 
     class ParsingStateMachine(object):
         def __init__(self, initialState, parser):
@@ -260,6 +280,7 @@ class PgnParser(object):
     ParsingStateMachine.moveSan = MoveSan()
     ParsingStateMachine.moveSuffixAnnotation = MoveSuffixAnnotation()
     ParsingStateMachine.moveWaitForNagOrSymbol = MoveWaitForNagOrSymbol()
+    ParsingStateMachine.moveNagDigits = MoveNagDigits()
 
 
 
@@ -276,6 +297,7 @@ class PgnParser(object):
         self.incrementMoveNumber = False
         self.moveSan = ""
         self.moveSuffix = ""
+        self.moveNag = ""
         self.debug = Debug.Debug()
         self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
 
@@ -290,6 +312,7 @@ class PgnParser(object):
         self.incrementMoveNumber = False
         self.moveSan = ""
         self.moveSuffix = ""
+        self.moveNag = ""
         self.SM.reset()
 
     def parseString(self, inString):
@@ -316,4 +339,11 @@ class PgnParser(object):
         self.incrementMoveNumber =  not self.incrementMoveNumber
 
     def saveMoveSuffix(self):
-        return self.lastMove.setSuffixNag(self.moveSuffix)
+        returnVal = self.lastMove.setSuffixNag(self.moveSuffix)
+        self.moveSuffix = ""
+        return returnVal
+
+    def saveNag(self):
+        returnVal = self.lastMove.setNag(int(self.moveNag))
+        self.moveNag = ""
+        return returnVal
