@@ -31,8 +31,7 @@ class Move(object):
     def setSuffixNag(self, suffixString):
         allowedSuffixes = { "!" : 1, "?" : 2, "!!" : 3, "??" : 4, "!?" : 5, "?!" : 6 }
         if suffixString in allowedSuffixes:
-            self.nag = allowedSuffixes[suffixString]
-            return True
+            return self.setNag(allowedSuffixes[suffixString])
         else:
             return False
 
@@ -52,6 +51,8 @@ class PgnParser(object):
     tagNameAllowed = symbolStart + "_"
     symbolAllowed = tagNameAllowed + "+" + "#" + "=" + "-"
 
+    validTermination = ["*", "1-0", "0-1", "1/2-1/2"]
+
     tagStart = "["
     tagEnd = "]"
     stringStartEnd = '"'
@@ -59,6 +60,7 @@ class PgnParser(object):
     escapeChar = "\\"
     moveSuffixAllowed = "!?"
     nagStart = "$"
+    terminationSpecialChars = "/-"
 
     class ParserState(object):
         def run(self, input, parser):
@@ -154,6 +156,11 @@ class PgnParser(object):
                     return PgnParser.ParsingStateMachine.moveConsumeDots
                 else:
                     return PgnParser.ParsingStateMachine.ErrorState
+            elif char in PgnParser.terminationSpecialChars:
+                parser.gameTerm = parser.parsedNumber
+                parser.gameTerm += char
+                parser.parsedNumber = ""
+                return PgnParser.ParsingStateMachine.moveGameTermination
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
 
@@ -244,6 +251,19 @@ class PgnParser(object):
             else:
                 return PgnParser.ParsingStateMachine.ErrorState
 
+    class MoveGameTermination(ParserState):
+        def run(self, char, parser):
+            if char in string.digits or char in PgnParser.terminationSpecialChars:
+                parser.gameTerm += char
+                return self
+            elif char in string.whitespace:
+                if parser.checkGameTermination():
+                    return PgnParser.ParsingStateMachine.waitForSymbol
+                else:
+                    return PgnParser.ParsingStateMachine.ErrorState
+            else:
+                return PgnParser.ParsingStateMachine.ErrorState
+
 
     class ParsingStateMachine(object):
         def __init__(self, initialState, parser):
@@ -281,6 +301,7 @@ class PgnParser(object):
     ParsingStateMachine.moveSuffixAnnotation = MoveSuffixAnnotation()
     ParsingStateMachine.moveWaitForNagOrSymbol = MoveWaitForNagOrSymbol()
     ParsingStateMachine.moveNagDigits = MoveNagDigits()
+    ParsingStateMachine.moveGameTermination = MoveGameTermination()
 
 
 
@@ -298,6 +319,7 @@ class PgnParser(object):
         self.moveSan = ""
         self.moveSuffix = ""
         self.moveNag = ""
+        self.gameTerm = ""
         self.debug = Debug.Debug()
         self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
 
@@ -313,6 +335,7 @@ class PgnParser(object):
         self.moveSan = ""
         self.moveSuffix = ""
         self.moveNag = ""
+        self.gameTerm = ""
         self.SM.reset()
 
     def parseString(self, inString):
@@ -347,3 +370,9 @@ class PgnParser(object):
         returnVal = self.lastMove.setNag(int(self.moveNag))
         self.moveNag = ""
         return returnVal
+
+    def checkGameTermination(self):
+        if self.gameTerm in self.validTermination:
+            return True
+        else:
+            return False

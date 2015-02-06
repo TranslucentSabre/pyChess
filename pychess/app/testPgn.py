@@ -115,6 +115,16 @@ class pgnTest(unittest.TestCase):
         self.assertEqual(200, self.parser.moves[1].nag)
         self.assertEqual(34, self.parser.moves[2].nag)
 
+    def test_ImportFormatMoveParse_MovesWithGameTerminationTie(self):
+        moveString = "e4 1... e6 2. Nf3 Kb5 1/2-1/2\n"
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual("1/2-1/2", self.parser.gameTerm)
+
 
 
 
