@@ -107,7 +107,7 @@ location  (read/set the physical location of the player)
 strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)"""
 
 
-    /game/config
+    /config
     Operations :
         Get : Returns the values of all configuration settings
             Input :
@@ -117,7 +117,7 @@ strict    (read/set strict algebraic parsing mode, if True only exactly formed a
                 config : Json object keyed by config item name with the appropriate values
 
 
-    /game/config/<configItem>
+    /config/<configItem>
     Operations :
         Get : Return the value of the specific config item
             Input :
