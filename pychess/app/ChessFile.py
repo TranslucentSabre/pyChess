@@ -3,15 +3,17 @@ import io, os
 
 
 class ValidConfig(object):
-      validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict"]
+      validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict","files"]
       ImportFile       = {"name" : validConfigItems[0], "default" : "savegame.dat"}
       ExportFile       = {"name" : validConfigItems[1], "default" : "savegame.dat"}
       PlayerName       = {"name" : validConfigItems[2], "default" : "Unknown"}
       Location         = {"name" : validConfigItems[3], "default" : "Unknown"}
       Debug            = {"name" : validConfigItems[4], "default" : "False", "values" : ["True", "False"]}
       StrictParse      = {"name" : validConfigItems[5], "default" : "False", "values" : ["True", "False"]}
+      FileDir          = {"name" : validConfigItems[6], "default" : "."}
       configMap = {"import":ImportFile, "export":ExportFile, "name":PlayerName, \
-                   "location":Location, "debug":Debug, "strict":StrictParse}
+                   "location":Location, "debug":Debug, "strict":StrictParse, \
+                   "files":FileDir}
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing config"""
@@ -76,8 +78,8 @@ class ChessFiles(ConfigFile):
 
    def attemptInputFileOpen(self, filename):
       self.inFileStatus = "Ready"
-      currentDir = os.path.dirname(__file__)
-      filename = os.path.join(currentDir, filename)
+      fileDir = os.path.abspath(self.getConfigItem(ValidConfig.FileDir["name"]))
+      filename = os.path.join(fileDir, filename)
       try:
          self.inFile = open(filename)
       except (OSError,IOError):
@@ -90,8 +92,8 @@ class ChessFiles(ConfigFile):
 
    def attemptOutputFileOpen(self, filename):
       self.outFileStatus = "Ready"
-      currentDir = os.path.dirname(__file__)
-      filename = os.path.join(currentDir, filename)
+      fileDir = os.path.abspath(self.getConfigItem(ValidConfig.FileDir["name"]))
+      filename = os.path.join(fileDir, filename)
       try:
          self.outFile = open(filename, "a");
       except (OSError,IOError):

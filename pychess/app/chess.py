@@ -107,6 +107,7 @@ if one is given use the argument as a filename to write the savegame to."""
       name      (read/set the players real name)
       location  (read/set the physical location of the player)
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
+      files     (read/set path to the location of save games and configuration
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen."""
       #Only split once, this allows the user to supply items with spaces in them
