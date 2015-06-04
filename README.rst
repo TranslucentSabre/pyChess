@@ -11,7 +11,7 @@ This is stalled slightly right now. The game engine is fully functional and so i
 the save game io. It is still not in in fully compatible PGN format however.
 
 To Install:
-    python setup.py install
+    pip install .
 
 This installation will install the required dependencies
 
