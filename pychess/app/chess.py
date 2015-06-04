@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from colorama import init
 from pychess.app.ChessGame import *
 import cmd

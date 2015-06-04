@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #File for PGN parser and exporter
 import string, Debug
 

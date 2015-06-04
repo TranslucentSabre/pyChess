@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from flask import Flask, jsonify, make_response, render_template
 from flask.ext.restful import Api, Resource, reqparse
 from pychess.app.ChessGame import *

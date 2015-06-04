@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import unittest
 from pychess.app.Board import *
 from pychess.app.Piece import *

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from pychess.app.Board import *
 from pychess.app.Player import *
 from pychess.app.ChessFile import *
