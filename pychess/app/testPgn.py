@@ -126,9 +126,70 @@ class pgnTest(unittest.TestCase):
         self.assertEqual("1/2-1/2", self.parser.gameTerm)
 
 
+    def test_ImportFormatMoveParse_MovesWithGameTerminationOngoing(self):
+        moveString = "1 e4 e6 2. Nf3 2 Kb5 *\n"
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual("*", self.parser.gameTerm)
 
 
+    def test_ImportFormatMoveParse_MovesWithGameTerminationOngoingAfterNag(self):
+        moveString = "1 e4 e6 2. Nf3 2 Kb5 $156 *\n"
 
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual(156, self.parser.moves[3].nag)
+        self.assertEqual("*", self.parser.gameTerm)
+
+    def test_ImportFormatMoveParse_MovesWithGameTerminationWhiteWins(self):
+        moveString = "e4 1... e6 2. Nf3 Kb5 1-0\n"
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual("1-0", self.parser.gameTerm)
+
+    def test_ImportFormatMoveParse_MovesWithGameTerminationWhiteWinsAfterSuffix(self):
+        moveString = "e4 1... e6 2. Nf3 Kb5? 1-0\n"
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual(2, self.parser.moves[3].nag)
+        self.assertEqual("1-0", self.parser.gameTerm)
+
+
+    def test_ImportFormatMoveParse_MovesWithGameTerminationBlackWins(self):
+        moveString = "e4 1... e6 2. Nf3 Kb5 0-1\n"
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual("0-1", self.parser.gameTerm)
+
+    def test_ImportFormatMoveParse_MovesWithGameTerminationBlackWinsAfterNag(self):
+        moveString = "e4 1... e6 2. Nf3 Kb5$87 0-1\n"
+
+        self.assertTrue(self.parser.parseString(moveString))
+        self.assertEqual("e4", self.parser.moves[0].san)
+        self.assertEqual("e6", self.parser.moves[1].san)
+        self.assertEqual("Nf3", self.parser.moves[2].san)
+        self.assertEqual("Kb5", self.parser.moves[3].san)
+        self.assertEqual(87, self.parser.moves[3].nag)
+        self.assertEqual("0-1", self.parser.gameTerm)
 
 if __name__ == "__main__":
     unittest.main()
