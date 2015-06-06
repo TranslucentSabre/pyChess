@@ -363,7 +363,7 @@ class PgnParser(object):
         self.SM.reset()
 
     def parseString(self, inString):
-        return self.SM.run(inString)
+        return self.SM.run(inString+"\n")
 
 
     def saveTag(self):
