@@ -2,6 +2,64 @@
 #File for PGN parser and exporter
 import string, Debug
 
+class Game(object):
+
+    sevenTagRoster = ["Event", "Site", "Date", "Round", "White", "Black", "Result"]
+
+    def __init__(self):
+        self.tags = {}
+        self.moves = []
+        self.lastMove = Move()
+        self.gameTerm = ""
+        
+    def setTag(self, tagClass):
+        self.tags[tagClass.name] = tagClass
+        
+    def saveMove(self, moveNumber, moveSan):
+        self.lastMove = Move(moveNumber, moveSan)
+        self.moves.append(self.lastMove)
+
+    def saveMoveSuffix(self, moveSuffix):
+        returnVal = self.lastMove.setSuffixNag(moveSuffix)
+        return returnVal
+
+    def saveNag(self, moveNag):
+        returnVal = self.lastMove.setNag(int(moveNag))
+        return returnVal
+        
+    def saveGameTermination(self, gameTerm):
+        self.gameTerm = gameTerm
+        
+    def __str__(self):
+        stringRep = ""
+        for tag in self.sevenTagRoster:
+            stringRep += str(self.tags[tag])+"\n"
+        stringRep += "\n"
+        
+        turns = ["white", "black"]
+        turnIndex = 0
+            
+        currentLine = ""
+        for move in self.moves:
+            startIndex = 0
+            if turns[turnIndex] == "black":
+                startIndex = 1
+            turnIndex = (turnIndex + 1) % 2
+            
+            items = str(move).split()
+            for itemIndex in range(startIndex, len(items)):
+                if (len(currentLine) == 0):
+                    currentLine += items[itemIndex]
+                elif (len(currentLine) + len(" "+items[itemIndex])) < 80:
+                    currentLine += " "+items[itemIndex]
+                else:
+                    stringRep += currentLine + "\n"
+                    currentLine = items[itemIndex]
+            
+        stringRep += currentLine+" "+self.gameTerm
+        return stringRep
+            
+
 class Tag(object):
 
     def __init__(self, tagName="UNKNOWN", tagValue="UNKNOWN"):
@@ -24,8 +82,9 @@ class Tag(object):
 
 class Move(object):
 
-    def __init__(self, moveSan = ""):
+    def __init__(self, moveNumber = "", moveSan = ""):
         self.san = moveSan
+        self.number = moveNumber
         self.nag = 0
 
     def setSuffixNag(self, suffixString):
@@ -41,6 +100,12 @@ class Move(object):
             return True
         else:
             return False
+            
+    def __str__(self):
+        stringRep = self.number+" "+self.san
+        if self.nag != 0:
+            stringRep += " $"+str(self.nag)
+        return stringRep
 
 
 
@@ -281,6 +346,7 @@ class PgnParser(object):
                 return self
             elif char in string.whitespace:
                 if parser.checkGameTermination():
+                    parser.saveGameTermination()
                     return PgnParser.ParsingStateMachine.waitForSymbol
                 else:
                     return PgnParser.ParsingStateMachine.ErrorState
@@ -332,9 +398,8 @@ class PgnParser(object):
 
 
     def __init__(self):
-        self.tags = {}
-        self.moves = []
-        self.lastMove = Move()
+        self.games = []
+        self.currentGame = Game()
         self.tagName = ""
         self.tagValue = ""
         self.parsedNumber = ""
@@ -348,9 +413,8 @@ class PgnParser(object):
         self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
 
     def reset(self):
-        self.tags = {}
-        self.moves = []
-        self.lastMove = Move()
+        self.games = []
+        self.currentGame = Game()
         self.tagName = ""
         self.tagValue = ""
         self.parsedNumber = ""
@@ -367,8 +431,8 @@ class PgnParser(object):
 
 
     def saveTag(self):
-        self.tags[self.tagName] = Tag(self.tagName, self.tagValue)
-        self.debug.dprint(self.tags[self.tagName])
+        self.currentGame.setTag(Tag(self.tagName, self.tagValue))
+        self.debug.dprint(self.currentGame.tags[self.tagName])
         self.tagName = ""
         self.tagValue = ""
 
@@ -378,22 +442,30 @@ class PgnParser(object):
         return returnVal
 
     def saveMove(self):
-        self.lastMove = Move(self.moveSan)
-        self.moves.append(self.lastMove)
+        moveNumber = str(self.currentMoveNumber)+"."
+        if self.incrementMoveNumber:
+            moveNumber += ".."
+        self.currentGame.saveMove(moveNumber, self.moveSan)
         self.moveSan = ""
         if self.incrementMoveNumber:
             self.currentMoveNumber += 1
         self.incrementMoveNumber =  not self.incrementMoveNumber
 
     def saveMoveSuffix(self):
-        returnVal = self.lastMove.setSuffixNag(self.moveSuffix)
+        returnVal = self.currentGame.saveMoveSuffix(self.moveSuffix)
         self.moveSuffix = ""
         return returnVal
 
     def saveNag(self):
-        returnVal = self.lastMove.setNag(int(self.moveNag))
+        returnVal = self.currentGame.saveNag(int(self.moveNag))
         self.moveNag = ""
         return returnVal
+        
+    def saveGameTermination(self):
+        self.currentGame.saveGameTermination(self.gameTerm)
+        self.games.append(self.currentGame)
+        self.currentGame = Game()
+        
 
     def checkGameTermination(self):
         if self.gameTerm in self.validTermination:
