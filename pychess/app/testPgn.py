@@ -15,7 +15,7 @@ class pgnTest(unittest.TestCase):
         for tagString in tagStrings:
             self.assertTrue(self.parser.parseString(tagString))
         for tagClass in tagClasses:
-            self.assertEqual(self.parser.currentGame.tags[tagClass.name], tagClass)
+            self.assertEqual(self.parser.currentGame.getTag(tagClass.name), tagClass)
 
     def test_ImportFormatTagParse_Freeform(self):
         tagString = '[ site  "The Internet" ]'
@@ -211,9 +211,9 @@ class pgnTest(unittest.TestCase):
         for line in lines:
             self.assertTrue(self.parser.parseString(line))
         
-        self.assertEqual(self.parser.games[0].tags["Event"], pgn.Tag("Event", "F/S Return Match"))
-        self.assertEqual(self.parser.games[0].tags["Date"], pgn.Tag("Date", "1992.11.04"))
-        self.assertEqual(self.parser.games[0].tags["Result"], pgn.Tag("Result", "1/2-1/2"))
+        self.assertEqual(self.parser.games[0].getTag("Event"), pgn.Tag("Event", "F/S Return Match"))
+        self.assertEqual(self.parser.games[0].getTag("Date"), pgn.Tag("Date", "1992.11.04"))
+        self.assertEqual(self.parser.games[0].getTag("Result"), pgn.Tag("Result", "1/2-1/2"))
         self.assertEqual("e4", self.parser.games[0].moves[0].san)
         self.assertEqual("e5", self.parser.games[0].moves[1].san)
         self.assertEqual("O-O", self.parser.games[0].moves[8].san)

@@ -7,13 +7,25 @@ class Game(object):
     sevenTagRoster = ["Event", "Site", "Date", "Round", "White", "Black", "Result"]
 
     def __init__(self):
+        self.strTags = { "Event" : "?", "Site" : "?", "Date" : "????.??.??", "Round" : "?", "White" : "?", "Black" : "?", "Result" : "*" }
         self.tags = {}
         self.moves = []
         self.lastMove = Move()
         self.gameTerm = ""
         
     def setTag(self, tagClass):
-        self.tags[tagClass.name] = tagClass
+        if tagClass.name in Game.sevenTagRoster:
+            self.strTags[tagClass.name] = tagClass
+        else:
+            self.tags[tagClass.name] = tagClass
+            
+    def getTag(self, tagName):
+        if tagName in self.strTags:
+            return self.strTags[tagName]
+        elif tagName in self.tags:
+            return self.tags[tagName]
+        else:
+            return ""
         
     def saveMove(self, moveNumber, moveSan):
         self.lastMove = Move(moveNumber, moveSan)
@@ -29,10 +41,13 @@ class Game(object):
         
     def saveGameTermination(self, gameTerm):
         self.gameTerm = gameTerm
+        self.setTag(Tag("Result", gameTerm))
         
     def __str__(self):
         stringRep = ""
         for tag in self.sevenTagRoster:
+            stringRep += str(self.strTags[tag])+"\n"
+        for tag in sorted(self.tags):
             stringRep += str(self.tags[tag])+"\n"
         stringRep += "\n"
         
@@ -432,7 +447,7 @@ class PgnParser(object):
 
     def saveTag(self):
         self.currentGame.setTag(Tag(self.tagName, self.tagValue))
-        self.debug.dprint(self.currentGame.tags[self.tagName])
+        self.debug.dprint(self.currentGame.getTag(self.tagName))
         self.tagName = ""
         self.tagValue = ""
 
