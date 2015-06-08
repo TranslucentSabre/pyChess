@@ -1,7 +1,6 @@
 from colorama import Style, Fore, Back
 from pychess.app import Util
 from pychess.app.Piece import *
-from math import ceil
 import re
 
 
@@ -208,12 +207,7 @@ class GameBoard(object):
       if turn == self.initialSetup:
          turnString = "0"
       else:
-         numericTurn = int(ceil(turn/float(2)))
-         WHITE = 1
-         if turn & 1 == WHITE:
-            turnString = str(numericTurn)+"."
-         else:
-            turnString = str(numericTurn)+"..."
+         turnString = Util.getTurnStringFromOnesBasedIndex(turn)
       return turnString
 
    def firstTurn(self):

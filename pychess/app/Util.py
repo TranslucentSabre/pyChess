@@ -1,3 +1,25 @@
+from math import ceil
+
+def getTurnStringFromOnesBasedIndex(onesBasedIndex):
+    turnString = ""
+    numericTurn = int(ceil(onesBasedIndex/float(2)))
+    WHITE = 1
+    if onesBasedIndex & 1 == WHITE:
+        turnString = str(numericTurn)+"."
+    else:
+        turnString = str(numericTurn)+"..."
+    return turnString
+
+def getNextTurnString(turnString):
+    if turnString == "0":
+        return "1."
+    parts = turnString.split(".")
+    if len(parts) == 2:
+        return parts[0]+"..."
+    elif len(parts) == 4:
+        return str(int(parts[0])+1)+"."
+    else:
+        return False
 
 def isCoordValid(coordinate):
    """Returns a boolean indicating whether the given coordinate is a valid chess coordinate"""

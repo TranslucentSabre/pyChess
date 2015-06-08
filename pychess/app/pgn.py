@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #File for PGN parser and exporter
 import string, Debug
+from pychess.app import Util, Debug
 
 class Game(object):
 
@@ -9,7 +10,7 @@ class Game(object):
     def __init__(self):
         self.strTags = { "Event" : "?", "Site" : "?", "Date" : "????.??.??", "Round" : "?", "White" : "?", "Black" : "?", "Result" : "*" }
         self.tags = {}
-        self.moves = []
+        self.moves = {}
         self.lastMove = Move()
         self.gameTerm = ""
         
@@ -26,10 +27,34 @@ class Game(object):
             return self.tags[tagName]
         else:
             return ""
-        
+
+    def getTags(self):
+        tags = []
+        for tag in self.sevenTagRoster:
+            tags.append(self.strTags[tag])
+        for tag in sorted(self.tags):
+            tags.append(self.tags[tag])
+        return tags
+
     def saveMove(self, moveNumber, moveSan):
         self.lastMove = Move(moveNumber, moveSan)
-        self.moves.append(self.lastMove)
+        self.moves[moveNumber] = self.lastMove
+
+
+    def getMove(self, moveNumber):
+        if moveNumber in self.moves:
+            return self.moves[moveNumber]
+        else:
+            return False
+
+    def getMoves(self):
+        moveNumber = "1."
+        while True:
+            if moveNumber in self.moves:
+                yield self.moves[moveNumber]
+            else:
+                raise StopIteration()
+            moveNumber = Util.getNextTurnString(moveNumber)
 
     def saveMoveSuffix(self, moveSuffix):
         returnVal = self.lastMove.setSuffixNag(moveSuffix)
@@ -45,17 +70,15 @@ class Game(object):
         
     def __str__(self):
         stringRep = ""
-        for tag in self.sevenTagRoster:
-            stringRep += str(self.strTags[tag])+"\n"
-        for tag in sorted(self.tags):
-            stringRep += str(self.tags[tag])+"\n"
+        for tag in self.getTags():
+            stringRep += str(tag)+"\n"
         stringRep += "\n"
         
         turns = ["white", "black"]
         turnIndex = 0
             
         currentLine = ""
-        for move in self.moves:
+        for move in self.getMoves():
             startIndex = 0
             if turns[turnIndex] == "black":
                 startIndex = 1
