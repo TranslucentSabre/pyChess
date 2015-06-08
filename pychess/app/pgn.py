@@ -183,6 +183,7 @@ class PgnParser(object):
                 parser.parsedNumber = char
                 return PgnParser.ParsingStateMachine.moveNumber
             else:
+                self.parser.parserErrorString="Unexpected character waiting for symbol"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class InTag(ParserState):
@@ -193,6 +194,7 @@ class PgnParser(object):
                 parser.tagName = char
                 return PgnParser.ParsingStateMachine.tagName
             else:
+                self.parser.parserErrorString="Unexpected character looking for tag name"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class TagName(ParserState):
@@ -205,6 +207,7 @@ class PgnParser(object):
             elif char in PgnParser.stringStartEnd:
                 return PgnParser.ParsingStateMachine.tagStringValue
             else:
+                self.parser.parserErrorString="Unexpected character while parsing tag name"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class TagWaitForStringValue(ParserState):
@@ -214,6 +217,7 @@ class PgnParser(object):
             elif char in PgnParser.stringStartEnd:
                 return PgnParser.ParsingStateMachine.tagStringValue
             else:
+                self.parser.parserErrorString="Unexpected character waiting for tag value"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class TagStringValue(ParserState):
@@ -243,6 +247,7 @@ class PgnParser(object):
                 parser.saveTag()
                 return PgnParser.ParsingStateMachine.waitForSymbol
             else:
+                self.parser.parserErrorString="Unexpected character waiting for close of tag"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveNumber(ParserState):
@@ -254,11 +259,13 @@ class PgnParser(object):
                 if parser.checkMoveNumber():
                     return PgnParser.ParsingStateMachine.moveWaitForSanOrDots
                 else:
+                    self.parser.parserErrorString="Parsed move number is not what is expected"
                     return PgnParser.ParsingStateMachine.ErrorState
             elif char in ".":
                 if parser.checkMoveNumber():
                     return PgnParser.ParsingStateMachine.moveConsumeDots
                 else:
+                    self.parser.parserErrorString="Parsed move number is not what is expected"
                     return PgnParser.ParsingStateMachine.ErrorState
             elif char in PgnParser.terminationSpecialChars:
                 parser.gameTerm = parser.parsedNumber
@@ -266,6 +273,7 @@ class PgnParser(object):
                 parser.parsedNumber = ""
                 return PgnParser.ParsingStateMachine.moveGameTermination
             else:
+                self.parser.parserErrorString="Unexpected character while parsing number"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForSanOrDots(ParserState):
@@ -278,15 +286,20 @@ class PgnParser(object):
                 parser.moveSan = char
                 return PgnParser.ParsingStateMachine.moveSan
             else:
+                self.parser.parserErrorString="Unexpected character while waiting for move san or dots"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveConsumeDots(ParserState):
         def run(self, char, parser):
             if char in ".":
                 return self
+            elif char in string.ascii_letters:
+                parser.moveSan = char
+                return PgnParser.ParsingStateMachine.moveSan
             elif char in string.whitespace:
                 return PgnParser.ParsingStateMachine.moveWaitForSan
             else:
+                self.parser.parserErrorString="Unexpected character while consuming dots"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForSan(ParserState):
@@ -297,6 +310,7 @@ class PgnParser(object):
                 parser.moveSan = char
                 return PgnParser.ParsingStateMachine.moveSan
             else:
+                self.parser.parserErrorString="Unexpected character while waiting for move san"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveSan(ParserState):
@@ -315,6 +329,7 @@ class PgnParser(object):
                 parser.saveMove()
                 return PgnParser.ParsingStateMachine.moveNagDigits
             else:
+                self.parser.parserErrorString="Unexpected character while parsing move san"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveSuffixAnnotation(ParserState):
@@ -326,8 +341,10 @@ class PgnParser(object):
                 if parser.saveMoveSuffix():
                     return PgnParser.ParsingStateMachine.moveWaitForGameTermOrSymbol
                 else:
+                    self.parser.parserErrorString="Invalid move suffix"
                     return PgnParser.ParsingStateMachine.ErrorState
             else:
+                self.parser.parserErrorString="Unexpected character while parsing move suffix"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForNagOrSymbol(ParserState):
@@ -346,6 +363,7 @@ class PgnParser(object):
                 parser.gameTerm = char
                 return PgnParser.ParsingStateMachine.moveGameTermination
             else:
+                self.parser.parserErrorString="Unexpected character while waiting for NAG or move symbol"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveNagDigits(ParserState):
@@ -357,8 +375,10 @@ class PgnParser(object):
                 if parser.saveNag():
                     return PgnParser.ParsingStateMachine.moveWaitForGameTermOrSymbol
                 else:
+                    self.parser.parserErrorString="Invalid NAG"
                     return PgnParser.ParsingStateMachine.ErrorState
             else:
+                self.parser.parserErrorString="Unexpected character while parsing NAG"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForGameTermOrSymbol(ParserState):
@@ -375,6 +395,7 @@ class PgnParser(object):
                 parser.gameTerm = char
                 return PgnParser.ParsingStateMachine.moveGameTermination
             else:
+                self.parser.parserErrorString="Unexpected character while waiting for move symbol or game termination"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveGameTermination(ParserState):
@@ -387,8 +408,10 @@ class PgnParser(object):
                     parser.saveGameTermination()
                     return PgnParser.ParsingStateMachine.waitForSymbol
                 else:
+                    self.parser.parserErrorString="Invalid game termination"
                     return PgnParser.ParsingStateMachine.ErrorState
             else:
+                self.parser.parserErrorString="Unexpected character while parsing game termination"
                 return PgnParser.ParsingStateMachine.ErrorState
 
 
@@ -397,6 +420,8 @@ class PgnParser(object):
             self.initialState = initialState
             self.currentState = initialState
             self.parser = parser
+            self.line = 1
+            self.character = 1
             self.debug = Debug.Debug()
 
         def reset(self):
@@ -409,7 +434,14 @@ class PgnParser(object):
                 self.currentState = self.currentState.run(i, self.parser)
                 self.debug.dprint(i, self.currentState)
                 if self.currentState == PgnParser.ParsingStateMachine.ErrorState:
+                    self.parser.parsingErrorString = "Error :"+self.line+":"+self.character+" :"+self.parser.parsingErrorString
                     return PgnParser.ParsingStateMachine.ErrorState
+                if i == "\n":
+                    self.line += 1
+                    self.character = 1
+                else:
+                    self.character += 1
+
             return True
 
 
@@ -435,9 +467,8 @@ class PgnParser(object):
 
 
 
-    def __init__(self):
-        self.games = []
-        self.currentGame = Game()
+    def __init__(self, pgnFile):
+        self.pgnFile = pgnFile
         self.tagName = ""
         self.tagValue = ""
         self.parsedNumber = ""
@@ -449,10 +480,14 @@ class PgnParser(object):
         self.gameTerm = ""
         self.debug = Debug.Debug()
         self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
+        self.parserErrorString = ""
 
     def reset(self):
-        self.games = []
-        self.currentGame = Game()
+        self.SM.reset()
+        self.parserErrorString = ""
+        self.resetForNewGame()
+
+    def resetForNewGame(self):
         self.tagName = ""
         self.tagValue = ""
         self.parsedNumber = ""
@@ -462,15 +497,15 @@ class PgnParser(object):
         self.moveSuffix = ""
         self.moveNag = ""
         self.gameTerm = ""
-        self.SM.reset()
 
     def parseString(self, inString):
         return self.SM.run(inString+"\n")
 
+    def getParseErrorString(self):
+        return self.parserErrorString
 
     def saveTag(self):
-        self.currentGame.setTag(Tag(self.tagName, self.tagValue))
-        self.debug.dprint(self.currentGame.getTag(self.tagName))
+        self.pgnFile.saveTag(self.tagName, self.tagValue)
         self.tagName = ""
         self.tagValue = ""
 
@@ -483,26 +518,25 @@ class PgnParser(object):
         moveNumber = str(self.currentMoveNumber)+"."
         if self.incrementMoveNumber:
             moveNumber += ".."
-        self.currentGame.saveMove(moveNumber, self.moveSan)
+        self.pgnFile.saveMove(moveNumber, self.moveSan)
         self.moveSan = ""
         if self.incrementMoveNumber:
             self.currentMoveNumber += 1
         self.incrementMoveNumber =  not self.incrementMoveNumber
 
     def saveMoveSuffix(self):
-        returnVal = self.currentGame.saveMoveSuffix(self.moveSuffix)
+        returnVal = self.pgnFile.saveMoveSuffix(self.moveSuffix)
         self.moveSuffix = ""
         return returnVal
 
     def saveNag(self):
-        returnVal = self.currentGame.saveNag(int(self.moveNag))
+        returnVal = self.pgnFile.saveNag(int(self.moveNag))
         self.moveNag = ""
         return returnVal
         
     def saveGameTermination(self):
-        self.currentGame.saveGameTermination(self.gameTerm)
-        self.games.append(self.currentGame)
-        self.currentGame = Game()
+        self.pgnFile.saveGameTermination(self.gameTerm)
+        self.resetForNewGame()
         
 
     def checkGameTermination(self):
@@ -510,3 +544,55 @@ class PgnParser(object):
             return True
         else:
             return False
+
+
+class PgnFile(object):
+    def __init__(self):
+        self.parser = PgnParser(self)
+        self.games = []
+        self.currentGame = Game()
+        self.debug = Debug.Debug()
+
+    def reset(self):
+        self.games = []
+        self.currentGame = Game()
+        self.parser.reset()
+
+    def parseString(self, inString):
+        return self.parser.parseString(inString)
+
+    def getParseErrorString(self):
+        return self.parser.getParseErrorString()
+
+    def saveTag(self, tagName, tagValue):
+        self.currentGame.setTag(Tag(tagName, tagValue))
+        self.debug.dprint(self.currentGame.getTag(tagName))
+
+    def saveMove(self, moveNumber, moveSan):
+        self.currentGame.saveMove(moveNumber, moveSan)
+
+    def saveMoveSuffix(self, moveSuffix):
+        returnVal = self.currentGame.saveMoveSuffix(moveSuffix)
+        return returnVal
+
+    def saveNag(self, moveNag):
+        returnVal = self.currentGame.saveNag(int(moveNag))
+        return returnVal
+        
+    def saveGameTermination(self, gameTerm):
+        self.currentGame.saveGameTermination(gameTerm)
+        self.games.append(self.currentGame)
+        self.currentGame = Game()
+        self.parser.resetForNewGame()
+        
+    def __str__(self):
+        stringRep = ""
+        firstTimeThrough = True
+        for game in self.games:
+            if firstTimeThrough:
+                firstTimeThrough = False
+            else:
+                stringRep += "\n\n"
+            stringRep += str(game)
+
+        return stringRep
