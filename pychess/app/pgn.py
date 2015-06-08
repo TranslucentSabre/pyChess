@@ -183,7 +183,7 @@ class PgnParser(object):
                 parser.parsedNumber = char
                 return PgnParser.ParsingStateMachine.moveNumber
             else:
-                self.parser.parserErrorString="Unexpected character waiting for symbol"
+                parser.parserErrorString="Unexpected character waiting for symbol"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class InTag(ParserState):
@@ -194,7 +194,7 @@ class PgnParser(object):
                 parser.tagName = char
                 return PgnParser.ParsingStateMachine.tagName
             else:
-                self.parser.parserErrorString="Unexpected character looking for tag name"
+                parser.parserErrorString="Unexpected character looking for tag name"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class TagName(ParserState):
@@ -207,7 +207,7 @@ class PgnParser(object):
             elif char in PgnParser.stringStartEnd:
                 return PgnParser.ParsingStateMachine.tagStringValue
             else:
-                self.parser.parserErrorString="Unexpected character while parsing tag name"
+                parser.parserErrorString="Unexpected character while parsing tag name"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class TagWaitForStringValue(ParserState):
@@ -217,7 +217,7 @@ class PgnParser(object):
             elif char in PgnParser.stringStartEnd:
                 return PgnParser.ParsingStateMachine.tagStringValue
             else:
-                self.parser.parserErrorString="Unexpected character waiting for tag value"
+                parser.parserErrorString="Unexpected character waiting for tag value"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class TagStringValue(ParserState):
@@ -247,7 +247,7 @@ class PgnParser(object):
                 parser.saveTag()
                 return PgnParser.ParsingStateMachine.waitForSymbol
             else:
-                self.parser.parserErrorString="Unexpected character waiting for close of tag"
+                parser.parserErrorString="Unexpected character waiting for close of tag"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveNumber(ParserState):
@@ -259,13 +259,13 @@ class PgnParser(object):
                 if parser.checkMoveNumber():
                     return PgnParser.ParsingStateMachine.moveWaitForSanOrDots
                 else:
-                    self.parser.parserErrorString="Parsed move number is not what is expected"
+                    parser.parserErrorString="Parsed move number is not what is expected"
                     return PgnParser.ParsingStateMachine.ErrorState
             elif char in ".":
                 if parser.checkMoveNumber():
                     return PgnParser.ParsingStateMachine.moveConsumeDots
                 else:
-                    self.parser.parserErrorString="Parsed move number is not what is expected"
+                    parser.parserErrorString="Parsed move number is not what is expected"
                     return PgnParser.ParsingStateMachine.ErrorState
             elif char in PgnParser.terminationSpecialChars:
                 parser.gameTerm = parser.parsedNumber
@@ -273,7 +273,7 @@ class PgnParser(object):
                 parser.parsedNumber = ""
                 return PgnParser.ParsingStateMachine.moveGameTermination
             else:
-                self.parser.parserErrorString="Unexpected character while parsing number"
+                parser.parserErrorString="Unexpected character while parsing number"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForSanOrDots(ParserState):
@@ -286,7 +286,7 @@ class PgnParser(object):
                 parser.moveSan = char
                 return PgnParser.ParsingStateMachine.moveSan
             else:
-                self.parser.parserErrorString="Unexpected character while waiting for move san or dots"
+                parser.parserErrorString="Unexpected character while waiting for move san or dots"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveConsumeDots(ParserState):
@@ -299,7 +299,7 @@ class PgnParser(object):
             elif char in string.whitespace:
                 return PgnParser.ParsingStateMachine.moveWaitForSan
             else:
-                self.parser.parserErrorString="Unexpected character while consuming dots"
+                parser.parserErrorString="Unexpected character while consuming dots"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForSan(ParserState):
@@ -310,7 +310,7 @@ class PgnParser(object):
                 parser.moveSan = char
                 return PgnParser.ParsingStateMachine.moveSan
             else:
-                self.parser.parserErrorString="Unexpected character while waiting for move san"
+                parser.parserErrorString="Unexpected character while waiting for move san"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveSan(ParserState):
@@ -329,7 +329,7 @@ class PgnParser(object):
                 parser.saveMove()
                 return PgnParser.ParsingStateMachine.moveNagDigits
             else:
-                self.parser.parserErrorString="Unexpected character while parsing move san"
+                parser.parserErrorString="Unexpected character while parsing move san"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveSuffixAnnotation(ParserState):
@@ -341,10 +341,10 @@ class PgnParser(object):
                 if parser.saveMoveSuffix():
                     return PgnParser.ParsingStateMachine.moveWaitForGameTermOrSymbol
                 else:
-                    self.parser.parserErrorString="Invalid move suffix"
+                    parser.parserErrorString="Invalid move suffix"
                     return PgnParser.ParsingStateMachine.ErrorState
             else:
-                self.parser.parserErrorString="Unexpected character while parsing move suffix"
+                parser.parserErrorString="Unexpected character while parsing move suffix"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForNagOrSymbol(ParserState):
@@ -363,7 +363,7 @@ class PgnParser(object):
                 parser.gameTerm = char
                 return PgnParser.ParsingStateMachine.moveGameTermination
             else:
-                self.parser.parserErrorString="Unexpected character while waiting for NAG or move symbol"
+                parser.parserErrorString="Unexpected character while waiting for NAG or move symbol"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveNagDigits(ParserState):
@@ -375,10 +375,10 @@ class PgnParser(object):
                 if parser.saveNag():
                     return PgnParser.ParsingStateMachine.moveWaitForGameTermOrSymbol
                 else:
-                    self.parser.parserErrorString="Invalid NAG"
+                    parser.parserErrorString="Invalid NAG"
                     return PgnParser.ParsingStateMachine.ErrorState
             else:
-                self.parser.parserErrorString="Unexpected character while parsing NAG"
+                parser.parserErrorString="Unexpected character while parsing NAG"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveWaitForGameTermOrSymbol(ParserState):
@@ -395,7 +395,7 @@ class PgnParser(object):
                 parser.gameTerm = char
                 return PgnParser.ParsingStateMachine.moveGameTermination
             else:
-                self.parser.parserErrorString="Unexpected character while waiting for move symbol or game termination"
+                parser.parserErrorString="Unexpected character while waiting for move symbol or game termination"
                 return PgnParser.ParsingStateMachine.ErrorState
 
     class MoveGameTermination(ParserState):
@@ -408,10 +408,10 @@ class PgnParser(object):
                     parser.saveGameTermination()
                     return PgnParser.ParsingStateMachine.waitForSymbol
                 else:
-                    self.parser.parserErrorString="Invalid game termination"
+                    parser.parserErrorString="Invalid game termination"
                     return PgnParser.ParsingStateMachine.ErrorState
             else:
-                self.parser.parserErrorString="Unexpected character while parsing game termination"
+                parser.parserErrorString="Unexpected character while parsing game termination"
                 return PgnParser.ParsingStateMachine.ErrorState
 
 
@@ -434,7 +434,7 @@ class PgnParser(object):
                 self.currentState = self.currentState.run(i, self.parser)
                 self.debug.dprint(i, self.currentState)
                 if self.currentState == PgnParser.ParsingStateMachine.ErrorState:
-                    self.parser.parsingErrorString = "Error :"+self.line+":"+self.character+" :"+self.parser.parsingErrorString
+                    self.parser.parserErrorString = "Error :"+str(self.line)+":"+str(self.character)+" :"+self.parser.parserErrorString
                     return PgnParser.ParsingStateMachine.ErrorState
                 if i == "\n":
                     self.line += 1
