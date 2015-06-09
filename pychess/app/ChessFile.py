@@ -1,11 +1,27 @@
 #!/usr/bin/env python3
 import io, os
+from pychess.app.pgn import PgnFile
+
+def isDebugEnabled():
+    config = ConfigFile()
+    debug = config.getConfigItem(ValidConfig.Debug["name"])
+    debug = booleanConfigItemIsTrue(debug)
+    del config
+    return debug
+         
+def booleanConfigItemIsTrue(configValue):
+   """This is necessary because config items are stored as strings"""
+   if configValue == "True":
+      return True
+   else:
+      return False
 
 
+      
 class ValidConfig(object):
       validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict","files"]
-      ImportFile       = {"name" : validConfigItems[0], "default" : "savegame.dat"}
-      ExportFile       = {"name" : validConfigItems[1], "default" : "savegame.dat"}
+      ImportFile       = {"name" : validConfigItems[0], "default" : "savegame.pgn"}
+      ExportFile       = {"name" : validConfigItems[1], "default" : "savegame.pgn"}
       PlayerName       = {"name" : validConfigItems[2], "default" : "Unknown"}
       Location         = {"name" : validConfigItems[3], "default" : "Unknown"}
       Debug            = {"name" : validConfigItems[4], "default" : "False", "values" : ["True", "False"]}
@@ -67,8 +83,7 @@ class ChessFiles(ConfigFile):
       self.attemptInputFileOpen(self.inFileName)
       self.attemptOutputFileOpen(self.outFileName)
 
-      self.resetWriteString()
-      self.moveSeekLocation = 0
+      self.pgnFile = PgnFile()
 
 
    def __del__(self):
@@ -111,56 +126,30 @@ class ChessFiles(ConfigFile):
    def changeOutputFile(self, outfile):
       self.closeOutFile()
       self.attemptOutputFileOpen(outfile)
-
-   def resetWriteString(self):
-      self.writeString = ""
-      self.moveCounter = 0
-      self.turnCounter = 1
+      
+   def resetPgnFile(self):
+      self.pgnFile = PgnFile()
 
    def appendMoveForWrite(self, move):
-
-      #The places at which the commas are written here are important for the parser
-      if self.moveCounter & 1 == 0:
-         self.writeString += str(self.turnCounter) + ". " + move
-         self.turnCounter += 1
-      else:
-         self.writeString += " " + move + "\n"
-      self.moveCounter += 1
+      self.pgnFile.saveMove(move)
 
    def writeGame(self):
       self.outFile.seek(0)
       self.outFile.truncate(0)
-      self.outFile.write(self.writeString)
+      self.outFile.write(str(self.pgnFile))
       self.outFile.flush()
 
+   def getPgnErrorString(self):
+      return self.pgnFile.getParseErrorString()
+
+   def readPgn(self):
+      self.resetPgnFile()
+      self.inFile.seek(0)
+      return self.pgnFile.parseFile(self.inFile)
+      
    def readMoves(self):
-      self._seekToMoves()
-      return [move for move in self._getMovesFromFile()]
-
-
-   def _getMovesFromFile(self):
-      for line in self.inFile:
-         if line != "":
-            for move in line.split()[1:]:
-               yield move
-
-   def _seekToMoves(self):
-      self.inFile.seek(self.moveSeekLocation)
-
-
-def isDebugEnabled():
-   config = ConfigFile()
-   debug = config.getConfigItem(ValidConfig.Debug["name"])
-   debug = booleanConfigItemIsTrue(debug)
-   del config
-   return debug
-
-def booleanConfigItemIsTrue(configValue):
-   """This is necessary because config items are stored as strings"""
-   if configValue == "True":
-      return True
-   else:
-      return False
+      for move in self.pgnFile.games[0].getMoves():
+         yield move.san
 
 
 if __name__ == "__main__":

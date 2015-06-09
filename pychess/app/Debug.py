@@ -1,6 +1,5 @@
 from __future__ import print_function
-from pychess.app.ChessFile import isDebugEnabled 
-
+from pychess.app.ChessFile import isDebugEnabled
 
 class Debug(object):
 

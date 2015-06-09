@@ -6,9 +6,9 @@ The goal of the project is to create a chess engine that imports and exports
 partial games in the Portable Game Notation file format so that chess games may be
 played over email.
 
-This is currently implmented in Python 3.4.
-This is stalled slightly right now. The game engine is fully functional and so is
-the save game io. It is still not in in fully compatible PGN format however.
+This is currently implemented in Python 3.4.
+This is back under active development right now. The game engine is fully functional 
+and so is a minimum functionality PGN parser/exporter.
 
 To Install:
     pip install .

@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 #File for PGN parser and exporter
 import string
-from pychess.app import Util, Debug
+from pychess.app import Util
+#from pychess.app.Debug import Debug
+
 
 class Game(object):
 
     sevenTagRoster = ["Event", "Site", "Date", "Round", "White", "Black", "Result"]
 
     def __init__(self):
-        self.strTags = { "Event" : "?", "Site" : "?", "Date" : "????.??.??", "Round" : "?", "White" : "?", "Black" : "?", "Result" : "*" }
+        self.strTags = { "Event" : Tag("Event","?"), "Site" : Tag("Site","?"), "Date" : Tag("Date","????.??.??"), "Round" : Tag("Round","?"),\
+        "White" : Tag("White","?"), "Black" : Tag("Black","?"), "Result" : Tag("Result","?") }
         self.tags = {}
         self.moves = {}
         self.lastMove = Move()
@@ -120,7 +123,7 @@ class Tag(object):
 
 class Move(object):
 
-    def __init__(self, moveNumber = "", moveSan = ""):
+    def __init__(self, moveNumber = "0", moveSan = ""):
         self.san = moveSan
         self.number = moveNumber
         self.nag = 0
@@ -422,7 +425,7 @@ class PgnParser(object):
             self.parser = parser
             self.line = 1
             self.character = 1
-            self.debug = Debug.Debug()
+            #self.debug = Debug()
 
         def reset(self):
             self.currentState = self.initialState
@@ -432,7 +435,7 @@ class PgnParser(object):
         def run(self, input):
             for i in input:
                 self.currentState = self.currentState.run(i, self.parser)
-                self.debug.dprint(i, self.currentState)
+                #self.debug.dprint(i, self.currentState)
                 if self.currentState == PgnParser.ParsingStateMachine.ErrorState:
                     self.parser.parserErrorString = "Error :"+str(self.line)+":"+str(self.character)+" :"+self.parser.parserErrorString
                     return PgnParser.ParsingStateMachine.ErrorState
@@ -469,16 +472,8 @@ class PgnParser(object):
 
     def __init__(self, pgnFile):
         self.pgnFile = pgnFile
-        self.tagName = ""
-        self.tagValue = ""
-        self.parsedNumber = ""
-        self.currentMoveNumber = 1
-        self.incrementMoveNumber = False
-        self.moveSan = ""
-        self.moveSuffix = ""
-        self.moveNag = ""
-        self.gameTerm = ""
-        self.debug = Debug.Debug()
+        self.resetForNewGame()
+        #self.debug = Debug()
         self.SM = PgnParser.ParsingStateMachine(PgnParser.ParsingStateMachine.waitForSymbol, self)
         self.parserErrorString = ""
 
@@ -496,7 +491,7 @@ class PgnParser(object):
         self.moveSan = ""
         self.moveSuffix = ""
         self.moveNag = ""
-        self.gameTerm = ""
+        self.gameTerm = "*"
 
     def parseString(self, inString):
         return self.SM.run(inString+"\n")
@@ -515,10 +510,7 @@ class PgnParser(object):
         return returnVal
 
     def saveMove(self):
-        moveNumber = str(self.currentMoveNumber)+"."
-        if self.incrementMoveNumber:
-            moveNumber += ".."
-        self.pgnFile.saveMove(moveNumber, self.moveSan)
+        self.pgnFile.saveMove(self.moveSan)
         self.moveSan = ""
         if self.incrementMoveNumber:
             self.currentMoveNumber += 1
@@ -551,7 +543,7 @@ class PgnFile(object):
         self.parser = PgnParser(self)
         self.games = []
         self.currentGame = Game()
-        self.debug = Debug.Debug()
+        #self.debug = Debug()
 
     def reset(self):
         self.games = []
@@ -560,15 +552,24 @@ class PgnFile(object):
 
     def parseString(self, inString):
         return self.parser.parseString(inString)
+        
+    def parseFile(self, file):
+        success = True
+        for line in file:
+            success = self.parseString(line)
+            if not success:
+                return success
+        return success
 
     def getParseErrorString(self):
         return self.parser.getParseErrorString()
 
     def saveTag(self, tagName, tagValue):
         self.currentGame.setTag(Tag(tagName, tagValue))
-        self.debug.dprint(self.currentGame.getTag(tagName))
+        #self.debug.dprint(self.currentGame.getTag(tagName))
 
-    def saveMove(self, moveNumber, moveSan):
+    def saveMove(self, moveSan):
+        moveNumber = Util.getNextTurnString(self.currentGame.lastMove.number)
         self.currentGame.saveMove(moveNumber, moveSan)
 
     def saveMoveSuffix(self, moveSuffix):

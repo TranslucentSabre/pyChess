@@ -3,5 +3,5 @@ playerName:Unset
 strict:True
 location:Unset
 debug:False
-defExportFile:savegame.dat
-defImportFile:savegame.dat
+defExportFile:savegame.pgn 
+defImportFile:savegame.pgn

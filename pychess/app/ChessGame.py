@@ -51,7 +51,7 @@ class ChessGame():
       return self.gameBoard.gotoTurnString(turnString)
 
    def restartGame(self):
-      self.files.resetWriteString()
+      self.files.resetPgnFile()
       self.whitePlayer = WhitePlayer()
       self.blackPlayer = BlackPlayer()
       self.whitePlayer.otherPlayer = self.blackPlayer
@@ -135,13 +135,17 @@ if one is given use the argument as a filename to read a savegame from."""
       if self.files.inFileStatus != "Ready":
          self.lastError = "Cannot read from that file. Please try again."
          return False
-      for move in self.files.readMoves():
-         if self.algebraicMove(move):
-            self.commitTurn()
-         else:
-            self.restartGame()
-            return False
-      return True
+      if self.files.readPgn():
+         for move in self.files.readMoves():
+            if self.algebraicMove(move):
+               self.commitTurn()
+            else:
+               self.restartGame()
+               return False
+         return True
+      else:
+         self.lastError = self.files.getPgnErrorString()
+         return False
 
    def writeSaveFile(self,fileName=""):
       """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,

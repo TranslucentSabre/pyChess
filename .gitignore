@@ -214,6 +214,7 @@ pip-log.txt
 .mr.developer.cfg
 
 *.dat
+*.pgn
 commitMsg.txt
 saveGames
 .zedstate

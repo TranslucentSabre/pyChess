@@ -11,7 +11,7 @@ except NameError:
     pass
 
 class Chess(cmd.Cmd):
-   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.0.0\n"
+   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.3.0\n"
    prompt = "pyChess# "
    game = ChessGame()
 
