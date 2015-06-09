@@ -128,7 +128,7 @@ class ChessFiles(ConfigFile):
       self.attemptOutputFileOpen(outfile)
       
    def resetPgnFile(self):
-      self.pgnFile = PgnFile()
+      self.pgnFile.reset()
 
    def appendMoveForWrite(self, move):
       self.pgnFile.saveMove(move)
@@ -146,10 +146,14 @@ class ChessFiles(ConfigFile):
       self.resetPgnFile()
       self.inFile.seek(0)
       return self.pgnFile.parseFile(self.inFile)
+
+   def getNumberOfGames(self):
+      return self.pgnFile.getNumberOfGames()
       
-   def readMoves(self):
-      for move in self.pgnFile.games[0].getMoves():
-         yield move.san
+   def readMovesFromGame(self, gameIndex):
+      if gameIndex >= 0 and gameIndex < self.getNumberOfGames:
+         for move in self.pgnFile.games[gameIndex].getMoves():
+            yield move.san
 
 
 if __name__ == "__main__":

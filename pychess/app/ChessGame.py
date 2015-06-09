@@ -136,7 +136,7 @@ if one is given use the argument as a filename to read a savegame from."""
          self.lastError = "Cannot read from that file. Please try again."
          return False
       if self.files.readPgn():
-         for move in self.files.readMoves():
+         for move in self.files.readMovesFromGame(0):
             if self.algebraicMove(move):
                self.commitTurn()
             else:

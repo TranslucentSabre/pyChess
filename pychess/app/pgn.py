@@ -427,8 +427,13 @@ class PgnParser(object):
             self.character = 1
             #self.debug = Debug()
 
-        def reset(self):
+        def resetState(self):
             self.currentState = self.initialState
+
+        def reset(self):
+            self.resetState()
+            self.line = 1
+            self.character = 1
 
         ErrorState = False
 
@@ -541,13 +546,13 @@ class PgnParser(object):
 class PgnFile(object):
     def __init__(self):
         self.parser = PgnParser(self)
-        self.games = []
         self.currentGame = Game()
+        self.games = [self.currentGame]
         #self.debug = Debug()
 
     def reset(self):
-        self.games = []
         self.currentGame = Game()
+        self.games = [self.currentGame]
         self.parser.reset()
 
     def parseString(self, inString):
@@ -560,6 +565,9 @@ class PgnFile(object):
             if not success:
                 return success
         return success
+
+    def getNumberOfGames(self):
+        return len(self.games)
 
     def getParseErrorString(self):
         return self.parser.getParseErrorString()
@@ -582,8 +590,8 @@ class PgnFile(object):
         
     def saveGameTermination(self, gameTerm):
         self.currentGame.saveGameTermination(gameTerm)
-        self.games.append(self.currentGame)
         self.currentGame = Game()
+        self.games.append(self.currentGame)
         self.parser.resetForNewGame()
         
     def __str__(self):
