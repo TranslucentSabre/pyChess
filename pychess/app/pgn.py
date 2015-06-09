@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #File for PGN parser and exporter
-import string, Debug
+import string
 from pychess.app import Util, Debug
 
 class Game(object):

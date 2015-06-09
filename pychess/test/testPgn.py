@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import unittest, pgn
+import unittest
+from pychess.app import pgn
 
 class pgnTest(unittest.TestCase):
 
