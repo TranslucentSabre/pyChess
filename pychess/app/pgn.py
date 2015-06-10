@@ -598,10 +598,11 @@ class PgnFile(object):
         stringRep = ""
         firstTimeThrough = True
         for game in self.games:
-            if firstTimeThrough:
-                firstTimeThrough = False
-            else:
-                stringRep += "\n\n"
-            stringRep += str(game)
+            if len(game.moves) > 0:
+                if firstTimeThrough:
+                    firstTimeThrough = False
+                else:
+                    stringRep += "\n\n"
+                stringRep += str(game)
 
         return stringRep
