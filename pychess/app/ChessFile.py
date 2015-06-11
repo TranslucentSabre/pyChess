@@ -8,7 +8,7 @@ def isDebugEnabled():
     debug = booleanConfigItemIsTrue(debug)
     del config
     return debug
-         
+
 def booleanConfigItemIsTrue(configValue):
    """This is necessary because config items are stored as strings"""
    if configValue == "True":
@@ -17,7 +17,7 @@ def booleanConfigItemIsTrue(configValue):
       return False
 
 
-      
+
 class ValidConfig(object):
       validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict","files"]
       ImportFile       = {"name" : validConfigItems[0], "default" : "savegame.pgn"}
@@ -126,7 +126,7 @@ class ChessFiles(ConfigFile):
    def changeOutputFile(self, outfile):
       self.closeOutFile()
       self.attemptOutputFileOpen(outfile)
-      
+
    def resetPgnFile(self):
       self.pgnFile.reset()
 
@@ -149,7 +149,7 @@ class ChessFiles(ConfigFile):
 
    def getNumberOfGames(self):
       return self.pgnFile.getNumberOfGames()
-      
+
    def readMoves(self, gameIndex):
       for move in self.pgnFile.getMoves():
          yield move.san

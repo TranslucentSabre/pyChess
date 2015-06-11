@@ -16,13 +16,13 @@ class Game(object):
       self.moves = {}
       self.lastMove = Move()
       self.gameTerm = ""
-        
+
    def setTag(self, tagClass):
       if tagClass.name in Game.sevenTagRoster:
          self.strTags[tagClass.name] = tagClass
       else:
          self.tags[tagClass.name] = tagClass
-            
+
    def getTag(self, tagName):
       if tagName in self.strTags:
          return self.strTags[tagName]
@@ -66,27 +66,27 @@ class Game(object):
    def saveNag(self, moveNag):
       returnVal = self.lastMove.setNag(int(moveNag))
       return returnVal
-        
+
    def saveGameTermination(self, gameTerm):
       self.gameTerm = gameTerm
       self.setTag(Tag("Result", gameTerm))
-        
+
    def __str__(self):
       stringRep = ""
       for tag in self.getTags():
          stringRep += str(tag)+"\n"
       stringRep += "\n"
-        
+
       turns = ["white", "black"]
       turnIndex = 0
-            
+
       currentLine = ""
       for move in self.getMoves():
          startIndex = 0
          if turns[turnIndex] == "black":
             startIndex = 1
          turnIndex = (turnIndex + 1) % 2
-            
+
          items = str(move).split()
          for itemIndex in range(startIndex, len(items)):
             if (len(currentLine) == 0):
@@ -96,10 +96,10 @@ class Game(object):
             else:
                stringRep += currentLine + "\n"
                currentLine = items[itemIndex]
-            
+
       stringRep += currentLine+" "+self.gameTerm
       return stringRep
-            
+
 
 class Tag(object):
 
@@ -141,7 +141,7 @@ class Move(object):
          return True
       else:
          return False
-            
+
    def __str__(self):
       stringRep = self.number+" "+self.san
       if self.nag != 0:
@@ -530,11 +530,11 @@ class PgnParser(object):
       returnVal = self.pgnFile.saveNag(int(self.moveNag))
       self.moveNag = ""
       return returnVal
-        
+
    def saveGameTermination(self):
       self.pgnFile.saveGameTermination(self.gameTerm)
       self.resetForNewGame()
-        
+
 
    def checkGameTermination(self):
       if self.gameTerm in self.validTermination:
@@ -557,7 +557,7 @@ class PgnFile(object):
 
    def parseString(self, inString):
       return self.parser.parseString(inString)
-        
+
    def parseFile(self, file):
       success = True
       for line in file:
@@ -587,23 +587,23 @@ class PgnFile(object):
    def saveNag(self, moveNag):
       returnVal = self.currentGame.saveNag(int(moveNag))
       return returnVal
-        
+
    def saveGameTermination(self, gameTerm):
       self.currentGame.saveGameTermination(gameTerm)
       self.currentGame = Game()
       self.games.append(self.currentGame)
       self.parser.resetForNewGame()
-        
+
    def selectCurrentGame(self, gameIndex):
       if gameIndex >= 0 and gameIndex < len(self.games):
          self.currentGame = self.games[gameIndex]
          return True
       return False
-        
+
    def getMoves(self):
       for move in self.currentGame.getMoves():
          yield move
-        
+
    def __str__(self):
       stringRep = ""
       firstTimeThrough = True
