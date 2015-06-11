@@ -125,7 +125,7 @@ class ChessGame():
       return False
 
    def loadSaveFile(self,fileName=""):
-      """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
+      """Read all games from a file and store the game information, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
       if fileName != "":
          importFileName = fileName
@@ -136,7 +136,7 @@ if one is given use the argument as a filename to read a savegame from."""
          self.lastError = "Cannot read from that file. Please try again."
          return False
       if self.files.readPgn():
-         for move in self.files.readMovesFromGame(0):
+         for move in self.files.readMoves():
             if self.algebraicMove(move):
                self.commitTurn()
             else:
@@ -148,7 +148,7 @@ if one is given use the argument as a filename to read a savegame from."""
          return False
 
    def writeSaveFile(self,fileName=""):
-      """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
+      """Write the current pgn information out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
     if one is given use the argument as a filename to write the savegame to."""
       if fileName != "":
          exportFileName = fileName

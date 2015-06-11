@@ -150,10 +150,9 @@ class ChessFiles(ConfigFile):
    def getNumberOfGames(self):
       return self.pgnFile.getNumberOfGames()
       
-   def readMovesFromGame(self, gameIndex):
-      if gameIndex >= 0 and gameIndex < self.getNumberOfGames:
-         for move in self.pgnFile.games[gameIndex].getMoves():
-            yield move.san
+   def readMoves(self, gameIndex):
+      for move in self.pgnFile.getMoves():
+         yield move.san
 
 
 if __name__ == "__main__":
