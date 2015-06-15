@@ -123,6 +123,16 @@ class ChessGame():
             return True
       self.lastError = "Move Failed:\n"+currentPlayer.moveResultReason
       return False
+      
+   def readMovesFromCurrentGame(self):
+      """Apply all moves from the current game in the file."""
+      for move in self.files.readMoves():
+         if self.algebraicMove(move):
+            self.commitTurn()
+         else:
+            self.restartGame()
+            return False
+      return True
 
    def loadSaveFile(self,fileName=""):
       """Read all games from a file and store the game information, if no argument is given use the default import file configured,
@@ -136,13 +146,7 @@ if one is given use the argument as a filename to read a savegame from."""
          self.lastError = "Cannot read from that file. Please try again."
          return False
       if self.files.readPgn():
-         for move in self.files.readMoves():
-            if self.algebraicMove(move):
-               self.commitTurn()
-            else:
-               self.restartGame()
-               return False
-         return True
+         return self.readMovesFromCurrentGame()
       else:
          self.lastError = self.files.getPgnErrorString()
          return False
