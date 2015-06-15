@@ -542,6 +542,13 @@ class PgnParser(object):
       else:
          return False
 
+class GameInfo(object):
+   def __init__(self, gameIndex, game):
+      self.index = gameIndex
+      self.white = game.getTag("White")
+      self.black = game.getTag("Black")
+      self.date = game.getTag("Date")
+
 
 class PgnFile(object):
    def __init__(self):
@@ -594,11 +601,22 @@ class PgnFile(object):
       self.games.append(self.currentGame)
       self.parser.resetForNewGame()
 
-   def selectCurrentGame(self, gameIndex):
-      if gameIndex >= 0 and gameIndex < len(self.games):
-         self.currentGame = self.games[gameIndex]
-         return True
-      return False
+   def getGameInfo(self):
+      gameInfos = []:
+      for index, game in enumerate(self.games):
+         gameInfos.append(GameInfo(index, game)
+      return gameInfos
+
+   def selectCurrentGame(self, game):
+      if type(game) == GameInfo:
+         return self.selectCurrentGame(game.index)
+      elif type(game) == int:
+         if game >= 0 and game < len(self.games):
+            self.currentGame = self.games[game]
+            return True
+         return False
+      else:
+         return False
 
    def getMoves(self):
       for move in self.currentGame.getMoves():
