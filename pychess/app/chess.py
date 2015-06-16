@@ -141,6 +141,36 @@ if one is given use the argument as a filename to write the savegame to."""
       return True
 
    do_exit = do_quit
+   
+   def do_pgn(self, arg):
+      """Perform various PGN related operations. The first argument must be one of the following keywords:
+   games    : Displays the game index, White Player, Black Player, and Date for each game in the loaded file
+   select   : Requires a further argument which is the game index, this makes that game the current game
+   tags     : With no further arguments this displays all tags for the current games
+            : If given two more arguments, those arguments are assumed to be the name and value respectively for a tag and are saved"""
+      args = arg.split()
+      numOfArgs = len(args)
+      if numOfArgs == 0:
+         print("You must specify a configuration item to set or read.")
+      else:
+         if args[0] == "games":
+            for game in self.game.getGameHeaders():
+               print("Index : "+str(game.index+1))
+               print("Date: "+game.date.value)
+               print("White Player: "+game.white.value)
+               print("Black Player: "+game.black.value)
+               print("")
+         elif args[0] == "select":
+            if numOfArgs != 2:
+               print("You must specify a game index to load.")
+               return
+            if self.game.selectGame(int(args[1]) - 1):
+               if not self.game.readMovesFromCurrentGame():
+                  print("That game had errors while loading moves...")
+                  return
+            else:
+               print("Could not select that game...")
+      
 
    def help_help(self):
        print("Display the help for one of the available commands.")

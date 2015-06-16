@@ -162,7 +162,6 @@ class Load(Resource):
       self.setup()
       result = {}
       args = Load.parser.parse_args()
-      game.restartGame()
       fileName = args['fileName']
       if fileName == None:
          loadSuccess = game.loadSaveFile()

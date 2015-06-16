@@ -51,14 +51,17 @@ class ChessGame():
       return self.gameBoard.gotoTurnString(turnString)
 
    def restartGame(self):
-      self.files.resetPgnFile()
+      self.files.resetCurrentGame()
+      self.resetGameRepresentation()
+      
+   def resetGameRepresentation(self):
       self.whitePlayer = WhitePlayer()
       self.blackPlayer = BlackPlayer()
       self.whitePlayer.otherPlayer = self.blackPlayer
       self.blackPlayer.otherPlayer = self.whitePlayer
       self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)
       self.moveList = []
-
+      
    def commitTurn(self):
       currentPlayer = self._getNextPlayer()
       if self.gameBoard.commitTurn():
@@ -126,11 +129,12 @@ class ChessGame():
       
    def readMovesFromCurrentGame(self):
       """Apply all moves from the current game in the file."""
+      self.resetGameRepresentation()
       for move in self.files.readMoves():
          if self.algebraicMove(move):
             self.commitTurn()
          else:
-            self.restartGame()
+            self.resetGameRepresentation()
             return False
       return True
 
@@ -146,7 +150,7 @@ if one is given use the argument as a filename to read a savegame from."""
          self.lastError = "Cannot read from that file. Please try again."
          return False
       if self.files.readPgn():
-         return self.readMovesFromCurrentGame()
+         return True
       else:
          self.lastError = self.files.getPgnErrorString()
          return False
@@ -164,6 +168,12 @@ if one is given use the argument as a filename to read a savegame from."""
          return False
       self.files.writeGame()
       return True
+      
+   def getGameHeaders(self):
+      return self.files.getGameHeaders()
+      
+   def selectGame(self, game):
+      return self.files.selectGame(game)
 
    def getAllConfigItems(self):
       config = {}

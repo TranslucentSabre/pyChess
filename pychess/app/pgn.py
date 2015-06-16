@@ -37,7 +37,7 @@ class Game(object):
          tags.append(self.strTags[tag])
       for tag in sorted(self.tags):
          tags.append(self.tags[tag])
-       return tags
+      return tags
 
    def saveMove(self, moveNumber, moveSan):
       self.lastMove = Move(moveNumber, moveSan)
@@ -52,12 +52,16 @@ class Game(object):
 
    def getMoves(self):
       moveNumber = "1."
-      while True:
+      validMoves = True
+      while validMoves:
          if moveNumber in self.moves:
             yield self.moves[moveNumber]
          else:
-            raise StopIteration()
+            validMoves = False
+            break
          moveNumber = Util.getNextTurnString(moveNumber)
+      if not validMoves:
+         raise StopIteration()
 
    def saveMoveSuffix(self, moveSuffix):
       returnVal = self.lastMove.setSuffixNag(moveSuffix)
@@ -597,14 +601,13 @@ class PgnFile(object):
 
    def saveGameTermination(self, gameTerm):
       self.currentGame.saveGameTermination(gameTerm)
-      self.currentGame = Game()
-      self.games.append(self.currentGame)
+      self.newGame()
       self.parser.resetForNewGame()
 
    def getGameInfo(self):
-      gameInfos = []:
+      gameInfos = []
       for index, game in enumerate(self.games):
-         gameInfos.append(GameInfo(index, game)
+         gameInfos.append(GameInfo(index, game))
       return gameInfos
 
    def selectCurrentGame(self, game):
@@ -621,6 +624,13 @@ class PgnFile(object):
    def getMoves(self):
       for move in self.currentGame.getMoves():
          yield move
+         
+   def resetCurrentGame(self):
+      self.currentGame = Game()
+      
+   def newGame(self):
+      self.currentGame = Game()
+      self.games.append(self.currentGame)
 
    def __str__(self):
       stringRep = ""

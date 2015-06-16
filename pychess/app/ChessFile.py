@@ -32,7 +32,7 @@ class ValidConfig(object):
                    "files":FileDir}
 
 class ConfigFile(object):
-   """A class that deals with reading, writing and storing config"""
+   """A class that deals with reading, writing and storing configuration"""
 
    def __init__(self):
       configFileName = os.path.join(os.path.dirname(__file__), '.chessrc')
@@ -73,7 +73,8 @@ class ConfigFile(object):
 
 
 class ChessFiles(ConfigFile):
-   """This class handles all file reads and writes for the chess program"""
+   """This class handles all file reads and writes for the chess program and provides an interface
+      for interacting with PGN files"""
 
    def __init__(self):
       super(ChessFiles, self).__init__()
@@ -126,6 +127,8 @@ class ChessFiles(ConfigFile):
    def changeOutputFile(self, outfile):
       self.closeOutFile()
       self.attemptOutputFileOpen(outfile)
+      
+   #Start PGN specific functions
 
    def resetPgnFile(self):
       self.pgnFile.reset()
@@ -149,10 +152,21 @@ class ChessFiles(ConfigFile):
 
    def getNumberOfGames(self):
       return self.pgnFile.getNumberOfGames()
+   
+   def getGameHeaders(self):
+      return self.pgnFile.getGameInfo()
+   
+   def selectGame(self, game):
+      return self.pgnFile.selectCurrentGame(game)
 
-   def readMoves(self, gameIndex):
-      for move in self.pgnFile.getMoves():
-         yield move.san
+   def readMoves(self):
+      return [move.san for move in self.pgnFile.getMoves()]
+         
+   def resetCurrentGame(self):
+      self.pgnFiles.resetCurrentGame()
+     
+   def startNewGame(self):
+      self.pgnFile.newGame()
 
 
 if __name__ == "__main__":
