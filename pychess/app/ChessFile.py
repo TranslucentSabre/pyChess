@@ -135,6 +135,9 @@ class ChessFiles(ConfigFile):
 
    def appendMoveForWrite(self, move):
       self.pgnFile.saveMove(move)
+      
+   def setTag(self, tagName, tagValue):
+      self.pgnFile.saveTag(tagName, tagValue)
 
    def writeGame(self):
       self.outFile.seek(0)
@@ -161,9 +164,18 @@ class ChessFiles(ConfigFile):
 
    def readMoves(self):
       return [move.san for move in self.pgnFile.getMoves()]
+      
+   def getTag(self, tagName):
+      return self.pgnFile.getTag(tagName)
+      
+   def getTags(self):
+      return self.pgnFile.getTags()
          
    def resetCurrentGame(self):
-      self.pgnFiles.resetCurrentGame()
+      self.pgnFile.resetCurrentGame()
+      
+   def resetCurrentGameMoves(self):
+      self.pgnFile.resetCurrentGameMoves()
      
    def startNewGame(self):
       self.pgnFile.newGame()

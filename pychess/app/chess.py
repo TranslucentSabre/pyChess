@@ -89,9 +89,8 @@ class Chess(cmd.Cmd):
    def do_load(self,arg):
       """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
-      if self._booleanPrompt("If any moves are invalid, this game will be reset. Continue?"):
-         if not self.game.loadSaveFile(arg):
-            print(self.game.lastError)
+      if not self.game.loadSaveFile(arg):
+         print(self.game.lastError)
 
    def do_save(self,arg):
       """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
@@ -145,13 +144,11 @@ if one is given use the argument as a filename to write the savegame to."""
    def do_pgn(self, arg):
       """Perform various PGN related operations. The first argument must be one of the following keywords:
    games    : Displays the game index, White Player, Black Player, and Date for each game in the loaded file
-   select   : Requires a further argument which is the game index, this makes that game the current game
-   tags     : With no further arguments this displays all tags for the current games
-            : If given two more arguments, those arguments are assumed to be the name and value respectively for a tag and are saved"""
+   select   : Requires a further argument which is the game index, this makes that game the current game"""
       args = arg.split()
       numOfArgs = len(args)
       if numOfArgs == 0:
-         print("You must specify a configuration item to set or read.")
+         print("You must specify a PGN operation.")
       else:
          if args[0] == "games":
             for game in self.game.getGameHeaders():
@@ -170,6 +167,29 @@ if one is given use the argument as a filename to write the savegame to."""
                   return
             else:
                print("Could not select that game...")
+         else:
+            print("You must specify a valid PGN operation.")
+            
+   def _printTagTuple(self, tagTuple):
+      print (tagTuple[0]+": "+tagTuple[1])
+            
+   def do_tags(self, arg):
+      """View and set tags for the current game. Takes up to two arguments, the tag name and the tag value respectively.
+With no arguments view all tags for the current game.
+With one argument view the tag found using the tag name provided.
+With two arguments create (or modify) the tag with the name provided using the value provided."""
+      #Only split once, this allows the user to supply items with spaces in them
+      args = arg.split(None,1)
+      numOfArgs = len(args)
+      if numOfArgs == 0:
+         for tag in self.game.getTags():
+            self._printTagTuple(tag)
+      elif numOfArgs == 1:
+         self._printTagTuple(self.game.getTag(args[0]))
+      elif numOfArgs == 2:
+         self.game.setTag(args[0], args[1])
+      else:
+         print("Invalid number of arguments")
       
 
    def help_help(self):

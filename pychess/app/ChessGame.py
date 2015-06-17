@@ -55,6 +55,7 @@ class ChessGame():
       self.resetGameRepresentation()
       
    def resetGameRepresentation(self):
+      self.files.resetCurrentGameMoves()
       self.whitePlayer = WhitePlayer()
       self.blackPlayer = BlackPlayer()
       self.whitePlayer.otherPlayer = self.blackPlayer
@@ -129,8 +130,9 @@ class ChessGame():
       
    def readMovesFromCurrentGame(self):
       """Apply all moves from the current game in the file."""
+      allMoves = self.files.readMoves()
       self.resetGameRepresentation()
-      for move in self.files.readMoves():
+      for move in allMoves:
          if self.algebraicMove(move):
             self.commitTurn()
          else:
@@ -174,6 +176,15 @@ if one is given use the argument as a filename to read a savegame from."""
       
    def selectGame(self, game):
       return self.files.selectGame(game)
+      
+   def setTag(self, tagName, tagValue):
+      self.files.setTag(tagName, tagValue)
+      
+   def getTag(self, tagName):
+      return self.files.getTag(tagName)
+      
+   def getTags(self):
+      return self.files.getTags()
 
    def getAllConfigItems(self):
       config = {}

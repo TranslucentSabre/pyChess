@@ -11,11 +11,15 @@ class Game(object):
 
    def __init__(self):
       self.strTags = { "Event" : Tag("Event","?"), "Site" : Tag("Site","?"), "Date" : Tag("Date","????.??.??"), "Round" : Tag("Round","?"),\
-      "White" : Tag("White","?"), "Black" : Tag("Black","?"), "Result" : Tag("Result","?") }
+      "White" : Tag("White","?"), "Black" : Tag("Black","?"), "Result" : Tag("Result","*") }
       self.tags = {}
       self.moves = {}
       self.lastMove = Move()
       self.gameTerm = ""
+      
+   def resetMovesOnly(self):
+      self.moves = {}
+      self.lastMove = Move()
 
    def setTag(self, tagClass):
       if tagClass.name in Game.sevenTagRoster:
@@ -29,7 +33,7 @@ class Game(object):
       elif tagName in self.tags:
          return self.tags[tagName]
       else:
-         return ""
+         return Tag(tagName, "")
 
    def getTags(self):
       tags = []
@@ -625,8 +629,18 @@ class PgnFile(object):
       for move in self.currentGame.getMoves():
          yield move
          
+   def getTag(self, tagName):
+      tag = self.currentGame.getTag(tagName)
+      return (tag.name, tag.value)
+      
+   def getTags(self):
+      return [ (tag.name, tag.value) for tag in self.currentGame.getTags() ]
+         
    def resetCurrentGame(self):
       self.currentGame = Game()
+      
+   def resetCurrentGameMoves(self):
+      self.currentGame.resetMovesOnly()
       
    def newGame(self):
       self.currentGame = Game()
