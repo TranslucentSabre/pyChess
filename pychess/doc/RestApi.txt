@@ -28,7 +28,7 @@ Resource URL:
             Output:
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
-                url    : String that gives the url of the newely created move
+                url    : String that gives the url of the newly created move
 
 
     /game/move/first
@@ -78,26 +78,86 @@ Resource URL:
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
-
-
-    /game/load
+                
+    /game/tag
     Operations :
-        Put : Load a saved game from the file system
+        Get : Gets a list of all defined tags for the current game
+            Input : 
+                None
+            Output :
+                result    : String indicating success or failure
+                firstTurn : Turn string indicating the first turn of the game
+                tags      : Json object containing all of the defined tags, keyed by tag name
+                
+        Post : Create or modify a tag value
+            Input :
+                tagName   : String, the case sensitive name of the tag to create or modify
+                tagValue  : String, the case sensitive value of the tag
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+                url    : String that gives the url of the newly created or modified tag
+                
+    /game/tag/<tagName>
+    Operations:
+        Get : Get the tag name and tag value keyed by the given tag name
+            Input : 
+                None
+            Output :
+                result    : String indicating success or failure
+                firstTurn : Turn string indicating the first turn of the game
+                tag       : Json object containing a single key-value pair representing the tag, keyed by tag name
+
+    /load
+    Operations :
+        Put : Load a pgn file from the file system
             Input :
                 fileName : String, the filename of the file to load from the filesystem on the server, if this is left out, the default file from config will be loaded
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
 
-    /game/save
+    /save
     Operations :
-        Put : Save the current game to the file system
+        Put : Save the current pgn file information to the file system
             Input :
                 fileName : String, the filename of the file to save the current game into on the filesystem on the server, if this is left out, the default file from config will be saved
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
-
+                
+    /new
+    Operations :
+        Post : Create a new game and start playing it
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+                
+    /games
+    Operations :
+        Get : Get a list of headers for each game in our pgn information
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+                games  : Json array containing Json object. Each object contains the following key-value pairs:
+                            url   : url containing the game index, used to select this game as the current,
+                            Date  : the value of the Date tag,
+                            White : the value of the White tag,
+                            Black : the value of the Black tag
+        
+    
+    /games/<gameIndex>
+    Operations :
+        Put : Select the game as the current game and load it's moves
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
 
 """Set or read configuration options. The first argument must be one of the following settings:
 import    (read/set default import file)

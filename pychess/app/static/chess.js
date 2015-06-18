@@ -217,7 +217,7 @@ function loadGameFile(file) {
       data = {}
    }
    $.ajax( {
-      url: "/game/load",
+      url: "/load",
       dataType: "json",
       type: "PUT",
       data: data,
@@ -239,7 +239,7 @@ function saveGameFile(file) {
       data = {}
    }
    $.ajax( {
-      url: "/game/save",
+      url: "/save",
       dataType: "json",
       type: "PUT",
       data: data,

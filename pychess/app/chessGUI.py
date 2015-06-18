@@ -176,7 +176,7 @@ class Load(Resource):
          result['error'] = game.lastError
          return result
 
-api.add_resource(Load, "/game/load")
+api.add_resource(Load, "/load")
 
 class Save(Resource):
    setupDone = False
@@ -204,7 +204,7 @@ class Save(Resource):
          result['error'] = game.lastError
          return result
 
-api.add_resource(Save, "/game/save")
+api.add_resource(Save, "/save")
 
 """Set or read configuration options. The first argument must be one of the following settings:
 import    (read/set default import file)
