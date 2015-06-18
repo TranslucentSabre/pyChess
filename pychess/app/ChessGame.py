@@ -191,6 +191,10 @@ if one is given use the argument as a filename to read a savegame from."""
       for configItem in ValidConfig.configMap:
          config[configItem] = self._getConfigOption(ValidConfig.configMap[configItem])
       return config
+      
+   def startNewGame(self):
+      self.files.startNewGame()
+      self.restartGame()
 
    def getConfigItem(self,configItem):
       """Read configuration options. The argument must be one of the following settings:

@@ -144,7 +144,8 @@ if one is given use the argument as a filename to write the savegame to."""
    def do_pgn(self, arg):
       """Perform various PGN related operations. The first argument must be one of the following keywords:
    games    : Displays the game index, White Player, Black Player, and Date for each game in the loaded file
-   select   : Requires a further argument which is the game index, this makes that game the current game"""
+   select   : Requires a further argument which is the game index, this makes that game the current game
+   new      : Start a brand new game and make it the current game"""
       args = arg.split()
       numOfArgs = len(args)
       if numOfArgs == 0:
@@ -167,6 +168,8 @@ if one is given use the argument as a filename to write the savegame to."""
                   return
             else:
                print("Could not select that game...")
+         elif args[0] == "new":
+            self.game.startNewGame()
          else:
             print("You must specify a valid PGN operation.")
             

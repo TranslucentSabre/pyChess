@@ -15,7 +15,14 @@ class Game(object):
       self.tags = {}
       self.moves = {}
       self.lastMove = Move()
-      self.gameTerm = ""
+      self.gameTerm = "*"
+      
+   def reset(self):
+      self.resetMovesOnly()
+      self.strTags = { "Event" : Tag("Event","?"), "Site" : Tag("Site","?"), "Date" : Tag("Date","????.??.??"), "Round" : Tag("Round","?"),\
+      "White" : Tag("White","?"), "Black" : Tag("Black","?"), "Result" : Tag("Result","*") }
+      self.tags = {}
+      self.gameTerm = "*"
       
    def resetMovesOnly(self):
       self.moves = {}
@@ -108,7 +115,6 @@ class Game(object):
       stringRep += currentLine+" "+self.gameTerm
       return stringRep
 
-
 class Tag(object):
 
    def __init__(self, tagName="UNKNOWN", tagValue="UNKNOWN"):
@@ -155,7 +161,6 @@ class Move(object):
       if self.nag != 0:
          stringRep += " $"+str(self.nag)
       return stringRep
-
 
 
 
@@ -637,7 +642,7 @@ class PgnFile(object):
       return [ (tag.name, tag.value) for tag in self.currentGame.getTags() ]
          
    def resetCurrentGame(self):
-      self.currentGame = Game()
+      self.currentGame.reset()
       
    def resetCurrentGameMoves(self):
       self.currentGame.resetMovesOnly()
