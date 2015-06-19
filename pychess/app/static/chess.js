@@ -9,6 +9,11 @@ function buildLeftPanel(){
    htmlString += '<input type="button" class="horizontal" id="saveButton" value="Save" onclick="saveButtonClick();"></input>';
    htmlString += '<input type="button" class="horizontal" id="resetButton" value="Restart Game" onclick="resetGame();"></input>';
    htmlString += '</div>';
+   htmlString += '<br/><br/>'
+   htmlString += '<div id="GameSelection"><div class="label newLine">Select a game:</div>';
+   htmlString += '<select class="newLine" id="gameSelect" ><option id="tempGameSel" value="">Please Load a Game</option></select>';
+   htmlString += '<input type="button" class="newLine" id="submitGameSelection" value="Select" onclick="selectGame();"></input>'
+   htmlString += '<div>'
    $("#leftPanel").html(htmlString);
 }
 
@@ -75,7 +80,8 @@ function capatilize(string) {
 }
 
 function moveSelectChanged() {
-   showTurnBoard($("#moveSelect").val());
+   Game.currentlySelectedTurn = $("#moveSelect").val();
+   showTurnBoard(Game.currentlySelectedTurn);
 }
 
 function displaySuccessOrError(data,successCallback,errorCallback) {
@@ -186,7 +192,15 @@ function showTurnBoard(turnString) {
    });
 }
 
-function getGameMoves(callback) {
+function timerTick() {
+   displayTurn = true;
+   if (Game.currentlySelectedTurn != Game.lastTurnSaved) {
+      displayTurn = false;
+   }
+   getGameMoves(false, displayTurn);
+}
+
+function getGameMoves(callback,displayTurn=true) {
    $.ajax( {
       url: "/game/move",
       dataType: "json",
@@ -199,9 +213,15 @@ function getGameMoves(callback) {
             } );
          } );
          $("#moveSelect").html(optionsString);
-         $("#moveSelect").val(data.lastTurn);
          Game.lastTurnSaved = data.lastTurn;
-         showTurnBoard(data.lastTurn);
+         if (displayTurn) {
+            $("#moveSelect").val(data.lastTurn);
+            Game.currentlySelectedTurn = Game.lastTurnSaved;
+            showTurnBoard(data.lastTurn);
+         }
+         else {
+            $("#moveSelect").val(Game.currentlySelectedTurn);
+         }
          if (typeof callback === "function") {
              callback();
          }
@@ -222,13 +242,45 @@ function loadGameFile(file) {
       type: "PUT",
       data: data,
       success: function(data, textStatus) {
-         displaySuccessOrError(data,getGameMoves);
+         displaySuccessOrError(data,populateGameSelection);
       }
    } );
 }
 
 function loadButtonClick() {
    loadGameFile($("#fileName").val());
+}
+
+function populateGameSelection() {
+   $.ajax( {
+      url: "/games",
+      dataType: "json",
+      success: function(data, textStatus) {
+         displaySuccessOrError(data);
+         lastGameUrl = "";
+         var optionsString = '';
+         $.each(data.games, function(_,dict) {
+            optionsString += '<option id="'+dict.url+'" value="'+dict.url+'">Date: '+dict.Date+'; White: '+dict.White+'; Black: '+dict.Black+'</option>';
+            lastGameUrl = dict.url;
+         } );
+         $("#gameSelect").html(optionsString);
+         $("#gameSelect").val(lastGameUrl);
+      }
+   } );
+}
+
+function selectGame() {
+   gameUrl = $("#gameSelect").val();
+   if (gameUrl != "") {
+      $.ajax( {
+         url: gameUrl,
+         dataType: "json",
+         type: "PUT",
+         success: function(data, textStatus) {
+            displaySuccessOrError(data,getGameMoves);
+         }
+      } );
+   }
 }
 
 function saveGameFile(file) {
@@ -343,7 +395,8 @@ function makeMove(move) {
 
 
 var Game = {
-   lastTurnSaved : "0"
+   lastTurnSaved : "0",
+   currentlySelectedTurn : "0"
 };
 
 var Drag = {
@@ -386,6 +439,7 @@ var Drag = {
 
 $(document).ready(function() {
    buildStartingHtml();
+   populateGameSelection();
    getGameMoves();
-   intervalID = window.setInterval(getGameMoves, refreshTimerInMs);
+   intervalID = window.setInterval(timerTick, refreshTimerInMs);
 });

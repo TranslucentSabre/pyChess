@@ -143,11 +143,19 @@ Resource URL:
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
-                games  : Json array containing Json object. Each object contains the following key-value pairs:
+                games  : Json array containing Json objects. Each object contains the following key-value pairs:
                             url   : url containing the game index, used to select this game as the current,
                             Date  : the value of the Date tag,
                             White : the value of the White tag,
                             Black : the value of the Black tag
+                            
+        Delete : Delete information on all currently stored games
+            Input : 
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+            
         
     
     /games/<gameIndex>

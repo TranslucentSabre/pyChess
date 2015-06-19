@@ -150,6 +150,44 @@ class MoveInstance(Resource):
 
 api.add_resource(MoveInstance, "/game/move/<instance>")
 
+class Games(Resource):
+   def get(self):
+      result = {}
+      headers = game.getGameHeaders()
+      result['games'] = []
+      for info in headers:
+         gameInfo = {}
+         gameInfo['url'] = '/games/'+str(int(info.index) + 1)
+         gameInfo['Date'] = info.date.value
+         gameInfo['White'] = info.white.value
+         gameInfo['Black'] = info.black.value
+         result['games'].append(gameInfo)
+      result['result'] = "Success"
+      return result
+      
+   
+   def delete(self):
+      pass
+
+api.add_resource(Games, "/games")
+
+class GamesIndex(Resource):
+   def put(self,gameIndex):
+      result = {}
+      if game.selectGame(int(gameIndex)-1):
+         if not game.readMovesFromCurrentGame():
+            result['result'] = "Failure"
+            result['error'] = "Error encountered while loading moves from game"
+            return result
+         result['result'] = "Success"
+         return result
+      else:
+         result['result'] = "Failure"
+         result['error'] = "That game does not exist."
+         return result
+         
+api.add_resource(GamesIndex, "/games/<gameIndex>")
+      
 class Load(Resource):
    setupDone = False
    def setup(self):
