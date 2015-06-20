@@ -86,8 +86,8 @@ Resource URL:
                 None
             Output :
                 result    : String indicating success or failure
-                firstTurn : Turn string indicating the first turn of the game
-                tags      : Json object containing all of the defined tags, keyed by tag name
+                error     : String indicating the type of error if there was a failure
+                tags      : Json array containing a Json object for each of the defined tags, keyed by tag name
                 
         Post : Create or modify a tag value
             Input :
@@ -105,7 +105,7 @@ Resource URL:
                 None
             Output :
                 result    : String indicating success or failure
-                firstTurn : Turn string indicating the first turn of the game
+                error     : String indicating the type of error if there was a failure
                 tag       : Json object containing a single key-value pair representing the tag, keyed by tag name
 
     /load
@@ -126,17 +126,16 @@ Resource URL:
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
                 
-    /new
+    /games
     Operations :
         Post : Create a new game and start playing it
             Input :
                 None
             Output :
+                url    : The URL of the new game
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
-                
-    /games
-    Operations :
+    
         Get : Get a list of headers for each game in our pgn information
             Input :
                 None

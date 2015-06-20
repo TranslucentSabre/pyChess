@@ -12,7 +12,8 @@ function buildLeftPanel(){
    htmlString += '<br/><br/>'
    htmlString += '<div id="GameSelection"><div class="label newLine">Select a game:</div>';
    htmlString += '<select class="newLine" id="gameSelect" ><option id="tempGameSel" value="">Please Load a Game</option></select>';
-   htmlString += '<input type="button" class="newLine" id="submitGameSelection" value="Select" onclick="selectGame();"></input>'
+   htmlString += '<input type="button" class="newLine" id="submitGameSelection" value="Select" onclick="selectGame();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="newGameButton" value="New Game" onclick="startNewGame();"></input>';
    htmlString += '<div>'
    $("#leftPanel").html(htmlString);
 }
@@ -251,18 +252,18 @@ function loadButtonClick() {
    loadGameFile($("#fileName").val());
 }
 
-function populateGameSelection() {
+function populateGameSelection(callback) {
    $.ajax( {
       url: "/games",
       dataType: "json",
       success: function(data, textStatus) {
-         displaySuccessOrError(data);
          var optionsString = '';
          $.each(data.games, function(_,dict) {
             optionsString += '<option id="'+dict.url+'" value="'+dict.url+'">Date: '+dict.Date+'; White: '+dict.White+'; Black: '+dict.Black+'</option>';
          } );
          $("#gameSelect").html(optionsString);
          $("#gameSelect").val("/games/"+data.currentGameIndex);
+         displaySuccessOrError(data, callback)
       }
    } );
 }
@@ -275,11 +276,21 @@ function selectGame() {
          dataType: "json",
          type: "PUT",
          success: function(data, textStatus) {
-            populateGameSelection()
-            displaySuccessOrError(data,getGameMoves);
+            displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);});
          }
       } );
    }
+}
+
+function startNewGame() {
+   $.ajax( {
+      url: "/games",
+      type: "POST",
+      dataType: "json",
+      success: function(data, textStatus) {
+         displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);})
+      }
+   } );
 }
 
 function saveGameFile(file) {

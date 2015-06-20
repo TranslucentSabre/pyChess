@@ -150,7 +150,52 @@ class MoveInstance(Resource):
 
 api.add_resource(MoveInstance, "/game/move/<instance>")
 
+class Tag(Resource):
+   setupDone = False
+   def setup(self):
+      if not Tag.setupDone:
+         Tag.parser = reqparse.RequestParser()
+         Tag.parser.add_argument("tagName", type=str, required=True)
+         Tag.parser.add_argument("tagValue", type=str, required=True)
+         Tag.setupDone = True
+         
+   def get(self):
+      result = {}
+      tags = []
+      for tag in game.getTags():
+         tags.append({tag[0]: tag[1]})
+      result['tags'] = tags
+      result['result'] = "Success"
+      return result
+      
+   def post(self):
+      self.setup()
+      result = {}
+      args = Tag.parser.parse_args()
+      game.setTag(args["tagName"], args["tagValue"])
+      result["url"] = "/game/tag/"+args["tagName"]
+      result['result'] = 'Success'
+      return result
+   
+api.add_resource(Tag, "/game/tag")
+
+class TagName(Resource):
+   def get(self,tagName):
+      result = {}
+      result['tag'] = { tagName : game.getTag(tagName)[1] }
+      result['result'] = "Success"
+      return result
+   
+api.add_resource(TagName, "/game/tag/<tagName>")
+
 class Games(Resource):
+   def post(self):
+      result = {}
+      game.startNewGame()
+      result['url'] = "/games/"+str(game.getCurrentGameIndex()+1);
+      result['result'] = "Success"
+      return result
+
    def get(self):
       result = {}
       headers = game.getGameHeaders()
