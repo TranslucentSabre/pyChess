@@ -177,6 +177,9 @@ if one is given use the argument as a filename to read a savegame from."""
    def selectGame(self, game):
       return self.files.selectGame(game)
       
+   def getCurrentGameIndex(self):
+      return self.files.getCurrentGameIndex()
+      
    def setTag(self, tagName, tagValue):
       self.files.setTag(tagName, tagValue)
       

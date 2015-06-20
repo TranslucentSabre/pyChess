@@ -166,6 +166,16 @@ Resource URL:
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
+                
+    /games/currentGameIndex
+    Operations :
+        Get : Retrieve the index of the currently selected game
+            Input :
+                None
+            Output :
+                currentGameIndex : String containing the index of the currently selected game
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
 
 """Set or read configuration options. The first argument must be one of the following settings:
 import    (read/set default import file)

@@ -568,11 +568,13 @@ class PgnFile(object):
       self.parser = PgnParser(self)
       self.currentGame = Game()
       self.games = [self.currentGame]
+      self.currentGameIndex = 0
       #self.debug = Debug()
 
    def reset(self):
       self.currentGame = Game()
       self.games = [self.currentGame]
+      self.currentGameIndex = 0
       self.parser.reset()
 
    def parseString(self, inString):
@@ -625,6 +627,7 @@ class PgnFile(object):
       elif type(game) == int:
          if game >= 0 and game < len(self.games):
             self.currentGame = self.games[game]
+            self.currentGameIndex = game
             return True
          return False
       else:
@@ -650,6 +653,7 @@ class PgnFile(object):
    def newGame(self):
       self.currentGame = Game()
       self.games.append(self.currentGame)
+      self.currentGameIndex = len(self.games)-1
 
    def __str__(self):
       stringRep = ""

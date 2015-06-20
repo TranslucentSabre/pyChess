@@ -152,7 +152,10 @@ if one is given use the argument as a filename to write the savegame to."""
          print("You must specify a PGN operation.")
       else:
          if args[0] == "games":
+            currentGameIndex = self.game.getCurrentGameIndex()
             for game in self.game.getGameHeaders():
+               if currentGameIndex == game.index:
+                  print("***Current Game***")
                print("Index : "+str(game.index+1))
                print("Date: "+game.date.value)
                print("White Player: "+game.white.value)

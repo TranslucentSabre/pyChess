@@ -257,14 +257,12 @@ function populateGameSelection() {
       dataType: "json",
       success: function(data, textStatus) {
          displaySuccessOrError(data);
-         lastGameUrl = "";
          var optionsString = '';
          $.each(data.games, function(_,dict) {
             optionsString += '<option id="'+dict.url+'" value="'+dict.url+'">Date: '+dict.Date+'; White: '+dict.White+'; Black: '+dict.Black+'</option>';
-            lastGameUrl = dict.url;
          } );
          $("#gameSelect").html(optionsString);
-         $("#gameSelect").val(lastGameUrl);
+         $("#gameSelect").val("/games/"+data.currentGameIndex);
       }
    } );
 }
@@ -277,6 +275,7 @@ function selectGame() {
          dataType: "json",
          type: "PUT",
          success: function(data, textStatus) {
+            populateGameSelection()
             displaySuccessOrError(data,getGameMoves);
          }
       } );

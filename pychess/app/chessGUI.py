@@ -162,6 +162,7 @@ class Games(Resource):
          gameInfo['White'] = info.white.value
          gameInfo['Black'] = info.black.value
          result['games'].append(gameInfo)
+      result["currentGameIndex"] = int(game.getCurrentGameIndex())+1
       result['result'] = "Success"
       return result
       
@@ -172,18 +173,36 @@ class Games(Resource):
 api.add_resource(Games, "/games")
 
 class GamesIndex(Resource):
+   currentString = "currentGameIndex"
+
    def put(self,gameIndex):
       result = {}
-      if game.selectGame(int(gameIndex)-1):
-         if not game.readMovesFromCurrentGame():
-            result['result'] = "Failure"
-            result['error'] = "Error encountered while loading moves from game"
+      if gameIndex != self.currentString:
+         if game.selectGame(int(gameIndex)-1):
+            if not game.readMovesFromCurrentGame():
+               result['result'] = "Failure"
+               result['error'] = "Error encountered while loading moves from game"
+               return result
+            result['result'] = "Success"
             return result
+         else:
+            result['result'] = "Failure"
+            result['error'] = "That game does not exist."
+            return result
+      else:
+         result['result'] = "Failure"
+         result['error'] = "Operation not permitted on that URL"
+         return result
+         
+   def get(self, gameIndex):
+      result = {}
+      if gameIndex == self.currentString:
+         result[self.currentString] = int(game.getCurrentGameIndex())+1
          result['result'] = "Success"
          return result
       else:
          result['result'] = "Failure"
-         result['error'] = "That game does not exist."
+         result['error'] = "Operation not permitted on that URL"
          return result
          
 api.add_resource(GamesIndex, "/games/<gameIndex>")

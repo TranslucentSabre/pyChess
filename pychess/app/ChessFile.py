@@ -179,6 +179,9 @@ class ChessFiles(ConfigFile):
      
    def startNewGame(self):
       self.pgnFile.newGame()
+   
+   def getCurrentGameIndex(self):
+      return self.pgnFile.currentGameIndex
 
 
 if __name__ == "__main__":
