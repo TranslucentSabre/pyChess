@@ -201,7 +201,10 @@ function timerTick() {
    getGameMoves(false, displayTurn);
 }
 
-function getGameMoves(callback,displayTurn=true) {
+function getGameMoves(callback,displayTurn) {
+   if ( typeof displayTurn === "undefined" ) {
+      displayTurn = true;
+   }
    $.ajax( {
       url: "/game/move",
       dataType: "json",
