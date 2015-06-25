@@ -4,12 +4,14 @@ var refreshTimerInMs = 5000;
 
 function buildLeftPanel(){
    var htmlString = "";
-   htmlString += '<div id="SaveLoad"><div class="label newLine">File Name:</div><input type="text" class="horizontal" id="fileName"></input>';
+   htmlString += '<a id="fileLink" class="newLine" onclick="toggleFileVisibility();">File Selection</a>';
+   htmlString += '<div hidden="" id="fileDiv"><div class="label newLine">File Name:</div><input type="text" class="horizontal" id="fileName"></input>';
    htmlString += '<input type="button" class="newLine" id="loadButton" value="Load" onclick="loadButtonClick();"></input>';
    htmlString += '<input type="button" class="horizontal" id="saveButton" value="Save" onclick="saveButtonClick();"></input>';
    htmlString += '</div>';
-   htmlString += '<br/><br/>'
-   htmlString += '<div id="GameSelection"><div class="label newLine">Select a game:</div>';
+   htmlString += '<br/><br/><br/><br/>'
+   htmlString += '<a id="gameLink" class="newLine" onclick="toggleGameVisibility();">Game Selection</a>';
+   htmlString += '<div hidden="" id="GameSelection">';
    htmlString += '<select class="newLine" id="gameSelect" ><option id="tempGameSel" value="">Please Load a Game</option></select>';
    htmlString += '<input type="button" class="newLine" id="submitGameSelection" value="Select" onclick="selectGame();"></input>';
    htmlString += '<input type="button" class="horizontal" id="newGameButton" value="New Game" onclick="startNewGame();"></input>';
@@ -22,11 +24,23 @@ function buildLeftPanel(){
 function buildRightPanel(){
    var htmlString = "";
    htmlString += '<div id="results"></div>';
-   htmlString += '<select class="newLine" id="moveSelect" onchange="moveSelectChanged()"></select>';
+   htmlString += '<a id="movesLink" class="newLine" onclick="toggleMovesVisibility();">Moves</a>';
+   htmlString += '<div hidden="" id="moveDiv"><select class="newLine" id="moveSelect" onchange="moveSelectChanged()"></select>';
    htmlString += '<div class="label newLine">Algebraic Notation: </div>';
    htmlString += '<input type="text" class="horizontal" id="algebraicMove"></input>';
    htmlString += '<input type="button" class="newLine" id="submitAlgebraicMove" value="Move" onclick="submitAlgebraicMove();"></input>';
+   htmlString += '</div>';
+   htmlString += '<br/><br/><br/><br/><br/><br/>';
+   htmlString += '<a id="promoLink" class="newLine" onclick="togglePromoVisibility();">Promotion Piece (Queen)</a>';
+   htmlString += '<div hidden="" id="promoDiv"><select class="newLine" id="promoSelect" >';
+   promoPieces = {"Rook" : "R", "Knight" : "N", "Bishop" : "B", "Queen" : "Q"};
+   $.each(promoPieces, function(key ,value) {
+      htmlString += '<option id="'+key+'Promo" value="'+value+'">'+key+'</option>';
+   } );
+   htmlString += '</select>';
+   htmlString += '</div>';
    $("#rightPanel").html(htmlString);
+   $("#promoSelect").val("Q");
 }
 
 function generateBoard() {
@@ -96,6 +110,48 @@ function disableInput() {
 
 function setInputDisabled(disabled) {
    $("input,select").prop("disabled", disabled);
+}
+
+function toggleFileVisibility() {
+   toggleDivVisibility("#fileDiv");
+}
+
+function toggleGameVisibility() {
+   toggleDivVisibility("#GameSelection");
+}
+
+function toggleMovesVisibility() {
+   toggleDivVisibility("#moveDiv");
+}
+
+function togglePromoVisibility() {
+   toggleDivVisibility("#promoDiv");
+
+   linkText = "Promotion Piece";
+    var container = $("#promoDiv");
+
+    if (container.prop("hidden") == false) {
+        $("#promoLink").html(linkText);
+    }
+    else {
+        $("#promoLink").html(linkText+" ("+$("#promoSelect :selected").html()+")");
+    }
+
+}
+
+function getPromotionPiece() {
+   return $("#promoSelect").val();
+}
+
+function toggleDivVisibility(divSelector) {
+    var container = $(divSelector);
+
+    if (container.prop("hidden") == false) {
+        container.prop("hidden",true);
+    }
+    else {
+        container.prop("hidden",false);
+    }
 }
 
 function displaySuccessOrError(data,successCallback,errorCallback) {
@@ -377,7 +433,7 @@ var Move = {
 };
 
 function submitCoordinateMove(firstCoord, secondCoord, promotion) {
-    if (typeof promotion === 'undefined') {
+    if (typeof promotion === 'undefined' || promotion === null) {
         promotion = "";
     }
     Move.clear();
@@ -462,8 +518,20 @@ var Drag = {
       if (Drag.jQuerySource[0] !== Drag.jQueryDest[0]) {
 
          Drag.jQuerySource.html("");
-         Drag.jQueryDest.html(evt.originalEvent.dataTransfer.getData("text/html"));
-         submitCoordinateMove(Drag.jQuerySource.attr("id"), Drag.jQueryDest.attr("id"));
+         promotionPiece = null;
+
+         sourceID = Drag.jQuerySource.attr("id");
+         destID = Drag.jQueryDest.attr("id");
+         transferData = evt.originalEvent.dataTransfer.getData("text/html");
+         pieceInformation = transferData.match(/[A-Z][a-z]+ [PRKNBQ].png/)[0].split(" ");
+         if (pieceInformation[1][0] === "P") {
+            if ( (pieceInformation[0] === "White" && destID[1] === "8") || 
+                 (pieceInformation[0] === "Black" && destID[1] === "1") ) {
+               promotionPiece = getPromotionPiece();
+            }
+         }
+         Drag.jQueryDest.html(transferData);
+         submitCoordinateMove(sourceID, destID, promotionPiece);
       }
       Drag.jQuerySource = null;
       Drag.jQueryDest = null;
