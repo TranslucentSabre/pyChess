@@ -53,6 +53,10 @@ class ChessGame():
    def restartGame(self):
       self.files.resetCurrentGame()
       self.resetGameRepresentation()
+
+   def resetAllGames(self):
+      self.files.resetPgnFile()
+      self.resetGameRepresentation()
       
    def resetGameRepresentation(self):
       self.files.resetCurrentGameMoves()

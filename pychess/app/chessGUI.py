@@ -213,7 +213,10 @@ class Games(Resource):
       
    
    def delete(self):
-      pass
+      result = {}
+      game.resetAllGames()
+      result['result'] = "Success"
+      return result
 
 api.add_resource(Games, "/games")
 

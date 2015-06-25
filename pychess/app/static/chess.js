@@ -1,19 +1,20 @@
 var boardSelector = "#chessBoard";
 var intervalID = 0;
-var refreshTimerInMs = 10000;
+var refreshTimerInMs = 5000;
 
 function buildLeftPanel(){
    var htmlString = "";
    htmlString += '<div id="SaveLoad"><div class="label newLine">File Name:</div><input type="text" class="horizontal" id="fileName"></input>';
    htmlString += '<input type="button" class="newLine" id="loadButton" value="Load" onclick="loadButtonClick();"></input>';
    htmlString += '<input type="button" class="horizontal" id="saveButton" value="Save" onclick="saveButtonClick();"></input>';
-   htmlString += '<input type="button" class="horizontal" id="resetButton" value="Restart Game" onclick="resetGame();"></input>';
    htmlString += '</div>';
    htmlString += '<br/><br/>'
    htmlString += '<div id="GameSelection"><div class="label newLine">Select a game:</div>';
    htmlString += '<select class="newLine" id="gameSelect" ><option id="tempGameSel" value="">Please Load a Game</option></select>';
    htmlString += '<input type="button" class="newLine" id="submitGameSelection" value="Select" onclick="selectGame();"></input>';
    htmlString += '<input type="button" class="horizontal" id="newGameButton" value="New Game" onclick="startNewGame();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="resetButton" value="Restart Game" onclick="resetGame();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="resetAllButton" value="Reset All Games" onclick="resetAllGames();"></input>';
    htmlString += '<div>'
    $("#leftPanel").html(htmlString);
 }
@@ -83,6 +84,18 @@ function capatilize(string) {
 function moveSelectChanged() {
    Game.currentlySelectedTurn = $("#moveSelect").val();
    showTurnBoard(Game.currentlySelectedTurn);
+}
+
+function enableInput() {
+   setInputDisabled(false);
+}
+
+function disableInput() {
+   setInputDisabled(true);
+}
+
+function setInputDisabled(disabled) {
+   $("input,select").prop("disabled", disabled);
 }
 
 function displaySuccessOrError(data,successCallback,errorCallback) {
@@ -274,11 +287,13 @@ function populateGameSelection(callback) {
 function selectGame() {
    gameUrl = $("#gameSelect").val();
    if (gameUrl != "") {
+      disableInput();
       $.ajax( {
          url: gameUrl,
          dataType: "json",
          type: "PUT",
          success: function(data, textStatus) {
+            enableInput();
             displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);});
          }
       } );
@@ -325,7 +340,19 @@ function resetGame() {
       type: "DELETE",
       data: {},
       success: function(data, textStatus) {
-         getGameMoves();
+         displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);})
+      }
+   } );
+}
+
+function resetAllGames() {
+   $.ajax( {
+      url: "/games",
+      dataType: "json",
+      type: "DELETE",
+      data: {},
+      success: function(data, textStatus) {
+         displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);})
       }
    } );
 }
