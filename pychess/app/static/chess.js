@@ -17,7 +17,14 @@ function buildLeftPanel(){
    htmlString += '<input type="button" class="horizontal" id="newGameButton" value="New Game" onclick="startNewGame();"></input>';
    htmlString += '<input type="button" class="horizontal" id="resetButton" value="Restart Game" onclick="resetGame();"></input>';
    htmlString += '<input type="button" class="horizontal" id="resetAllButton" value="Reset All Games" onclick="resetAllGames();"></input>';
-   htmlString += '<div>'
+   htmlString += '</div>';
+   htmlString += '<br/><br/><br/><br/>';
+   htmlString += '<a id="configLink" class="newLine" onclick="toggleConfigVisibility();">Configuration</a>';
+   htmlString += '<div hidden="" id="configDiv">';
+   htmlString += '<select class="newLine" id="configSelect" onchange="showConfigItem()"></select>';
+   htmlString += '<input type="text" class="newLine" id="configValue"></input>';
+   htmlString += '<input type="button" class="newLine" id="configSave" value="Save" onclick="saveConfigItem();"></input>';
+   htmlString += '</div>';
    $("#leftPanel").html(htmlString);
 }
 
@@ -114,6 +121,10 @@ function setInputDisabled(disabled) {
 
 function toggleFileVisibility() {
    toggleDivVisibility("#fileDiv");
+}
+
+function toggleConfigVisibility() {
+   toggleDivVisibility("#configDiv");
 }
 
 function toggleGameVisibility() {
@@ -413,6 +424,48 @@ function resetAllGames() {
    } );
 }
 
+var Config = {
+   values : {}
+};
+
+function showConfigItem() {
+   $("#configValue").val(Config.values[$("#configSelect").val()]);
+}
+
+function getConfiguration() {
+   $.ajax( {
+      url: "/config",
+      dataType: "json",
+      success: function(data, textStatus) {
+         var optionsString = '';
+         Config.values = data.config;
+         previousVal = $("#configSelect").val();
+         $.each(Config.values, function(name,_) {
+            if (previousVal == null) {
+               previousVal = name;
+            }
+            optionsString += '<option id="config'+name+'" value="'+name+'">'+name+'</option>';
+         } );
+         $("#configSelect").html(optionsString);
+         $("#configSelect").val(previousVal);
+         showConfigItem();
+      }
+   } );
+}
+
+function saveConfigItem() {
+   data = { value : $("#configValue").val() };
+   $.ajax( {
+      url: "/config/"+$("#configSelect").val(),
+      dataType: "json",
+      type: "PUT",
+      data: data,
+      success: function(data, textStatus) {
+         displaySuccessOrError(data, getConfiguration());
+      }
+   } );
+}
+
 var Move = {
   ALGEBRAIC : "algebra",
   COORDINATE : "coordinate",
@@ -549,5 +602,6 @@ $(document).ready(function() {
    buildStartingHtml();
    populateGameSelection();
    getGameMoves();
+   getConfiguration();
    intervalID = window.setInterval(timerTick, refreshTimerInMs);
 });
