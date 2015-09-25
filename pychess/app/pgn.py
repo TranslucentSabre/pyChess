@@ -8,19 +8,18 @@ from pychess.app import Util
 class Game(object):
 
    sevenTagRoster = ["Event", "Site", "Date", "Round", "White", "Black", "Result"]
+   sevenTagRosterDefaultValues = { "Event" : "?", "Site" : "?", "Date" : "????.??.??", "Round" : "?",\
+      "White" : "?", "Black" : "?", "Result" : "*" }
+
 
    def __init__(self):
-      self.strTags = { "Event" : Tag("Event","?"), "Site" : Tag("Site","?"), "Date" : Tag("Date","????.??.??"), "Round" : Tag("Round","?"),\
-      "White" : Tag("White","?"), "Black" : Tag("Black","?"), "Result" : Tag("Result","*") }
-      self.tags = {}
-      self.moves = {}
-      self.lastMove = Move()
-      self.gameTerm = "*"
+      self.reset()
       
    def reset(self):
       self.resetMovesOnly()
-      self.strTags = { "Event" : Tag("Event","?"), "Site" : Tag("Site","?"), "Date" : Tag("Date","????.??.??"), "Round" : Tag("Round","?"),\
-      "White" : Tag("White","?"), "Black" : Tag("Black","?"), "Result" : Tag("Result","*") }
+      self.strTags = {}
+      for key, item  in self.sevenTagRosterDefaultValues.items():
+         self.strTags[key] = Tag(key, item)
       self.tags = {}
       self.gameTerm = "*"
       
@@ -41,6 +40,12 @@ class Game(object):
          return self.tags[tagName]
       else:
          return Tag(tagName, "")
+
+   def deleteTag(self, tagName):
+      if tagName in self.strTags:
+         self.strTags[tagName].value =  self.sevenTagRosterDefaultValues[tagName]
+      else:
+         self.tags.pop(tagName, "")
 
    def getTags(self):
       tags = []
@@ -643,6 +648,9 @@ class PgnFile(object):
       
    def getTags(self):
       return [ (tag.name, tag.value) for tag in self.currentGame.getTags() ]
+
+   def deleteTag(self, tagName):
+      self.currentGame.deleteTag(tagName)
          
    def resetCurrentGame(self):
       self.currentGame.reset()

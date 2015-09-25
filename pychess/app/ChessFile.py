@@ -170,6 +170,9 @@ class ChessFiles(ConfigFile):
       
    def getTags(self):
       return self.pgnFile.getTags()
+
+   def deleteTag(self, tagName):
+      self.pgnFile.deleteTag(tagName)
          
    def resetCurrentGame(self):
       self.pgnFile.resetCurrentGame()

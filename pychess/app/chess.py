@@ -87,13 +87,13 @@ class Chess(cmd.Cmd):
          self.game.cancelTurn()
 
    def do_load(self,arg):
-      """Read all moves from a file and apply them to the current game, if no argument is given use the default import file configured,
+      """Read all games from a file and make them available to be the current game, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
       if not self.game.loadSaveFile(arg):
          print(self.game.lastError)
 
    def do_save(self,arg):
-      """Write the current game out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
+      """Write the current list of games out to a file. This will erase the old savegame file. If no argument is given use the default export file configured,
 if one is given use the argument as a filename to write the savegame to."""
       if self._booleanPrompt("This will erase the contents of the the export file before writing. Continue?"):
          if not self.game.writeSaveFile(arg):
@@ -140,6 +140,7 @@ if one is given use the argument as a filename to write the savegame to."""
       return True
 
    do_exit = do_quit
+   do_EOF  = do_quit
    
    def do_pgn(self, arg):
       """Perform various PGN related operations. The first argument must be one of the following keywords:
@@ -199,6 +200,24 @@ With two arguments create (or modify) the tag with the name provided using the v
          self.game.setTag(args[0], args[1])
       else:
          print("Invalid number of arguments")
+
+   def do_delete(self, arg):
+      """Delete tags associated with the current game. The first argument must be the string "tag", and the second argument must be the name of the tag to delete.
+Deleting on of the tags in the mandatory Seven Tag Roster will reset it to default instead of removing it."""
+      args = arg.split()
+      numOfArgs = len(args)
+      if numOfArgs == 0:
+         print("You must provide keyword \"tag\" and then a tag name.")
+      elif numOfArgs == 1:
+         print("You must provide a tag name.")
+      elif numOfArgs == 2:
+         if args[0].lower() != "tag":
+            print("The keyword \"tag\" must be the first argument.")
+         else:
+            self.game.deleteTag(args[1])
+      else:
+         print("Too many arguments given")
+         
       
 
    def help_help(self):
@@ -213,4 +232,7 @@ With two arguments create (or modify) the tag with the name provided using the v
 
 if __name__ == "__main__":
     init()
-    Chess().cmdloop()
+    try:
+      Chess().cmdloop()
+    except KeyboardInterrupt:
+      pass

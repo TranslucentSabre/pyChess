@@ -186,6 +186,9 @@ if one is given use the argument as a filename to read a savegame from."""
       
    def setTag(self, tagName, tagValue):
       self.files.setTag(tagName, tagValue)
+
+   def deleteTag(self, tagName):
+      self.files.deleteTag(tagName)
       
    def getTag(self, tagName):
       return self.files.getTag(tagName)
