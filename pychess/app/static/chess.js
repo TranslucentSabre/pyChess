@@ -425,11 +425,18 @@ function resetAllGames() {
 }
 
 var Config = {
-   values : {}
+   values : {},
+   backToFront : {"import" : "Default File To Load",
+                  "export" : "Default File To Save",
+                  "strict" : "Strict Algebraic Move Parsing"},
+   frontToBack : {"Default File To Load" : "import",
+                  "Default File To Save" : "export",
+                  "Strict Algebraic Move Parsing" : "strict"}
 };
 
 function showConfigItem() {
-   $("#configValue").val(Config.values[$("#configSelect").val()]);
+   backendConfig = Config.frontToBack[$("#configSelect").val()];
+   $("#configValue").val(Config.values[backendConfig]);
 }
 
 function getConfiguration() {
@@ -441,10 +448,14 @@ function getConfiguration() {
          Config.values = data.config;
          previousVal = $("#configSelect").val();
          $.each(Config.values, function(name,_) {
-            if (previousVal == null) {
-               previousVal = name;
+            if(Config.backToFront[name])
+            {
+               name = Config.backToFront[name];
+               if (previousVal == null) {
+                  previousVal = name;
+               }
+               optionsString += '<option id="config'+name+'" value="'+name+'">'+name+'</option>';
             }
-            optionsString += '<option id="config'+name+'" value="'+name+'">'+name+'</option>';
          } );
          $("#configSelect").html(optionsString);
          $("#configSelect").val(previousVal);
@@ -454,9 +465,10 @@ function getConfiguration() {
 }
 
 function saveConfigItem() {
+   backendConfig = Config.frontToBack[$("#configSelect").val()];
    data = { value : $("#configValue").val() };
    $.ajax( {
-      url: "/config/"+$("#configSelect").val(),
+      url: "/config/"+backendConfig,
       dataType: "json",
       type: "PUT",
       data: data,
