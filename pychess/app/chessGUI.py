@@ -185,6 +185,12 @@ class TagName(Resource):
       result['tag'] = { tagName : game.getTag(tagName)[1] }
       result['result'] = "Success"
       return result
+
+   def delete(self,tagName):
+      result = {}
+      game.deleteTag(tagName)
+      result['result'] = "Success"
+      return result
    
 api.add_resource(TagName, "/game/tag/<tagName>")
 

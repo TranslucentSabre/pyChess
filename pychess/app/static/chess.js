@@ -46,6 +46,15 @@ function buildRightPanel(){
    } );
    htmlString += '</select>';
    htmlString += '</div>';
+   htmlString += '<br/><br/><br/><br/><br/><br/>';
+   htmlString += '<a id="tagLink" class="newLine" onclick="toggleTagVisibility();">Tags</a>';
+   htmlString += '<div hidden="" id="tagDiv"><select class="newLine" id="tagSelect" onchange="selectGameTag()"></select>';
+   htmlString += '<div class="label newLine">Tag Name: </div><input type="text" class="horizontal" disabled="disabled" id="tagName"></input>';
+   htmlString += '<div class="label newLine">Tag Value: </div><input type="text" class="horizontal" id="tagValue"></input>';
+   htmlString += '<input type="button" class="newLine" id="createTag" value="Create" onclick="createTag();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="deleteTag" value="Delete" onclick="deleteTag();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="saveTag" value="Save" onclick="saveTag();"></input>';
+   htmlString += '</div>';
    $("#rightPanel").html(htmlString);
    $("#promoSelect").val("Q");
 }
@@ -148,6 +157,10 @@ function togglePromoVisibility() {
         $("#promoLink").html(linkText+" ("+$("#promoSelect :selected").html()+")");
     }
 
+}
+
+function toggleTagVisibility() {
+   toggleDivVisibility("#tagDiv");
 }
 
 function getPromotionPiece() {
@@ -352,7 +365,7 @@ function populateGameSelection(callback) {
 }
 
 function selectGame() {
-   gameUrl = $("#gameSelect").val();
+   var gameUrl = $("#gameSelect").val();
    if (gameUrl != "") {
       disableInput();
       $.ajax( {
@@ -361,7 +374,7 @@ function selectGame() {
          type: "PUT",
          success: function(data, textStatus) {
             enableInput();
-            displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);});
+            displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);populateGameTags();});
          }
       } );
    }
@@ -374,6 +387,42 @@ function startNewGame() {
       dataType: "json",
       success: function(data, textStatus) {
          displaySuccessOrError(data,function(){populateGameSelection(getGameMoves);})
+      }
+   } );
+}
+
+function populateGameTags() {
+   var tagUrl = "/game/tag"
+   $.ajax( {
+      url: tagUrl,
+      dataType: "json",
+      success: function(data, textStatus) {
+         var tagsString = '';
+         var selected = null;
+         $.each(data.tags, function(_,dict) {
+            $.each(dict, function(key, value) {
+               if (selected == null) {
+                  selected = key
+               }
+               tagsString += '<option id="tag_'+key+'" value="'+key+'">'+key+'</option>';
+            } );
+         } );
+         $("#tagSelect").html(tagsString);
+         $("#tagSelect").val(selected);
+         selectGameTag();
+      }
+   } );
+}
+
+function selectGameTag() {
+   var tagUrl = "/game/tag/"+$("#tagSelect").val();
+   $.ajax( {
+      url: tagUrl,
+      dataType: "json",
+      success: function(data, textStatus) {
+         name = $("#tagSelect").val();
+         $("#tagName").val(name);
+         $("#tagValue").val(data.tag[name]);
       }
    } );
 }
@@ -614,6 +663,7 @@ $(document).ready(function() {
    buildStartingHtml();
    populateGameSelection();
    getGameMoves();
+   populateGameTags();
    getConfiguration();
    intervalID = window.setInterval(timerTick, refreshTimerInMs);
 });

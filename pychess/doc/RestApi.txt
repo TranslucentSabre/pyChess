@@ -108,6 +108,13 @@ Resource URL:
                 error     : String indicating the type of error if there was a failure
                 tag       : Json object containing a single key-value pair representing the tag, keyed by tag name
 
+        Delete : Delete this tag (or defaults it, if it is a part of the Seven Tag Roster)
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+
     /load
     Operations :
         Put : Load a pgn file from the file system
