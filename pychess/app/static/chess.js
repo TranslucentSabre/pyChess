@@ -391,14 +391,27 @@ function startNewGame() {
    } );
 }
 
-function populateGameTags() {
+function tagCreationInProgress() {
+   return $("#createTag").val() == "Cancel" ? true : false;
+}
+
+function beginTagCreation() {
+   $("#tagName").prop("disabled", false);
+   $("#createTag").val("Cancel");
+}
+
+function cancelTagCreation() {
+   $("#tagName").prop("disabled", true);
+   $("#createTag").val("Create");
+}
+
+function populateGameTags(selected) {
    var tagUrl = "/game/tag"
    $.ajax( {
       url: tagUrl,
       dataType: "json",
       success: function(data, textStatus) {
          var tagsString = '';
-         var selected = null;
          $.each(data.tags, function(_,dict) {
             $.each(dict, function(key, value) {
                if (selected == null) {
@@ -415,6 +428,7 @@ function populateGameTags() {
 }
 
 function selectGameTag() {
+   cancelTagCreation();
    var tagUrl = "/game/tag/"+$("#tagSelect").val();
    $.ajax( {
       url: tagUrl,
@@ -423,6 +437,22 @@ function selectGameTag() {
          name = $("#tagSelect").val();
          $("#tagName").val(name);
          $("#tagValue").val(data.tag[name]);
+      }
+   } );
+}
+
+function saveTag() {
+   cancelTagCreation();
+   var tagUrl = "/game/tag";
+   var tagNameVal = $("#tagName").val();
+   $.ajax( {
+      url: tagUrl,
+      type: "POST",
+      dataType: "json",
+      data : { tagName  : tagNameVal,
+               tagValue : $("#tagValue").val() },
+      success : function(data, textStatus) {
+         populateGameTags(tagNameVal);
       }
    } );
 }
