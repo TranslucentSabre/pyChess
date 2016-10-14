@@ -401,13 +401,13 @@ function tagCreationInProgress() {
 function beginTagCreation() {
    $("#tagName").prop("disabled", false);
    $("#createTag").val("Cancel");
-   $("#deleteTag").prop("diabled", true);
+   $("#deleteTag").prop("disabled", true);
 }
 
 function cancelTagCreation() {
    $("#tagName").prop("disabled", true);
    $("#createTag").val("Create");
-   $("#deleteTag").prop("diabled", false);
+   $("#deleteTag").prop("disabled", false);
 }
 
 function populateGameTags(selected) {
