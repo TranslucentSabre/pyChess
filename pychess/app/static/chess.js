@@ -427,6 +427,20 @@ function populateGameTags(selected) {
    } );
 }
 
+var previouslySelectedTagValue = ""
+function createTag() {
+   if(tagCreationInProgress()) {
+      cancelTagCreation();
+      $("#tagSelect").val(previouslySelectedTagValue);
+      selectGameTag();
+   }
+   else {
+      beginTagCreation();
+      $("#tagName").val("");
+      $("#tagValue").val("");
+   }
+}
+
 function selectGameTag() {
    cancelTagCreation();
    var tagUrl = "/game/tag/"+$("#tagSelect").val();
@@ -437,6 +451,7 @@ function selectGameTag() {
          name = $("#tagSelect").val();
          $("#tagName").val(name);
          $("#tagValue").val(data.tag[name]);
+         previouslySelectedTagValue = name;
       }
    } );
 }
@@ -445,6 +460,12 @@ function saveTag() {
    cancelTagCreation();
    var tagUrl = "/game/tag";
    var tagNameVal = $("#tagName").val();
+   if(tagNameVal === "") {
+      $("#results").html("No Tag Name Specified");
+      //Note this is really "cancelCreateTag" due to our current state
+      createTag();
+      return;
+   }
    $.ajax( {
       url: tagUrl,
       type: "POST",
