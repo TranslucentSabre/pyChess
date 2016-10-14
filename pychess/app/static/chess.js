@@ -126,6 +126,7 @@ function disableInput() {
 
 function setInputDisabled(disabled) {
    $("input,select").prop("disabled", disabled);
+   Game.pageDisabled = disabled;
 }
 
 function toggleFileVisibility() {
@@ -287,11 +288,13 @@ function showTurnBoard(turnString) {
 }
 
 function timerTick() {
-   displayTurn = true;
-   if (Game.currentlySelectedTurn != Game.lastTurnSaved) {
-      displayTurn = false;
+   if(!Game.pageDisabled) {
+      displayTurn = true;
+      if (Game.currentlySelectedTurn != Game.lastTurnSaved) {
+         displayTurn = false;
+      }
+      getGameMoves(false, displayTurn);
    }
-   getGameMoves(false, displayTurn);
 }
 
 function getGameMoves(callback,displayTurn) {
@@ -398,11 +401,13 @@ function tagCreationInProgress() {
 function beginTagCreation() {
    $("#tagName").prop("disabled", false);
    $("#createTag").val("Cancel");
+   $("#deleteTag").prop("diabled", true);
 }
 
 function cancelTagCreation() {
    $("#tagName").prop("disabled", true);
    $("#createTag").val("Create");
+   $("#deleteTag").prop("diabled", false);
 }
 
 function populateGameTags(selected) {
@@ -427,11 +432,10 @@ function populateGameTags(selected) {
    } );
 }
 
-var previouslySelectedTagValue = ""
 function createTag() {
    if(tagCreationInProgress()) {
       cancelTagCreation();
-      $("#tagSelect").val(previouslySelectedTagValue);
+      $("#tagSelect").val(Game.previouslySelectedTagValue);
       selectGameTag();
    }
    else {
@@ -451,7 +455,7 @@ function selectGameTag() {
          name = $("#tagSelect").val();
          $("#tagName").val(name);
          $("#tagValue").val(data.tag[name]);
-         previouslySelectedTagValue = name;
+         Game.previouslySelectedTagValue = name;
       }
    } );
 }
@@ -474,6 +478,24 @@ function saveTag() {
                tagValue : $("#tagValue").val() },
       success : function(data, textStatus) {
          populateGameTags(tagNameVal);
+      }
+   } );
+}
+
+function deleteTag() {
+   var tagUrl = "/game/tag/"+$("#tagSelect").val();
+   var selectedTag = $("#tagSelect").val();
+   //Here I cheat and know that the top seven will only be defaulted becuase they are the Seven Tag Roster
+   //Revert to the first entry once we delete a non-STR tag
+   if($("#tagSelect")[0].selectedIndex >= 7) {
+      selectedTag = $("#tagSelect > option:first").val();
+   }
+   $.ajax( {
+      url: tagUrl,
+      type: "DELETE",
+      dataType: "json",
+      success: function(data, textStatus) {
+         populateGameTags(selectedTag);
       }
    } );
 }
@@ -657,7 +679,9 @@ function makeMove(move) {
 
 var Game = {
    lastTurnSaved : "0",
-   currentlySelectedTurn : "0"
+   currentlySelectedTurn : "0",
+   previouslySelectedTagValue : "",
+   pageDisabled : false
 };
 
 var Drag = {
