@@ -93,9 +93,26 @@ class Chess(cmd.Cmd):
       coord = arg.split()
       if len(coord) == 1:
          coord = coord[0]
-         print(self.game.getValidMovesForPieceAtPosition(coord))
+         moves = self.game.getValidMovesForPieceAtPosition(coord)
+         self.printValidMoves(coord, moves)
       else:
-         print(self.game.getAllValidMoves())
+         moves = self.game.getAllValidMoves()
+         for player in [ self.game.whitePlayer, self.game.blackPlayer ]:
+            print("{0} Pieces:".format(player.color.name))
+            for piece in player.getAllPieces():
+               self.printValidMoves(piece.position, moves[piece.position])
+            print("")
+
+   def printValidMoves(self, coord, moves):
+      print("{0}({1})".format(moves[0], coord))
+      moves = moves[1]
+      if len(moves) == 0:
+         print("   None")
+      else:
+         for move in moves:
+            print("   {0}: ".format(move), end="")
+            print(*moves[move], sep=", ")
+      print("")     
 
    def do_load(self,arg):
       """Read all games from a file and make them available to be the current game, if no argument is given use the default import file configured,

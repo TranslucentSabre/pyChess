@@ -33,17 +33,17 @@ pieces = { "Pawn" : "P", "Rook" : "R", "Knight" : "N", "Bishop" : "B", "Queen" :
 invPieces = {"P" : "Pawn", "R" : "Rook", "N" : "Knight", "B" : "Bishop", "Q" : "Queen", "K" : "King"}
 
 class Castle(object):
-   KINGSIDE = "kingside"
-   QUEENSIDE = "queenside"
-   NONE = "none"
+   KINGSIDE = "Kingside Castle"
+   QUEENSIDE = "Queenside Castle"
+   NONE = "None"
 
 class MoveType(object):
-   NORMAL = "normal"
-   CAPTURE = "capture"
-   EN_PASSANT = "enPassant"
+   NORMAL = "Normal"
+   CAPTURE = "Capture"
+   EN_PASSANT = "En Passant"
    KINGSIDECASTLE = Castle.KINGSIDE
    QUEENSIDECASTLE = Castle.QUEENSIDE
-   PROMOTION = "promotion"
+   PROMOTION = "Promotion"
 
 
 class colors(object):
@@ -59,7 +59,7 @@ class colors(object):
 
 
    class WHITE(CommonColor):
-      name  = "white"
+      name  = "White"
       pawnRank = "2"
       majorRank = "1"
       promotionRank = "8"
@@ -67,7 +67,7 @@ class colors(object):
       pawnRankModifier = 1
 
    class BLACK(CommonColor):
-      name = "black"
+      name = "Black"
       pawnRank = "7"
       majorRank = "8"
       promotionRank = "1"
@@ -75,7 +75,7 @@ class colors(object):
       pawnRankModifier = -1
 
    class NONE(CommonColor):
-      name = "none"
+      name = "None"
       pawnRank = "0"
       majorRank = "0"
       promotionRank = "0"

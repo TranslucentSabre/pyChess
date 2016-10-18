@@ -205,14 +205,15 @@ class Player(object):
                if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
                   if move not in validMap:
                       self.debug.dprint("Adding new move for pawn for En Passant: ", move)
-                      validMap[move] = set(Util.MoveType.CAPTURE);
+                      validMap[move] = set();
+                      validMap[move].add(Util.MoveType.CAPTURE);
                   self.debug.dprint("Set move as En Passant: ", move)
                   validMap[move].add(Util.MoveType.EN_PASSANT)
             for move in validMap:
                if self.color.promotionRank in move:
                   self.debug.dprint("Set move as Promotion: ", move)
                   validMap[move].add(Util.MoveType.PROMOTION)
-         #TODO Now check for Castle Moves
+         #Now check for Castle Moves
          elif type(piece) == King:
             self.debug.dprint("King Specials.")
             if not piece.moved and not self.checked:
@@ -342,17 +343,17 @@ class Player(object):
             capturePiece = None
             promotionPiece = None
             castledRook = None
-            if Util.MoveType.CAPTURE in validMoves[endCoord]:
-               self.debug.dprint("Capture move.")
-               self.generateCapture(piece, True)
-               capturePiece = self.capture(endCoord)
-               self.debug.dprint("Captured piece: ", capturePiece)
-            elif Util.MoveType.EN_PASSANT in validMoves[endCoord]:
+            if Util.MoveType.EN_PASSANT in validMoves[endCoord]:
                #We know that this is a pawn now
                self.debug.dprint("En Passant Capture move.")
                self.generateCapture(piece, True)
                capturePiece = self.capture(endCoord[0]+piece.position[1])
                self.debug.dprint("En Passant Captured piece: ", capturePiece)
+            elif Util.MoveType.CAPTURE in validMoves[endCoord]:
+               self.debug.dprint("Capture move.")
+               self.generateCapture(piece, True)
+               capturePiece = self.capture(endCoord)
+               self.debug.dprint("Captured piece: ", capturePiece)
             elif Util.MoveType.KINGSIDECASTLE in validMoves[endCoord]:
                self.debug.dprint("Kingside Castle move.")
                self.generateCastle(Util.Castle.KINGSIDE)

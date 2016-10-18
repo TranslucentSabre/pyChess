@@ -158,7 +158,7 @@ class ChessGame():
       for player in [self.whitePlayer, self.blackPlayer]:
          piece = player.getMyPieceAtLocation(coord)
          if piece:
-            return player.getValidMovesForPiece(piece)
+            return [ piece.piece, player.getValidMovesForPiece(piece) ]
          else:
             continue
 
