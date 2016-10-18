@@ -174,8 +174,7 @@ class Player(object):
       """Return a map of available moves for the piece at the coordinate, move mapped to move type"""
       self.debug.startSection("getValidMovesForPieceAtCoord")
       validMap = {}
-      vBoard = VerifyBoard(self.getAllPieces)
-      piece = vBoard.getPiece(coord)
+      piece = getMyPieceAtLocation(coord)
       if piece:
          self.debug.dprint("Found piece for getting valid moves.")
          validMap = self.getValidMovesForPiece(piece)
@@ -193,7 +192,7 @@ class Player(object):
          self.debug.dprint("Valid moves from Piece: ", validList)
          for move in validList:
             validMap[move] = set()
-            if self.enemyPieceIsAtLocation(move, vBoard):
+            if self._enemyPieceIsAtLocation(move, vBoard):
                self.debug.dprint("Set move as capture:", move)
                validMap[move].add(Util.MoveType.CAPTURE)
             else:
@@ -302,7 +301,12 @@ class Player(object):
       """Returns a function that only accepts pieces that are at the specificed coordinate"""
       return lambda piece: piece.position == coord
 
-   def enemyPieceIsAtLocation(self,coord, vBoard):
+   def getMyPieceAtLocation(self, coord):
+      """This returns my piece at the given location or None if I don't have a piece there"""
+      return VerifyBoard(self.getAllPieces()).getPiece(coord)
+
+
+   def _enemyPieceIsAtLocation(self,coord, vBoard):
       """This checks to see if there is an enemy piece at the position given"""
       result = False
       otherPiece = vBoard.getPiece(coord)

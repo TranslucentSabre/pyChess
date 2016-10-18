@@ -11,7 +11,7 @@ except NameError:
     pass
 
 class Chess(cmd.Cmd):
-   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.3.0\n"
+   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.4.0\n"
    prompt = "pyChess# "
    game = ChessGame()
 
@@ -85,6 +85,17 @@ class Chess(cmd.Cmd):
       else:
          print(self.game.lastError)
          self.game.cancelTurn()
+
+   def do_valid(self,arg):
+      """Print the valid moves of all pieces in play with no arguments or print the moves of just the piece at the coordiante given.\n
+         Ex. valid\n
+             valid f3\n"""
+      coord = arg.split()
+      if len(coord) == 1:
+         coord = coord[0]
+         print(self.game.getValidMovesForPieceAtPosition(coord))
+      else:
+         print(self.game.getAllValidMoves())
 
    def do_load(self,arg):
       """Read all games from a file and make them available to be the current game, if no argument is given use the default import file configured,

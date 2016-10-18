@@ -6,7 +6,7 @@ def readme():
         return readme.read()
 
 setup(  name='pychess',
-        version='1.3',
+        version='1.4',
         description='Python Chess engine with CLI and REST based Web User interfaces',
         long_description=readme(),
         url='https://github.com/TranslucentSabre/pyChess',

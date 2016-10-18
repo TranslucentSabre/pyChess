@@ -1,4 +1,40 @@
 Resource URL:
+
+"""Set or read configuration options. The first argument must be one of the following settings:
+import    (read/set default import file)
+export    (read/set default export file)
+name      (read/set the players real name)
+location  (read/set the physical location of the player)
+strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)"""
+
+
+    /config
+    Operations :
+        Get : Returns the values of all configuration settings
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                config : Json object keyed by config item name with the appropriate values
+
+
+    /config/<configItem>
+    Operations :
+        Get : Return the value of the specific config item
+            Input :
+                None
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+                value  : The value of the requested config item.
+
+        Put : Set the value of the specific config item
+            Input :
+                value : The value to set for the config item
+            Output :
+                result : String indicating success or failure
+                error  : String indicating the type of error if there was a failure
+
     /game
     Operations:
         Delete : Restart the currently in progress game
@@ -78,6 +114,27 @@ Resource URL:
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
+
+    /game/moves
+    Operations :
+        Get : Get a json object of arrays of potential valid moves keyed by the current coordinate of each piece in play
+            Input :
+                None
+            Output :
+                result      : String indicating success or failure
+                error       : String indicating the type of error if there was a failure
+                moves       : Json object containing arrays of coordinates indicating valid movement locations for each piece, keyed by the coordinates of that piece
+                
+
+    /game/moves/<coordinate>
+    Operations :
+        Get : Get a json array of potential valid moves for the piece at the specified coodinates
+            Input : 
+                None
+            Output :
+                result      : String indicating success or failure
+                error       : String indicating the type of error if there was a failure
+                moves       : Json array of coordinates indicating valid movement locations for the piece at this coordinate
                 
     /game/tag
     Operations :
@@ -115,24 +172,6 @@ Resource URL:
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
 
-    /load
-    Operations :
-        Put : Load a pgn file from the file system
-            Input :
-                fileName : String, the filename of the file to load from the filesystem on the server, if this is left out, the default file from config will be loaded
-            Output :
-                result : String indicating success or failure
-                error  : String indicating the type of error if there was a failure
-
-    /save
-    Operations :
-        Put : Save the current pgn file information to the file system
-            Input :
-                fileName : String, the filename of the file to save the current game into on the filesystem on the server, if this is left out, the default file from config will be saved
-            Output :
-                result : String indicating success or failure
-                error  : String indicating the type of error if there was a failure
-                
     /games
     Operations :
         Post : Create a new game and start playing it
@@ -183,38 +222,22 @@ Resource URL:
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
 
-"""Set or read configuration options. The first argument must be one of the following settings:
-import    (read/set default import file)
-export    (read/set default export file)
-name      (read/set the players real name)
-location  (read/set the physical location of the player)
-strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)"""
-
-
-    /config
+    /load
     Operations :
-        Get : Returns the values of all configuration settings
+        Put : Load a pgn file from the file system
             Input :
-                None
-            Output :
-                result : String indicating success or failure
-                config : Json object keyed by config item name with the appropriate values
-
-
-    /config/<configItem>
-    Operations :
-        Get : Return the value of the specific config item
-            Input :
-                None
+                fileName : String, the filename of the file to load from the filesystem on the server, if this is left out, the default file from config will be loaded
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
-                value  : The value of the requested config item.
 
-        Put : Set the value of the specific config item
+    /save
+    Operations :
+        Put : Save the current pgn file information to the file system
             Input :
-                value : The value to set for the config item
+                fileName : String, the filename of the file to save the current game into on the filesystem on the server, if this is left out, the default file from config will be saved
             Output :
                 result : String indicating success or failure
                 error  : String indicating the type of error if there was a failure
+                
 

@@ -150,6 +150,20 @@ class MoveInstance(Resource):
 
 api.add_resource(MoveInstance, "/game/move/<instance>")
 
+class Moves(Resource):
+   def get(self, coordinate):
+      pass
+
+api.add_resource(Moves, "/game/moves")
+
+
+class MovesCoordinate(Resource):
+    def get(self, coordinate):
+        pass
+
+
+api.add_resource(MovesCoordinate, "/game/moves/<coordinate>")
+
 class Tag(Resource):
    setupDone = False
    def setup(self):

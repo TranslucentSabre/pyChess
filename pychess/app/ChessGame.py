@@ -144,6 +144,24 @@ class ChessGame():
             return False
       return True
 
+   def getAllValidMoves(self):
+      """Returns the valid moves for all pieces on the board at the latest game state"""
+      allMoves = {}
+      for player in [self.whitePlayer, self.blackPlayer]:
+         for piece in player.getAllPieces():
+            allMoves[piece.position] = self.getValidMovesForPieceAtPosition(piece.position)
+      return allMoves
+
+   def getValidMovesForPieceAtPosition(self, coord):
+      """Returns the valid moves for the piece at the coordinate, or None if there is no piece there"""
+      moves = None
+      for player in [self.whitePlayer, self.blackPlayer]:
+         piece = player.getMyPieceAtLocation(coord)
+         if piece:
+            return player.getValidMovesForPiece(piece)
+         else:
+            continue
+
    def loadSaveFile(self,fileName=""):
       """Read all games from a file and store the game information, if no argument is given use the default import file configured,
 if one is given use the argument as a filename to read a savegame from."""
