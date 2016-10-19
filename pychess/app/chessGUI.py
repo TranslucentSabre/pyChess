@@ -151,15 +151,26 @@ class MoveInstance(Resource):
 api.add_resource(MoveInstance, "/game/move/<instance>")
 
 class Moves(Resource):
-   def get(self, coordinate):
-      pass
+   def get(self):
+      result = {}
+      result['result'] = "Success"
+      result['moves'] = game.getAllValidMoves()
+      return result
 
 api.add_resource(Moves, "/game/moves")
 
 
 class MovesCoordinate(Resource):
-    def get(self, coordinate):
-        pass
+   def get(self, coordinate):
+      result = {}
+      moves = game.getValidMovesForPieceAtPosition(coordinate)
+      if(moves):
+         result['result'] = "Success"
+         result['moves'] = moves
+      else:
+         result['result'] = "Failure"
+         result['error'] = "No piece at that coordinate to get moves from"
+      return result
 
 
 api.add_resource(MovesCoordinate, "/game/moves/<coordinate>")

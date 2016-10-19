@@ -191,12 +191,12 @@ class Player(object):
          validList = piece.getValidMoves(vBoard)
          self.debug.dprint("Valid moves from Piece: ", validList)
          for move in validList:
-            validMap[move] = set()
+            validMap[move] = []
             if self._enemyPieceIsAtLocation(move, vBoard):
                self.debug.dprint("Set move as capture:", move)
-               validMap[move].add(Util.MoveType.CAPTURE)
+               validMap[move].append(Util.MoveType.CAPTURE)
             else:
-               validMap[move].add(Util.MoveType.NORMAL)
+               validMap[move].append(Util.MoveType.NORMAL)
          #En Passant and promotion checking for Pawns
          if type(piece) == Pawn:
             self.debug.dprint("Pawn Specials.")
@@ -205,14 +205,14 @@ class Player(object):
                if move not in validMap and self.canPawnCaptureEnPassantAtCoord(piece, move):
                   if move not in validMap:
                       self.debug.dprint("Adding new move for pawn for En Passant: ", move)
-                      validMap[move] = set();
-                      validMap[move].add(Util.MoveType.CAPTURE);
+                      validMap[move] = [];
+                      validMap[move].append(Util.MoveType.CAPTURE);
                   self.debug.dprint("Set move as En Passant: ", move)
-                  validMap[move].add(Util.MoveType.EN_PASSANT)
+                  validMap[move].append(Util.MoveType.EN_PASSANT)
             for move in validMap:
                if self.color.promotionRank in move:
                   self.debug.dprint("Set move as Promotion: ", move)
-                  validMap[move].add(Util.MoveType.PROMOTION)
+                  validMap[move].append(Util.MoveType.PROMOTION)
          #Now check for Castle Moves
          elif type(piece) == King:
             self.debug.dprint("King Specials.")
@@ -220,13 +220,13 @@ class Player(object):
                if self.kingsideCastleIsValid(piece):
                   move = self.color.kingsideKingFile + self.color.majorRank
                   self.debug.dprint("Set move as Kingside Castle: ", move)
-                  validMap[move] = set()
-                  validMap[move].add(Util.MoveType.KINGSIDECASTLE)
+                  validMap[move] = []
+                  validMap[move].append(Util.MoveType.KINGSIDECASTLE)
                if self.queensideCastleIsValid(piece):
                   move = self.color.queensideKingFile + self.color.majorRank
                   self.debug.dprint("Set move as Queenside Castle: ", move)
-                  validMap[move] = set()
-                  validMap[move].add(Util.MoveType.QUEENSIDECASTLE)
+                  validMap[move] = []
+                  validMap[move].append(Util.MoveType.QUEENSIDECASTLE)
       self.debug.endSection()
       return validMap
 
