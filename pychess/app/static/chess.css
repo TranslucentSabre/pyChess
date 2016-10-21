@@ -12,6 +12,9 @@
 #chessBoard .whiteSquare {
    background:#fff;
 }
+#chessBoard .greenSquare {
+   background:#7fff00
+}
 #chessBoard .bottom-bordered {
    border-bottom:2px solid #000;
 }

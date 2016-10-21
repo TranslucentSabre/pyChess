@@ -223,14 +223,21 @@ function showTurnBoard(turnString) {
          $(".chessSquare").html("");
          var piecesDraggable = 'draggable="true"';
          var piecesNotDraggable = 'draggable="false"';
+         var hoverNothing = function(){};
+         var hoverOver = null;//This will be set later for each piece
+         var hoverOff = Valid.clearHighlighting;
          var whiteDraggable = piecesNotDraggable;
          var blackDraggable = piecesNotDraggable;
+         var whiteHovers = [hoverNothing, hoverNothing];
+         var blackHovers = [hoverNothing, hoverNothing];
          if (Game.lastTurnSaved == turnString) {
             if (WhiteGoesNext(turnString)) {
                 whiteDraggable = piecesDraggable;
+                whiteHovers = [hoverOver, hoverOff];
             }
             else {
                 blackDraggable = piecesDraggable;
+                blackHovers = [hoverOver, hoverOff];
             }
             enableDragFunctionality();
             $("#algebraicMove").attr("disabled",false);
@@ -242,17 +249,22 @@ function showTurnBoard(turnString) {
             $("#submitAlgebraicMove").attr("disabled",true);
          }
          var lastTurnOption = "";
+         var lastTurnHovers = [];
          $.each( data.board, function(key, value) {
+            //Set the hover over function if this is needed
+            hoverOver = function(){Valid.startHover(key);};
             if (value[0] != " ") {
                if (value[1] === "white")
                {
                    lastTurnOption = whiteDraggable;
+                   lastTurnHovers = whiteHovers;
                }
                else
                {
                    lastTurnOption = blackDraggable;
+                   lastTurnHovers = blackHovers;
                }
-               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" '+lastTurnOption+' >');
+               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" '+lastTurnOption+' >').hover(lastTurnHovers[0], lastTurnHovers[1]);
             }
          } );
          //Black metadata
@@ -683,6 +695,51 @@ var Game = {
    previouslySelectedTagValue : "",
    pageDisabled : false
 };
+
+var Valid = {
+   stillHovering : false,
+   currentCoord : "",
+   highlightedSquares : [],
+   
+   startHover : function(coord) {
+      Valid.stillHovering = true;
+      Valid.currentCoord = coord;
+      window.setTimeout(Valid.fireHover, 1000);
+   },
+
+   stopHover : function() {
+      Valid.stillHovering = false;
+      Valid.currentCoord = "";
+      Valid.clearHighlight();
+   },
+
+   fireHover: function() {
+      if(Valid.stillHovering) {
+         $.ajax( {
+            url: "/game/moves/"+Valid.currentCoord,
+            dataType: "json",
+            success: function(data, textStatus) {
+               //Remove piece name from dataset
+               squares = data.moves
+               squares.splice(0, 1);
+               $.each(squares, function(_, dict) {
+                  $.each(dict, function(key, _) {
+                     Valid.highlightedSquares.push(key);
+                     $("#"+key).addClass("greenSquare");
+                  })
+               })
+            }
+         });
+      }
+   },
+
+   clearHighlight : function() {
+      $.each(Valid.highlightedSquares, function(_, id) {
+         $("#"+id).removeClass("greenSquare")
+      })
+      Valid.highlightSquares = [];
+   }
+}
 
 var Drag = {
    jQuerySource : null,
