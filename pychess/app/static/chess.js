@@ -223,21 +223,18 @@ function showTurnBoard(turnString) {
          $(".chessSquare").html("");
          var piecesDraggable = 'draggable="true"';
          var piecesNotDraggable = 'draggable="false"';
-         var hoverNothing = function(){};
-         var hoverOver = null;//This will be set later for each piece
-         var hoverOff = Valid.clearHighlighting;
          var whiteDraggable = piecesNotDraggable;
          var blackDraggable = piecesNotDraggable;
-         var whiteHovers = [hoverNothing, hoverNothing];
-         var blackHovers = [hoverNothing, hoverNothing];
+         var whiteCurrentTurn = false;
+         var blackCurrentTurn = false;
          if (Game.lastTurnSaved == turnString) {
             if (WhiteGoesNext(turnString)) {
                 whiteDraggable = piecesDraggable;
-                whiteHovers = [hoverOver, hoverOff];
+                whiteCurrentTurn = true;
             }
             else {
                 blackDraggable = piecesDraggable;
-                blackHovers = [hoverOver, hoverOff];
+                blackCurrentTurn = true;
             }
             enableDragFunctionality();
             $("#algebraicMove").attr("disabled",false);
@@ -252,19 +249,22 @@ function showTurnBoard(turnString) {
          var lastTurnHovers = [];
          $.each( data.board, function(key, value) {
             //Set the hover over function if this is needed
-            hoverOver = function(){Valid.startHover(key);};
+            var setHovers = false;
             if (value[0] != " ") {
-               if (value[1] === "white")
+               if (value[1] === "White")
                {
                    lastTurnOption = whiteDraggable;
-                   lastTurnHovers = whiteHovers;
+                   setHovers = whiteCurrentTurn;
                }
                else
                {
                    lastTurnOption = blackDraggable;
-                   lastTurnHovers = blackHovers;
+                   setHovers = blackCurrentTurn;
                }
-               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" '+lastTurnOption+' >').hover(lastTurnHovers[0], lastTurnHovers[1]);
+               $("#"+key).html('<img src="/static/'+capatilize(value[1])+' '+value[0]+'.png" '+lastTurnOption+' >');
+               if (setHovers) {
+                  $("#"+key+">img").hover(function(){Valid.startHover(key);}, Valid.stopHover);
+               }
             }
          } );
          //Black metadata
