@@ -1,5 +1,6 @@
 from __future__ import print_function
 from pychess.app.ChessFile import isDebugEnabled
+#TODO: Add ability to write to specified file and abstraction layer
 
 class Debug(object):
 
