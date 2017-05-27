@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
 import io, os
 from pychess.app.pgn import PgnFile
-
-def isDebugEnabled():
-    config = ConfigFile()
-    debug = config.getConfigItem(ValidConfig.Debug["name"])
-    debug = booleanConfigItemIsTrue(debug)
-    del config
-    return debug
+from pychess.app.Debug import Debug
 
 def booleanConfigItemIsTrue(configValue):
    """This is necessary because config items are stored as strings"""

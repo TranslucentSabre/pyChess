@@ -1,6 +1,5 @@
 from __future__ import print_function
-from pychess.app.ChessFile import isDebugEnabled
-#TODO: Add ability to write to specified file and abstraction layer
+#TODO: Add ability to write to specified file 
 
 class Debug(object):
 
@@ -8,9 +7,10 @@ class Debug(object):
       self.sections = []
       self.indent = 2
       self.indentString = ""
+      self.enabled = False
 
    def dprint(self, *printables):
-      if isDebugEnabled():
+      if self.enabled:
          section = ""
          if len(self.sections) > 0:
             section = self.sections[-1]
@@ -32,3 +32,6 @@ class Debug(object):
       numSections = len(self.sections)
       if numSections > 1:
          self.indentString = "".center((numSections-1)*self.indent)
+
+   def enableDebug(self, enabledFlag):
+      self.enabled = enabledFlag
