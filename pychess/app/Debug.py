@@ -1,4 +1,5 @@
 from __future__ import print_function
+from sys import stdout
 #TODO: Add ability to write to specified file 
 
 class Debug(object):
@@ -8,13 +9,14 @@ class Debug(object):
       self.indent = 2
       self.indentString = ""
       self.enabled = False
+      self.outputFile = stdout
 
    def dprint(self, *printables):
       if self.enabled:
          section = ""
          if len(self.sections) > 0:
             section = self.sections[-1]
-         print(self.indentString, section, *printables)
+         print(self.indentString, section, *printables, file=self.outputFile)
 
    def startSection(self, sectionName):
       self.sections.append(sectionName)
