@@ -63,6 +63,6 @@ class Debug(object):
             self.outputFile = self.defaultOutputFile
          self.errorString = ""
          return True
-      else
+      else:
          self.errorString = "Output file cannot be changed while debug is enabled."
          return False
