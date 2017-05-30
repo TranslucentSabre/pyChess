@@ -5,6 +5,7 @@ from pychess.app.ChessFile import *
 from pychess.test.TestPyChess import *
 from pychess.app import Piece
 from pychess.app import Util
+import os
 
 
 class ChessGame():
@@ -271,6 +272,10 @@ if one is given use the argument as a filename to read a savegame from."""
       self.whitePlayer.enableDebug(debugEnabled)
       self.blackPlayer.enableDebug(debugEnabled)
 
+   def setDebugFileName(self, debugFileName):
+      self.whitePlayer.setDebugFileName(debugFileName)
+      self.blackPlayer.setDebugFileName(debugFileName)
+
    def _getConfigOption(self, option):
       retVal = ""
       if option["name"] in ValidConfig.validConfigItems:
@@ -281,12 +286,20 @@ if one is given use the argument as a filename to read a savegame from."""
       if option["name"] in ValidConfig.validConfigItems:
          if "values" in option and value not in option["values"]:
             return False
+         #Make immediate changes
+         #Do these first, if these fail, do not write to file
+         if option["name"] == ValidConfig.Debug["name"]:
+            self.enableDebug(booleanConfigItemIsTrue(value))
+         elif option["name"] == ValidConfig.DebugFile["name"]:
+            if value == ValidConfig.DebugFile["default"]:
+               filename = value
+            else:
+               fileDir = os.path.abspath(self._getConfigOption(ValidConfig.FileDir))
+               filename = os.path.join(fileDir, value)
+            self.setDebugFileName(filename)
          #Write config option to file
          self.files.setConfigItem(option["name"], value)
          self.files.writeConfig()
-         #Make immediate changes
-         if option["name"] == "debug":
-            self.enableDebug(booleanConfigItemIsTrue(value))
          return True
       return False
 

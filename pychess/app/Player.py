@@ -60,6 +60,9 @@ class Player(object):
    def enableDebug(self, debugEnabled):
       self.debug.enableDebug(debugEnabled)
 
+   def setDebugFileName(self, debugFileName):
+      self.debug.setOutputFileName(debugFileName)
+
    def getAllPieces(self):
       """Return an array of all of my current pieces"""
       return self.pawns + self.rooks + self.knights + self.bishops + self.queens + [self.king]
