@@ -39,17 +39,8 @@ class Debug(object):
          self.indentString = "".center((numSections-1)*self.indent)
 
    def enableDebug(self, enabledFlag):
-      self.enabled = enabledFlag
-
-   def setDefaultOutput(self):
-      return self.setOutputFileName(self.defaultOutputFileName)
-
-   def setOutputFileName(self, outputFileName):
-      if not self.enabled:
-         if self.outputFileName != self.defaultOutputFileName:
-            #Our current file is not STDOUT, we must close it
-            self.outputFile.close()
-         self.outputFileName = outputFileName
+      if enabledFlag:
+         #Open debug file if necessary
          if self.outputFileName != self.defaultOutputFileName:
             #We are using a file that is not STDOUT, we must open it
             try:
@@ -58,9 +49,20 @@ class Debug(object):
                self.outputFileName = self.defaultOutputFileName
                self.outputFile = self.defaultOutputFile
                self.errorStatus = "Cannot open output file. Defaulting to STDOUT"
-               return False
          else:
             self.outputFile = self.defaultOutputFile
+      else:
+         if self.outputFileName != self.defaultOutputFileName:
+            #Our current file is not STDOUT, we must close it
+            self.outputFile.close()
+      self.enabled = enabledFlag
+
+   def setDefaultOutput(self):
+      return self.setOutputFileName(self.defaultOutputFileName)
+
+   def setOutputFileName(self, outputFileName):
+      if not self.enabled:
+         self.outputFileName = outputFileName
          self.errorString = ""
          return True
       else:
