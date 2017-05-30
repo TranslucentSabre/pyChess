@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import io, os
 from pychess.app.pgn import PgnFile
-from pychess.app.Debug import Debug
 
 def booleanConfigItemIsTrue(configValue):
    """This is necessary because config items are stored as strings"""
@@ -64,6 +63,7 @@ class ConfigFile(object):
    def setConfigItem(self,key,item):
       if key in ValidConfig.validConfigItems:
          self.configDict[key] = item
+      
 
 
 class ChessFiles(ConfigFile):

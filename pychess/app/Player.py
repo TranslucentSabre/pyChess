@@ -57,6 +57,9 @@ class Player(object):
    def setOpponent(self, player):
       self.otherPlayer = player
 
+   def enableDebug(self, debugEnabled):
+      self.debug.enableDebug(debugEnabled)
+
    def getAllPieces(self):
       """Return an array of all of my current pieces"""
       return self.pawns + self.rooks + self.knights + self.bishops + self.queens + [self.king]

@@ -267,6 +267,10 @@ if one is given use the argument as a filename to read a savegame from."""
       else:
          unittest.main(exit=False)
 
+   def enableDebug(self, debugEnabled):
+      self.whitePlayer.enableDebug(debugEnabled)
+      self.blackPlayer.enableDebug(debugEnabled)
+
    def _getConfigOption(self, option):
       retVal = ""
       if option["name"] in ValidConfig.validConfigItems:
@@ -277,8 +281,12 @@ if one is given use the argument as a filename to read a savegame from."""
       if option["name"] in ValidConfig.validConfigItems:
          if "values" in option and value not in option["values"]:
             return False
+         #Write config option to file
          self.files.setConfigItem(option["name"], value)
          self.files.writeConfig()
+         #Make immediate changes
+         if option["name"] == "debug":
+            self.enableDebug(booleanConfigItemIsTrue(value))
          return True
       return False
 
