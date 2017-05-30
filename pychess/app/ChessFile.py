@@ -12,7 +12,7 @@ def booleanConfigItemIsTrue(configValue):
 
 
 class ValidConfig(object):
-      validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict","files"]
+      validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict","files","debugFile"]
       ImportFile       = {"name" : validConfigItems[0], "default" : "savegame.pgn"}
       ExportFile       = {"name" : validConfigItems[1], "default" : "savegame.pgn"}
       PlayerName       = {"name" : validConfigItems[2], "default" : "Unknown"}
@@ -20,9 +20,10 @@ class ValidConfig(object):
       Debug            = {"name" : validConfigItems[4], "default" : "False", "values" : ["True", "False"]}
       StrictParse      = {"name" : validConfigItems[5], "default" : "False", "values" : ["True", "False"]}
       FileDir          = {"name" : validConfigItems[6], "default" : "."}
+      DebugFile        = {"name" : validConfigItems[7], "default" : "STDOUT"}
       configMap = {"import":ImportFile, "export":ExportFile, "name":PlayerName, \
                    "location":Location, "debug":Debug, "strict":StrictParse, \
-                   "files":FileDir}
+                   "files":FileDir, "debugFile":DebugFile}
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing configuration"""
