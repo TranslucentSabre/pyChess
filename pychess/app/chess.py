@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from colorama import init
 from pychess.app.ChessGame import *
+from pychess.app.ChessFile import booleanConfigItemIsTrue
 import cmd
 
 """This tries to make raw_input look like input for python 2.7
@@ -76,15 +77,19 @@ class Chess(cmd.Cmd):
       if len(move) > 1:
          print("Only one argument is valid.")
          return
-      if self.game.algebraicMove(move[0]):
-         print(self.game.showPendingBoard())
-         if self._booleanPrompt("Are you sure this is the move you would like to make?"):
-            self.game.commitTurn()
+      if len(move) == 1:
+         if self.game.algebraicMove(move[0]):
+            if booleanConfigItemIsTrue(self.game.getConfigItem("confirm")):
+               print(self.game.showPendingBoard())
+               if self._booleanPrompt("Are you sure this is the move you would like to make?"):
+                  self.game.commitTurn()
+               else:
+                  self.game.cancelTurn()
+            else:
+               self.game.commitTurn()
          else:
+            print(self.game.lastError)
             self.game.cancelTurn()
-      else:
-         print(self.game.lastError)
-         self.game.cancelTurn()
 
    def do_valid(self,arg):
       """Print the valid moves of all pieces in play with no arguments or print the moves of just the piece at the coordiante given.\n
@@ -135,6 +140,7 @@ if one is given use the argument as a filename to write the savegame to."""
       location  (read/set the physical location of the player)
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
       files     (read/set path to the location of save games and configuration
+      confirm   (read/set whether to ask for confirmation on moves)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen."""
       #Only split once, this allows the user to supply items with spaces in them
