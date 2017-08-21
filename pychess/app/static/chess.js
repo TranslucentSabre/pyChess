@@ -700,14 +700,24 @@ var Valid = {
    stillHovering : false,
    currentCoord : "",
    highlightedSquares : [],
+   timeout : null,
    
    startHover : function(coord) {
       Valid.stillHovering = true;
       Valid.currentCoord = coord;
-      window.setTimeout(Valid.fireHover, 1000);
+      if(Valid.timeout != null)
+      {
+         clearTimeout(Valid.timeout);
+      }
+      Valid.timeout = setTimeout(Valid.fireHover, 1000);
    },
 
    stopHover : function() {
+      if(Valid.timeout != null)
+      {
+         clearTimeout(Valid.timeout);
+         Valid.timeout = null;
+      }
       Valid.stillHovering = false;
       Valid.currentCoord = "";
       Valid.clearHighlight();
@@ -763,6 +773,9 @@ var Drag = {
       Drag.jQueryDest = $(evt.currentTarget);
       if (Drag.jQuerySource[0] !== Drag.jQueryDest[0]) {
 
+         //For some reason, whenever a piece is dropped the stop hover isn't called
+         //Do it now
+         Valid.stopHover();
          Drag.jQuerySource.html("");
          promotionPiece = null;
 
