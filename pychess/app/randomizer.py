@@ -1,6 +1,6 @@
 import random
 
-class randomizer(object):
+class Randomizer(object):
    """Class used to randomly generate sets of chess pieces"""
 
    def __init__(self):
@@ -26,7 +26,7 @@ class randomizer(object):
 
    def generatePieceSets(self, number=10):
       while number > 0:
-         getter.generatePieceSet()
+         self.generatePieceSet()
          number = number - 1
 
    def clearGeneratedSets(self):
@@ -51,7 +51,7 @@ class randomizer(object):
 
 
 if __name__ == "__main__":
-   getter = randomizer()
+   getter = Randomizer()
    print(getter.generatePieceSet())
    print(getter.generatePieceSet())
    print(getter.generatePieceSet())
