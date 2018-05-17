@@ -10,7 +10,6 @@ class Randomizer(object):
                            "R" : 5,
                            "Q" : 9 }
       self.generatedPieces = {}
-      self.generatedPiecesReverse = {}
 
    def generatePieceSet(self):
       pieces = []
@@ -19,9 +18,6 @@ class Randomizer(object):
       pieceSet = "".join(sorted(pieces))
       pieceSetValue = self.getSetValue(pieceSet)
       self.generatedPieces[pieceSet] = pieceSetValue
-      valueSets = self.generatedPiecesReverse.get(pieceSetValue, [])
-      valueSets.append(pieceSet)
-      self.generatedPiecesReverse[pieceSetValue] = valueSets
       return pieceSet
 
    def generatePieceSets(self, number=10):
@@ -31,38 +27,29 @@ class Randomizer(object):
 
    def clearGeneratedSets(self):
       self.generatedPieces = {}
-      self.generatedPiecesReverse = {}
 
    def getSetValue(self, pieceSet):
       return self.generatedPieces.get(pieceSet, sum([self.pieceValues.get(piece, 0) for piece in pieceSet]))
 
    def getRandomPieceSet(self):
-      return random.choice(list(self.generatedPieces.keys()))
+      try:
+         return random.choice(list(self.generatedPieces.keys()))
+      except IndexError:
+         return None
 
-   def getPieceSetWithinThreshold(self, otherPieceSet, threshold=5):
+   def getPieceSetsWithinThreshold(self, otherPieceSet, threshold=5):
       otherValue = self.getSetValue(otherPieceSet)
       possibleMatches = []
-      for value in self.generatedPiecesReverse:
+      for pieceSet, value in self.generatedPieces.items():
          if value - threshold <= otherValue and otherValue <= value + threshold:
-            for pieceSet in self.generatedPiecesReverse[value]:
-               possibleMatches.append(pieceSet)
-      print(possibleMatches)
-      return random.choice(possibleMatches)
+            possibleMatches.append(pieceSet)
+      return possibleMatches
 
+   def getPieceSetWithinThreshold(self, otherPieceSet, threshold=5):
+      possibleMatches = self.getPeiceSetsWithinThreshold(otherPieceSet, threshold)
+      try:
+         return random.choice(possibleMatches)
+      except IndexError:
+         return None
 
-if __name__ == "__main__":
-   getter = Randomizer()
-   print(getter.generatePieceSet())
-   print(getter.generatePieceSet())
-   print(getter.generatePieceSet())
-   print(getter.generatedPieces)
-   print(getter.getSetValue("ABCDEFGHIJKLMNPQRSTUVWXYZ"))
-   getter.generatePieceSets()
-   print(getter.generatedPieces)
-   print(getter.generatedPiecesReverse)
-   print("")
-   pieceSet = getter.getRandomPieceSet()
-   print(pieceSet)
-   print(getter.getPieceSetWithinThreshold(pieceSet))
-   
 

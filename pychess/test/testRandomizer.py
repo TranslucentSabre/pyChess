@@ -18,7 +18,7 @@ class RandomizerTest(unittest.TestCase):
       self.assertEqual(15, len(genSet))
 
       for piece in genSet:
-         self.assertEqual(True, piece in self.randomizer.pieceValues)
+         self.assertTrue(piece in self.randomizer.pieceValues)
 
    def test_generateMultipleSets_Default(self):
       self.randomizer.generatePieceSets()
@@ -40,6 +40,34 @@ class RandomizerTest(unittest.TestCase):
                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : 21}
       for pieceSet in specifiedSets:
          self.assertEqual(specifiedSets[pieceSet], self.randomizer.getSetValue(pieceSet))
+
+   def test_getRandomSet_Empty(self):
+      self.assertIsNone(self.randomizer.getRandomPieceSet())
+
+   def test_getRandomSet_NonEmpty(self):
+      self.randomizer.generatePieceSets()
+      iterations = 10
+      while iterations > 0:
+         pieceSet = self.randomizer.getRandomPieceSet()
+         self.assertIsNotNone(pieceSet)
+         self.assertIn(pieceSet, self.randomizer.generatedPieces)
+         iterations = iterations - 1 
+
+   def test_getSetsWithinThreshold_Empty(self):
+      self.assertEqual([], self.randomizer.getPieceSetsWithinThreshold("QQQQQQQQQQQQQQQ"))
+
+   def test_getSetsWithinThreshold(self):
+      self.randomizer.generatePieceSets()
+      #Get one set of the ones generated
+      pieceSet = list(self.randomizer.generatedPieces.keys())[0]
+      for threshold in range(0,21,5):
+         with self.subTest(threshold=threshold):
+            self.assertEqual([], self.randomizer.getPieceSetsWithinThreshold("QQQQQQQQQQQQQQQ", threshold))
+            pieceSets = self.randomizer.getPieceSetsWithinThreshold(pieceSet, threshold)
+            self.assertTrue(len(pieceSets) >= 1)
+            setValue = self.randomizer.getSetValue(pieceSet)
+            for testedSet in pieceSets:
+               self.assertTrue(abs(setValue-self.randomizer.getSetValue(testedSet)) <= threshold)
    
 if __name__ == "__main__":
     unittest.main()
