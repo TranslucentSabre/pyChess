@@ -29,9 +29,26 @@ class randomizer(object):
          getter.generatePieceSet()
          number = number - 1
 
+   def clearGeneratedSets(self):
+      self.generatedPieces = {}
+      self.generatedPiecesReverse = {}
 
    def getSetValue(self, pieceSet):
-      return sum([self.pieceValues.get(piece, 0) for piece in pieceSet])
+      return self.generatedPieces.get(pieceSet, sum([self.pieceValues.get(piece, 0) for piece in pieceSet]))
+
+   def getRandomPieceSet(self):
+      return random.choice(list(self.generatedPieces.keys()))
+
+   def getPieceSetWithinThreshold(self, otherPieceSet, threshold=5):
+      otherValue = self.getSetValue(otherPieceSet)
+      possibleMatches = []
+      for value in self.generatedPiecesReverse:
+         if value - threshold <= otherValue and otherValue <= value + threshold:
+            for pieceSet in self.generatedPiecesReverse[value]:
+               possibleMatches.append(pieceSet)
+      print(possibleMatches)
+      return random.choice(possibleMatches)
+
 
 if __name__ == "__main__":
    getter = randomizer()
@@ -43,4 +60,9 @@ if __name__ == "__main__":
    getter.generatePieceSets()
    print(getter.generatedPieces)
    print(getter.generatedPiecesReverse)
+   print("")
+   pieceSet = getter.getRandomPieceSet()
+   print(pieceSet)
+   print(getter.getPieceSetWithinThreshold(pieceSet))
+   
 
