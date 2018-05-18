@@ -33,6 +33,14 @@ class Piece(object):
       else:
          return returnValue
 
+   def _getFileNumber(self):
+      """Return the ascii value of the file of the piece as a number"""
+      return ord(self.position[0])
+
+   def _getRankNumber(self):
+      """Return the rank of the piece as a number"""
+      return int(self.position[1])
+
    def move(self,coord):
       """Attempt to move this piece, it will fail if the movement places it outside the
          board or if it does not have an initial position"""
@@ -99,8 +107,8 @@ class Knight(Piece):
       """Get the valid moves for a Knight"""
       currentPosition = self.position
       if vBoard.getPiece(currentPosition) == self:
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          #I probably should break this list comprension up because this is just long, we will see
          physicalMoves = [chr(file) + str(rank) for file in range(fileNum - 2, fileNum + 3) for rank in range(rankNum - 2, rankNum + 3) if (abs(rank-rankNum) == 2 and abs(file-fileNum) == 1) or (abs(rank-rankNum) == 1 and abs(file-fileNum) == 2)]
          validMoves = []
@@ -133,8 +141,8 @@ class Rook(Piece):
          continueLeft = True
          continueRight = True
          keepChecking = True
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          loopCounter = 1
          validMoves = []
          while keepChecking:
@@ -188,8 +196,8 @@ class Bishop(Piece):
          continueLowerLeft = True
          continueLowerRight = True
          keepChecking = True
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          loopCounter = 1
          validMoves = []
          while keepChecking:
@@ -246,8 +254,8 @@ class Queen(Piece):
          continueLeft = True
          continueRight = True
          keepChecking = True
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          loopCounter = 1
          validMoves = []
          while keepChecking:
@@ -322,8 +330,8 @@ class King(Piece):
       """Get the valid moves for the King"""
       currentPosition = self.position
       if vBoard.getPiece(currentPosition) == self:
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          physicalMoves = [chr(file) + str(rank) for file in range(fileNum - 1, fileNum + 2) for rank in range(rankNum - 1, rankNum + 2) if not file == rank]
          validMoves = []
          for move in physicalMoves:
@@ -377,8 +385,8 @@ class Pawn(Piece):
       """Get the valid moves for a Pawn"""
       currentPosition = self.position
       if vBoard.getPiece(currentPosition) == self:
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          captures = [ chr(fileNum-1) + str(rankNum + self.color.pawnRankModifier), chr(fileNum +1) + str(rankNum + self.color.pawnRankModifier)]
          regular = [ chr(fileNum) + str(rankNum + self.color.pawnRankModifier) ]
          if (not self.moved):
