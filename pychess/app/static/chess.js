@@ -560,12 +560,16 @@ function resetAllGames() {
 
 var Config = {
    values : {},
-   backToFront : {"import" : "Default File To Load",
-                  "export" : "Default File To Save",
-                  "strict" : "Strict Algebraic Move Parsing"},
+   backToFront : {"import"    : "Default File To Load",
+                  "export"    : "Default File To Save",
+                  "strict"    : "Strict Algebraic Move Parsing"},
+                  "random"    : "Random pieces on new game"},
+                  "threshold" : "Maximum difference between piece values in random games"},
    frontToBack : {"Default File To Load" : "import",
                   "Default File To Save" : "export",
                   "Strict Algebraic Move Parsing" : "strict"}
+                  "Random pieces on new game" : "random"},
+                  "Maximum difference between piece values in random games" : "threshold"},
 };
 
 function showConfigItem() {
