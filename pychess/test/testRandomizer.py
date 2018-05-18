@@ -69,5 +69,20 @@ class RandomizerTest(unittest.TestCase):
             for testedSet in pieceSets:
                self.assertTrue(abs(setValue-self.randomizer.getSetValue(testedSet)) <= threshold)
    
+   def test_getSetWithinThreshold_Empty(self):
+      self.assertEqual(None, self.randomizer.getPieceSetWithinThreshold("QQQQQQQQQQQQQQQ"))
+
+   def test_getSetWithinThreshold(self):
+      self.randomizer.generatePieceSets()
+      #Get one set of the ones generated
+      pieceSet = list(self.randomizer.generatedPieces.keys())[0]
+      for threshold in range(0,21,5):
+         with self.subTest(threshold=threshold):
+            self.assertEqual(None, self.randomizer.getPieceSetWithinThreshold("QQQQQQQQQQQQQQQ", threshold))
+            otherSet = self.randomizer.getPieceSetWithinThreshold(pieceSet, threshold)
+            setValue = self.randomizer.getSetValue(pieceSet)
+            otherValue = self.randomizer.getSetValue(otherSet)
+            self.assertTrue(abs(setValue-otherValue) <= threshold)
+   
 if __name__ == "__main__":
     unittest.main()

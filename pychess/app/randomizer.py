@@ -46,7 +46,7 @@ class Randomizer(object):
       return possibleMatches
 
    def getPieceSetWithinThreshold(self, otherPieceSet, threshold=5):
-      possibleMatches = self.getPeiceSetsWithinThreshold(otherPieceSet, threshold)
+      possibleMatches = self.getPieceSetsWithinThreshold(otherPieceSet, threshold)
       try:
          return random.choice(possibleMatches)
       except IndexError:
