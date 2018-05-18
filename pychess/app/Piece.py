@@ -347,6 +347,9 @@ class Pawn(Piece):
    """A Pawn"""
    def __init__(self, color, position):
       super(Pawn,self).__init__("Pawn", color, position)
+      #Keep track of initial rank and charge rank for each pawn, necessary for random mode
+      self.startingRank = self._getRankNumber()
+      self.chargeRank = self.startingRank + (2 * self.color.pawnRankModifier)
       self.enPassantCapturable = False
 
    def move(self,coord):
@@ -356,7 +359,7 @@ class Pawn(Piece):
       if self.placed:
          if Util.isCoordValid(coord):
             self.lastState = (self.position, self.moved, self.enPassantCapturable)
-            if self.color.pawnRank in self.position and self.color.pawnChargeRank in coord:
+            if str(self.startingRank) in self.position and str(self.chargeRank) in coord:
                self.enPassantCapturable = True
             else:
                self.enPassantCapturable = False
@@ -377,8 +380,8 @@ class Pawn(Piece):
          self.lastState = ()
 
    def getCaptureCoords(self):
-      fileNum = ord(self.position[0])
-      rankNum = int(self.position[1])
+      fileNum = self._getFileNumber()
+      rankNum = self._getRankNumber()
       return [coord for coord in [chr(fileNum-1) + str(rankNum + self.color.pawnRankModifier), chr(fileNum +1) + str(rankNum + self.color.pawnRankModifier)] if Util.isCoordValid(coord)]
 
    def getValidMoves(self, vBoard):
