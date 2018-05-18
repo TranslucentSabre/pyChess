@@ -25,9 +25,11 @@ class RandomizerTest(unittest.TestCase):
       self.assertEqual(10, len(self.randomizer.generatedPieces))
 
    def test_generateMultipleSets_Specified(self):
-      specifiedSets = 7
-      self.randomizer.generatePieceSets(specifiedSets)
-      self.assertEqual(specifiedSets, len(self.randomizer.generatedPieces))
+      for generatedSets in range(0,101,5):
+         with self.subTest(generatedSets=generatedSets):
+            self.randomizer.generatePieceSets(generatedSets)
+            self.assertEqual(generatedSets, len(self.randomizer.generatedPieces))
+            self.randomizer.clearGeneratedSets()
 
    def test_setValues(self):
       specifiedSets = { "BBBBBBBBBBBBBBB" : 45,

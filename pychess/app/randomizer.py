@@ -21,9 +21,9 @@ class Randomizer(object):
       return pieceSet
 
    def generatePieceSets(self, number=10):
-      while number > 0:
+      startingSize = len(self.generatedPieces)
+      while len(self.generatedPieces) - startingSize < number :
          self.generatePieceSet()
-         number = number - 1
 
    def clearGeneratedSets(self):
       self.generatedPieces = {}
