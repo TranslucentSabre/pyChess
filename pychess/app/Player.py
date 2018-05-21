@@ -1,3 +1,4 @@
+import random
 from pychess.app.Piece import *
 from pychess.app.Board import *
 from pychess.app.Algebra import *
@@ -16,7 +17,7 @@ class PlayerLastMove(object):
 class Player(object):
    """Base player class"""
 
-   def __init__(self):
+   def __init__(self, **kwargs):
       """Create all our pieces in their initial locations"""
 
       self.checked = False
@@ -40,12 +41,48 @@ class Player(object):
 
       self.debug = Debug()
 
-      self.pawns = [Pawn(self.color,file+self.color.pawnRank) for file in Util.files]
-      self.rooks = [Rook(self.color,file+self.color.majorRank) for file in rookFiles]
-      self.knights = [Knight(self.color,file+self.color.majorRank) for file in knightFiles]
-      self.bishops = [Bishop(self.color,file+self.color.majorRank) for file in bishopFiles]
-      self.queens = [Queen(self.color,"d"+self.color.majorRank)]
+      randomPieces = kwargs.get("pieces", None)
+      randomPieces = "PPPPPPPPRRKKBBQ"
+
+      if randomPieces:
+         #Random piece distribution and placement
+         self.pawns = []
+         self.rooks = []
+         self.knights = []
+         self.bishops = []
+         self.queens = []
+
+         #Create a list of all possible coords except for the king's coord
+         consumeCoords = [file+rank for file in Util.files for rank in [self.color.pawnRank, self.color.majorRank]]  
+         consumeCoords.remove("e"+self.color.majorRank)
+
+         for piece in randomPieces:
+            coord = random.choice(consumeCoords)
+            consumeCoords.remove(coord)
+
+            if piece == "P":
+               self.pawns.append(Pawn(self.color, coord))
+            elif piece == "R":
+               self.rooks.append(Rook(self.color, coord))
+            elif piece == "N":
+               self.knights.append(Knight(self.color, coord))
+            elif piece == "B":
+               self.bishops.append(Bishop(self.color, coord))
+            elif piece == "Q":
+               self.queens.append(Queen(self.color, coord))
+
+
+      else:
+         #Standard piece distribution and placement
+         self.pawns = [Pawn(self.color,file+self.color.pawnRank) for file in Util.files]
+         self.rooks = [Rook(self.color,file+self.color.majorRank) for file in rookFiles]
+         self.knights = [Knight(self.color,file+self.color.majorRank) for file in knightFiles]
+         self.bishops = [Bishop(self.color,file+self.color.majorRank) for file in bishopFiles]
+         self.queens = [Queen(self.color,"d"+self.color.majorRank)]
+
+      #The king is always in the same space no matter what
       self.king = King(self.color,"e"+self.color.majorRank)
+
       #This is a lookup table that is primarily used for captures and un-captures
       self.pieceMap = { "Pawn" : self.pawns,
                         "Rook" : self.rooks,
@@ -632,15 +669,15 @@ class Player(object):
 
 class WhitePlayer(Player):
    """The Player of the White Pieces"""
-   def __init__(self):
+   def __init__(self, **kwargs):
       self.color = Util.colors.WHITE
-      super(WhitePlayer,self).__init__()
+      super(WhitePlayer,self).__init__(**kwargs)
 
 class BlackPlayer(Player):
    """The Player of the Black Pieces"""
-   def __init__(self):
+   def __init__(self, **kwargs):
       self.color = Util.colors.BLACK
-      super(BlackPlayer,self).__init__()
+      super(BlackPlayer,self).__init__(**kwargs) 
 
 def getIds(lst):
    return [id(val) for val in lst]
