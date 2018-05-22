@@ -42,7 +42,6 @@ class Player(object):
       self.debug = Debug()
 
       randomPieces = kwargs.get("pieces", None)
-      randomPieces = "PPPPPPPPRRKKBBQ"
 
       if randomPieces:
          #Random piece distribution and placement
