@@ -1,3 +1,4 @@
+import re
 import pychess.app.randomizer
 
 class FEN(object):
@@ -16,25 +17,38 @@ class FEN(object):
       if fenString:
 
 
-   class FENValidator(object):
-      
-      def __init__(self):
-         self.boardSize = 8
-         self.__resetErrString__()
+class FENValidator(object):
 
-      def __resetErrString__(self):
-         self.errStr = "None"
+   validPieces = "rnbqkpRNBQKP"
+   
+   def __init__(self, ranks=8, files=8):
+      self.rankNum = ranks
+      self.fileNum = files
+      self.__resetErrString__()
 
-      def validatePositions(self, positions):
-         if not type(positions) == str:
-            self.errStr = "Position string is not a string"
-            return False
+   def __resetErrString__(self):
+      self.errStr = "None"
 
-         rows = positions.split("/")
-         if not len(rows) == self.boardSize:
-            self.errStr = "Should be " + str(self.boardSize) + " rows, there are "+len(rows)+"."
-            return False
+   def validatePositions(self, positions):
+      if not type(positions) == str:
+         self.errStr = "Position string is not a string"
+         return False
 
+      self.errStr = ""
+      errorState = False
+      ranks = positions.split("/")
+      if not len(ranks) == self.rankNum:
+         self.errStr += "Should be " + str(self.rankNum) + " ranks, there are "+len(ranks)+".\n"
+         errorState = True
+
+      for invRankNum, rank in ranks:
+         fileCount = len([ file for file in rank if file in FENValidator.validPieces])
+         fileCount += sum([int(empty) for empty in re.findall(r'[0-9]+', rank)])
+         if not fileCount == self.fileNum:
+            self.errStr += "Rank "+self.rankNum-invRankNum+" should be "+self.fileNum+" files, there are "+fileCount+".\n"
+            errorState = True
+
+            
 
 
          

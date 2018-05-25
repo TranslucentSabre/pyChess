@@ -3,18 +3,20 @@ from pychess.app.Board import *
 from pychess.app.Player import *
 from pychess.app.ChessFile import *
 from pychess.test.TestPyChess import *
-from pychess.app import Piece
-from pychess.app import Util
+from pychess.app import Piece, Util, randomizer
 import os
 
 
-class ChessGame():
+class ChessGame(object):
    files = ChessFiles()
    whitePlayer = WhitePlayer()
    blackPlayer = BlackPlayer()
    whitePlayer.setOpponent(blackPlayer)
    blackPlayer.setOpponent(whitePlayer)
    gameBoard = GameBoard(whitePlayer, blackPlayer)
+   #We could get by with only one randomzer, but two makes for more randomness
+   whiteRandom = randomizer.Randomizer()
+   blackRandom = randomizer.Randomizer()
    lastError = ""
    moveList = []
 
@@ -61,8 +63,13 @@ class ChessGame():
       
    def resetGameRepresentation(self):
       self.files.resetCurrentGameMoves()
-      self.whitePlayer = WhitePlayer()
-      self.blackPlayer = BlackPlayer()
+      whitePieces = None
+      blackPieces = None
+      if booleanConfigItemIsTrue(self._getConfigOption(ValidConfig.RandomMode)):
+         pass
+
+      self.whitePlayer = WhitePlayer(pieces=whitePieces)
+      self.blackPlayer = BlackPlayer(pieces=blackPieces)
       self.whitePlayer.otherPlayer = self.blackPlayer
       self.blackPlayer.otherPlayer = self.whitePlayer
       self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)

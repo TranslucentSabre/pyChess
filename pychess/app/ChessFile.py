@@ -22,7 +22,7 @@ class ValidConfig(object):
       StrictParse      = {"name" : validConfigItems[5], "default" : "False", "values" : ["True", "False"]}
       FileDir          = {"name" : validConfigItems[6], "default" : "."}
       DebugFile        = {"name" : validConfigItems[7], "default" : "STDOUT"}
-      RandomMode       = {"name" : validConfigItems[8], "default" : "False", "valuse" : ["True", "False"]}
+      RandomMode       = {"name" : validConfigItems[8], "default" : "False", "values" : ["True", "False"]}
       RandomThreshold  = {"name" : validConfigItems[9], "default" : "5"}
       configMap = {"import":ImportFile, "export":ExportFile, "name":PlayerName, \
                    "location":Location, "debug":Debug, "strict":StrictParse, \
