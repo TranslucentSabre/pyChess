@@ -245,7 +245,7 @@ class Player(object):
       return self.castleIsValid(king, castleDirection)
 
    def castleIsValid(self, king, direction):
-      self.debug.startSection("getValidMovesForPiece")
+      self.debug.startSection("castleIsValid")
       self.debug.dprint("Checking "+direction+".")
       result = False
       rook = self.findCastlingRook(direction)
@@ -289,6 +289,10 @@ class Player(object):
             break
       return foundRook
 
+   def clearEnPassant(self):
+      """The opponent has just made a move, if we still have EnPassant vulnerable Pawns they are not anymore"""
+      [pawn.clearEnPassantVunerable() for pawn in self.pawns if pawn.isEnPassantVulnerable()]
+
    def canPawnCaptureEnPassantAtCoord(self, pawn, coord):
       """Determine if the destination coordinate is an En Passant capture for the given pawn"""
       if type(pawn) == Pawn:
@@ -296,7 +300,7 @@ class Player(object):
          vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
          enemyPiece = vBoard.getPiece(possibleEnemyPosition)
          if type(enemyPiece) == Pawn and enemyPiece.color != pawn.color:
-            if enemyPiece.enPassantCapturable:
+            if enemyPiece.isEnPassantVulnerable():
                return True
             else:
                return False
@@ -437,6 +441,8 @@ class Player(object):
       self.otherPlayer.verifyCheck()
       self.otherPlayer.verifyMate()
       self.generateCheckMate(self.otherPlayer.checked, self.otherPlayer.mated)
+      self.debug.dprint(self.color, "Player Post move checking, transfer control to other player to clear EnPassant Vulnerable Pawns.")
+      self.otherPlayer.clearEnPassant()
       self.debug.endSection()
 
    def generateDisambiguation(self, piece, destination):

@@ -341,6 +341,13 @@ class Pawn(Piece):
       super(Pawn,self).__init__("Pawn", color, position)
       self.enPassantCapturable = False
 
+   def isEnPassantVulnerable(self):
+      return self.enPassantCapturable
+
+   def clearEnPassantVunerable(self):
+      """A pawn is not capturable through En Passant if not captured immediately, this facilitates this."""
+      self.enPassantCapturable = False
+
    def move(self,coord):
       """Attempt to move this piece, it will fail if the movement places it outside the
          board or if it does not have an initial position"""
