@@ -15,6 +15,7 @@ class FEN(object):
 
       fenList = []
       if fenString:
+         pass
 
 
 class FENValidator(object):
@@ -34,19 +35,20 @@ class FENValidator(object):
          self.errStr = "Position string is not a string"
          return False
 
-      self.errStr = ""
       errorState = False
       ranks = positions.split("/")
       if not len(ranks) == self.rankNum:
-         self.errStr += "Should be " + str(self.rankNum) + " ranks, there are "+len(ranks)+".\n"
+         self.errStr += "Should be {} ranks, there are {}.\n".format(self.rankNum, len(ranks))
          errorState = True
 
-      for invRankNum, rank in ranks:
+      for invRankNum, rank in enumerate(ranks):
          fileCount = len([ file for file in rank if file in FENValidator.validPieces])
          fileCount += sum([int(empty) for empty in re.findall(r'[0-9]+', rank)])
          if not fileCount == self.fileNum:
-            self.errStr += "Rank "+self.rankNum-invRankNum+" should be "+self.fileNum+" files, there are "+fileCount+".\n"
+            self.errStr += "Rank {} should be {} files, there are {}, or it has invalid pieces.\n".format(self.rankNum-invRankNum, self.fileNum, fileCount)
             errorState = True
+
+      return errorState
 
             
 
