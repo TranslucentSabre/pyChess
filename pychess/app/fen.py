@@ -14,6 +14,8 @@ class FEN(object):
    _halfmove_index_ = 4
    _fullmove_index_ = 5
 
+   VALID_BLACK_PIECES = "rnbqkp"
+   VALID_WHITE_PIECES = "RNBQKP"
    VALID_PLAYER = "bw"
    VALID_CASTLE = "-KQkq"
    VALID_NON_COORD_EN_PASSANT = "-"
@@ -25,6 +27,8 @@ class FEN(object):
       self.fenString = ""
       self.parseValid = False
       self.parseErrors = "No parse attempted"
+      self.whitePieces = []
+      self.blackPieces = []
 
    def getParseValid(self):
       return self.parseValid
@@ -39,21 +43,63 @@ class FEN(object):
       else:
          return ""
 
+   def parse(self, fenString=STANDARD_OPENING):
+      self.fenString = fenString
+
+      if self.fenString == FEN.RANDOM_OPENING:
+         #self.randomize_pieces()
+         pass
+
+      self.parseErrors = ""
+      self.parseValid = True
+
+      positionString = self._getFENItem(FEN._position_index_)
+      if positionString == "":
+         self.parseErrors += "Piece positions are not present"
+         self.parseValid = False
+         return self.parseValid
+
+      successfulParse = True and self._validatePositions(positionString)
+
+      return successfulParse
 
 
+
+   def _validatePositions(self, positions):
+      ranks = positions.split("/")
+      rankCount = len(ranks)
+     
+      for invRankNum, rank in enumerate(ranks):
+         # Each number is that number of files, each other character is 1 file
+         fileCount = len([ file for file in re.findall(r'[^0-9]', rank) ])
+         fileCount += sum([ int(empty) for empty in re.findall(r'[0-9]+', rank) ])
+
+         # Here we ensure that the board is square
+         if not fileCount == rankCount:
+            self.parseErrors += "Rank {} should be {} files, there are {}, or it has invalid pieces.\n".format(rankCount-invRankNum, rankCount, fileCount)
+            self.parseValid = False
+      
+      return self.parseValid
+      
+
+   def getBlackPieces(self):
+      return self.blackPieces
+
+   def getWhitePieces(self):
+      return self.whitePieces
 
    def getNextPlayer(self):
       return self._getFENItem(FEN._player_index_)
 
    def getHalfmoveClock(self):
-      clock = self._getFENItems(FEN._halfmove_index_)
+      clock = self._getFENItem(FEN._halfmove_index_)
       try:
          return int(clock)
       except ValueError:
          return ""
 
    def getFullmoveClock(self):
-      clock = self._getFENItems(FEN._fullmove_index_)
+      clock = self._getFENItem(FEN._fullmove_index_)
       try:
          return int(clock)
       except ValueError:
@@ -61,35 +107,4 @@ class FEN(object):
 
    def getFENString(self):
       return self.fenString
-
-class FENValidator(object):
-   validPieces = "rnbqkpRNBQKP"
-   
-   def __init__(self, ranks=8, files=8):
-      self.rankNum = ranks
-      self.fileNum = files
-      self.__resetErrString__()
-  
-   def __resetErrString__(self):
-      self.errStr = "None"
-   
-   def validatePositions(self, positions):
-      if not type(positions) == str:
-         self.errStr = "Position string is not a string"
-         return False
-    
-      errorState = False
-      ranks = positions.split("/")
-      if not len(ranks) == self.rankNum:
-         self.errStr += "Should be {} ranks, there are {}.\n".format(self.rankNum, len(ranks))
-         errorState = True
-     
-      for invRankNum, rank in enumerate(ranks):
-         fileCount = len([ file for file in rank if file in FENValidator.validPieces])
-         fileCount += sum([int(empty) for empty in re.findall(r'[0-9]+', rank)])
-         if not fileCount == self.fileNum:
-            self.errStr += "Rank {} should be {} files, there are {}, or it has invalid pieces.\n".format(self.rankNum-invRankNum, self.fileNum, fileCount)
-            errorState = True
-      
-      return errorState
 

@@ -7,7 +7,7 @@ From fen import FEN
 (bool)fen.parse(str)
 -(bool)fen.validParse()
 -(str)fen.getParseErrors()
-(list?)fen.get[White|Black]Pieces()
+-(list?)fen.get[White|Black]Pieces()
 -(str)fen.getNextPlayer()
 -(int)fen.getHalfmoveClock()
 -(int)fen.getFullmoveClock()
