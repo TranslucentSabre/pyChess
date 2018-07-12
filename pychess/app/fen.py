@@ -17,8 +17,8 @@ class FEN(object):
    VALID_BLACK_PIECES = "rnbqkp"
    VALID_WHITE_PIECES = "RNBQKP"
    VALID_PLAYER = "bw"
-   VALID_CASTLE = "-KQkq"
-   VALID_NON_COORD_EN_PASSANT = "-"
+   VALID_CASTLE = "KQkq"
+   VALID_DASH = "-"
 
    def __init__(self):
       self.reset()
@@ -59,14 +59,14 @@ class FEN(object):
          self.parseValid = False
          return self.parseValid
 
-      successfulParse = True and self._validatePositions(positionString)
+      successfulParse = True and self._validatePositions()
 
       return successfulParse
 
 
 
-   def _validatePositions(self, positions):
-      ranks = positions.split("/")
+   def _validatePositions(self):
+      ranks = self._getFENItem(FEN._position_index_).split("/")
       rankCount = len(ranks)
      
       for invRankNum, rank in enumerate(ranks):
@@ -80,6 +80,17 @@ class FEN(object):
             self.parseValid = False
       
       return self.parseValid
+
+   def _validateNextPlayer(self):
+      firstPlayer = self.getNextPlayer()
+
+      itemLength = len(firstPlayer)
+      if itemLength != 1 or firstPlayer not in FEN.VALID_PLAYER:
+         self.parseErrors += "Next player token must be either {}\n".format(" or ".join(FEN.VALID_PLAYER))
+         self.parseValid = False
+
+      return self.parseValid
+
       
 
    def getBlackPieces(self):
