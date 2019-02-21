@@ -91,6 +91,9 @@ class FEN(object):
 
       return self.parseValid
 
+   def _validateCastle(self):
+      castle = self._getFENItem(FEN._castle_index_)
+
       
 
    def getBlackPieces(self):
