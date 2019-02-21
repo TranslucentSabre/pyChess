@@ -219,3 +219,5 @@ commitMsg.txt
 saveGames
 .zedstate
 tags
+csctags*
+env
