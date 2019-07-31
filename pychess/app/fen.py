@@ -16,6 +16,7 @@ class FEN(object):
 
    VALID_BLACK_PIECES = "rnbqkp"
    VALID_WHITE_PIECES = "RNBQKP"
+   VALID_PIECES = VALID_BLACK_PIECES + VALID_WHITE_PIECES
    VALID_PLAYER = "bw"
    VALID_CASTLE = "KQkq"
    VALID_DASH = "-"
@@ -71,10 +72,10 @@ class FEN(object):
      
       for invRankNum, rank in enumerate(ranks):
          # Each number is that number of files, each other character is 1 file
-         fileCount = len([ file for file in re.findall(r'[^0-9]', rank) ])
+         fileCount = len([ file for file in re.findall(r'['+FEN.VALID_PIECES+']', rank) ])
          fileCount += sum([ int(empty) for empty in re.findall(r'[0-9]+', rank) ])
 
-         # Here we ensure that the board is square
+         # Here we ensure that the board is square, only valid pieces are counted
          if not fileCount == rankCount:
             self.parseErrors += "Rank {} should be {} files, there are {}, or it has invalid pieces.\n".format(rankCount-invRankNum, rankCount, fileCount)
             self.parseValid = False
