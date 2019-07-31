@@ -68,16 +68,13 @@ class Game(object):
 
    def getMoves(self):
       moveNumber = "1."
-      validMoves = True
-      while validMoves:
+      while True:
          if moveNumber in self.moves:
             yield self.moves[moveNumber]
          else:
-            validMoves = False
             break
          moveNumber = Util.getNextTurnString(moveNumber)
-      if not validMoves:
-         raise StopIteration()
+      return
 
    def saveMoveSuffix(self, moveSuffix):
       returnVal = self.lastMove.setSuffixNag(moveSuffix)
