@@ -345,14 +345,14 @@ class King(Piece):
 
 class Pawn(Piece):
    """A Pawn"""
-   def __init__(self, color, position):
+   def __init__(self, color, position, enPassant=False):
       super(Pawn,self).__init__("Pawn", color, position)
       # It is possible we were given a given a bad position, if so skip the EnPassant math
       if self.placed:
          #Keep track of initial rank and charge rank for each pawn, necessary for random mode
          self.startingRank = self._getRankNumber()
          self.chargeRank = self.startingRank + (2 * self.color.pawnRankModifier)
-      self.enPassantCapturable = False
+      self.enPassantCapturable = enPassant
 
    def isEnPassantVulnerable(self):
       return self.enPassantCapturable

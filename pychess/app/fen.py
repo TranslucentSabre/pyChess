@@ -1,5 +1,7 @@
 import re
 import pychess.app.randomizer
+import pychess.app.Piece
+import pychess.app.Util as Util
 
 class FEN(object):
    """Class used to parse and operate on a FEN string"""
@@ -18,7 +20,9 @@ class FEN(object):
    VALID_WHITE_PIECES = "RNBQKP"
    VALID_PIECES = VALID_BLACK_PIECES + VALID_WHITE_PIECES
    VALID_PLAYER = "bw"
-   VALID_CASTLE = "KQkq"
+   VALID_BLACK_CASTLE = "kq"
+   VALID_WHITE_CASTLE = "KQ"
+   VALID_CASTLE = VALID_BLACK_CASTLE + VALID_WHITE_CASTLE
    VALID_DASH = "-"
 
    def __init__(self):
@@ -60,10 +64,18 @@ class FEN(object):
          self.parseValid = False
          return self.parseValid
 
-      successfulParse = True and self._validatePositions()
+      self._validatePositions() 
+      self._validateNextPlayer() 
+      self._validateCastle() 
+      self._validateEnPassant()
+      self.getHalfmoveClock()
+      self.getFullmoveClock()
 
-      return successfulParse
+      if not self.parseValid:
+         return self.parseValid
 
+      
+      return True
 
 
    def _validatePositions(self):
@@ -82,18 +94,39 @@ class FEN(object):
       
       return self.parseValid
 
+   def _createPieces(self):
+       pass
+
    def _validateNextPlayer(self):
       firstPlayer = self.getNextPlayer()
 
       itemLength = len(firstPlayer)
       if itemLength != 1 or firstPlayer not in FEN.VALID_PLAYER:
-         self.parseErrors += "Next player token must be either {}\n".format(" or ".join(FEN.VALID_PLAYER))
+         self.parseErrors += "Next player token must be either {}.\n".format(" or ".join(FEN.VALID_PLAYER))
          self.parseValid = False
 
       return self.parseValid
 
    def _validateCastle(self):
       castle = self._getFENItem(FEN._castle_index_)
+      if castle is FEN.VALID_DASH:
+          #Short Circuit
+          return parse.Valid
+
+      for position in castle:
+          if position not in FEN.VALID_CASTLE:
+              self.parseErrors += "Invalid character '{}' in castle specification.\n".format(position)
+              self.parseValid = False
+      return self.parseValid
+
+   def _validateEnPassant(self):
+      enPassant = self._getFENItem(FEN._en_passant_index_)
+      if enPassant is not FEN.VALID_DASH and not Util.isCoordValid(enPassant):
+         self.parseErrors += "En Passant value of '{}' is not valid.\n".format(enPassant)
+         self.parseValid = False
+      return self.parseValid
+
+
 
       
 
@@ -111,6 +144,8 @@ class FEN(object):
       try:
          return int(clock)
       except ValueError:
+         self.parseErrors += "Halfmove clock is not an integer.\n"
+         self.parseValid = False
          return ""
 
    def getFullmoveClock(self):
@@ -118,6 +153,8 @@ class FEN(object):
       try:
          return int(clock)
       except ValueError:
+         self.parseErrors += "Fullmove clock is not an integer.\n"
+         self.parseValid = False
          return ""
 
    def getFENString(self):
