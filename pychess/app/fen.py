@@ -3,6 +3,18 @@ import pychess.app.randomizer
 import pychess.app.Piece
 import pychess.app.Util as Util
 
+class Pieces(object):
+   #Thank you https://stackoverflow.com/a/42816745
+   Object = lambda **kwargs: type("Object", (), kwargs)
+   def __init__(self):
+      self.blackPieces = Pieces.Object(color=Util.colors.BLACK, pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None)
+      self.whitePieces = Pieces.Object(color=Util.colors.WHITE, pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None)
+
+   def createPiece(self, coord, letter, castle, enPassant):
+
+      
+      pass
+
 class FEN(object):
    """Class used to parse and operate on a FEN string"""
 
@@ -32,8 +44,7 @@ class FEN(object):
       self.fenString = ""
       self.parseValid = False
       self.parseErrors = "No parse attempted"
-      self.whitePieces = []
-      self.blackPieces = []
+      self.pieces = Pieces()
 
    def getParseValid(self):
       return self.parseValid
@@ -131,10 +142,10 @@ class FEN(object):
       
 
    def getBlackPieces(self):
-      return self.blackPieces
+      return self.pieces.blackPieces
 
    def getWhitePieces(self):
-      return self.whitePieces
+      return self.pieces.whitePieces
 
    def getNextPlayer(self):
       return self._getFENItem(FEN._player_index_)

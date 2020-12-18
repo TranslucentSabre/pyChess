@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+from pychess.app.Util import colors
 from pychess.app.fen import FEN
 
 
@@ -19,10 +20,22 @@ class FENTest(unittest.TestCase):
       self.assertEqual("No parse attempted", self.fen.getParseErrors())
 
    def test_getBlackPieces_NoParse(self):
-      self.assertEqual([], self.fen.getBlackPieces())
+      self.assertEqual(colors.BLACK, self.fen.getBlackPieces().color)
+      self.assertEqual([], self.fen.getBlackPieces().pawns)
+      self.assertEqual([], self.fen.getBlackPieces().rooks)
+      self.assertEqual([], self.fen.getBlackPieces().knights)
+      self.assertEqual([], self.fen.getBlackPieces().bishops)
+      self.assertEqual([], self.fen.getBlackPieces().queens)
+      self.assertEqual(None, self.fen.getBlackPieces().king)
 
    def test_getWhitePieces_NoParse(self):
-      self.assertEqual([], self.fen.getWhitePieces())
+      self.assertEqual(colors.WHITE, self.fen.getWhitePieces().color)
+      self.assertEqual([], self.fen.getWhitePieces().pawns)
+      self.assertEqual([], self.fen.getWhitePieces().rooks)
+      self.assertEqual([], self.fen.getWhitePieces().knights)
+      self.assertEqual([], self.fen.getWhitePieces().bishops)
+      self.assertEqual([], self.fen.getWhitePieces().queens)
+      self.assertEqual(None, self.fen.getWhitePieces().king)
 
    def test_getNextPlayer_NoParse(self):
       self.assertEqual("", self.fen.getNextPlayer())

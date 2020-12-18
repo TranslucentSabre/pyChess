@@ -66,7 +66,8 @@ class ChessGame(object):
       whitePieces = None
       blackPieces = None
       if booleanConfigItemIsTrue(self._getConfigOption(ValidConfig.RandomMode)):
-         pass
+         whitePieces = []
+         blackPieces = []
 
       self.whitePlayer = WhitePlayer(pieces=whitePieces)
       self.blackPlayer = BlackPlayer(pieces=blackPieces)
