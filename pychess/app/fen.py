@@ -1,19 +1,59 @@
 import re
 import pychess.app.randomizer
-import pychess.app.Piece
+import pychess.app.Piece as Piece
 import pychess.app.Util as Util
 
+
 class Pieces(object):
-   #Thank you https://stackoverflow.com/a/42816745
-   Object = lambda **kwargs: type("Object", (), kwargs)
+
    def __init__(self):
-      self.blackPieces = Pieces.Object(color=Util.colors.BLACK, pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None)
-      self.whitePieces = Pieces.Object(color=Util.colors.WHITE, pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None)
+      #Thank you https://stackoverflow.com/a/42816745
+      self.Object = lambda **kwargs: type("Object", (), kwargs)
+      self.pieces = { Util.colors.BLACK: self.Object(pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None), \
+                      Util.colors.WHITE: self.Object(pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None) }
+      create = { "p" : self.createPawn,
+                 "r" : self.createRook,
+                 "n" : self.createKnight,
+                 "b" : self.createQueen,
+                 "k" : self.createKing }
+
+
+   def createPawn(self, color, coord, castle, enPassant):
+      pass
+
+   def createRook(self, color, coord, castle, enPassant):
+      rook=Piece.Rook(color,coord)
+      # Deal with castle eligability, use lookup dicts
+      lookup = { Util.colors.WHITE: { Util.colors.WHITE.kingsideRookFile+Util.colors.WHITE.majorRank: "K",
+                                      Util.colors.WHITE.queensideRookFile+Util.colors.WHITE.majorRank: "Q" },
+                 Util.colors.BLACK: { Util.colors.BLACK.kingsideRookFile+Util.colors.BLACK.majorRank: "k",
+                                      Util.colors.BLACK.queensideRookFile+Util.colors.BLACK.majorRank: "q" }}
+      castleValue = lookup[color].get(coord,"NA")
+      if castle is "-" or castleValue not in castle:
+         rook.castleOption = Util.Castle.NONE
+      self.pieces[color].rooks.append(rook)
+
+   def createKnight(self, color, coord, castle, enPassant):
+      self.pieces[color].knights.append(Piece.Knights(color, coord))
+
+   def createBishop(self, color, coord, castle, enPassant):
+      self.pieces[color].bishops.append(Piece.Bishop(color, coord))
+
+   def createQueen(self, color, coord, castle, enPassant):
+      self.pieces[color].queens.append(Piece.Queen(color, coord))
+
+   def createKing(self, color, coord, castle, enPassant):
+      self.pieces[color].king=Piece.King(color, coord)
 
    def createPiece(self, coord, letter, castle, enPassant):
-
-      
-      pass
+      if letter not in FEN.VALID_PIECES:
+         return
+      color = Util.colors.BLACK
+      if letter in FEN.VALID_WHITE_PIECES:
+         color = Util.colors.WHITE
+      #To lowercase for ease
+      letter.lower()
+      self.create[letter](color, coord, castle, enPassant)
 
 class FEN(object):
    """Class used to parse and operate on a FEN string"""
@@ -142,10 +182,10 @@ class FEN(object):
       
 
    def getBlackPieces(self):
-      return self.pieces.blackPieces
+      return self.pieces.pieces[Util.colors.BLACK]
 
    def getWhitePieces(self):
-      return self.pieces.whitePieces
+      return self.pieces.pieces[Util.colors.WHITE]
 
    def getNextPlayer(self):
       return self._getFENItem(FEN._player_index_)

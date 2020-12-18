@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 from pychess.app.Util import colors
-from pychess.app.fen import FEN
+from pychess.app.fen import FEN,Pieces
+from pychess.app import Piece
 
 
 class FENTest(unittest.TestCase):
@@ -20,7 +21,6 @@ class FENTest(unittest.TestCase):
       self.assertEqual("No parse attempted", self.fen.getParseErrors())
 
    def test_getBlackPieces_NoParse(self):
-      self.assertEqual(colors.BLACK, self.fen.getBlackPieces().color)
       self.assertEqual([], self.fen.getBlackPieces().pawns)
       self.assertEqual([], self.fen.getBlackPieces().rooks)
       self.assertEqual([], self.fen.getBlackPieces().knights)
@@ -29,7 +29,6 @@ class FENTest(unittest.TestCase):
       self.assertEqual(None, self.fen.getBlackPieces().king)
 
    def test_getWhitePieces_NoParse(self):
-      self.assertEqual(colors.WHITE, self.fen.getWhitePieces().color)
       self.assertEqual([], self.fen.getWhitePieces().pawns)
       self.assertEqual([], self.fen.getWhitePieces().rooks)
       self.assertEqual([], self.fen.getWhitePieces().knights)
@@ -115,6 +114,12 @@ Fullmove clock is not an integer.
 """
       self.assertFalse(self.fen.parse(testFen))
       self.assertEqual(error, self.fen.getParseErrors())
+
+   def test_add_king(self):
+      testKing = Piece.King(colors.WHITE,"e1")
+      pieces = Pieces()
+      pieces.createKing(colors.WHITE,"e1","","")
+      self.assertEqual(testKing,pieces.pieces[colors.WHITE].king)
    
    
 if __name__ == "__main__":
