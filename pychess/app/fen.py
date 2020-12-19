@@ -11,15 +11,20 @@ class Pieces(object):
       self.Object = lambda **kwargs: type("Object", (), kwargs)
       self.pieces = { Util.colors.BLACK: self.Object(pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None), \
                       Util.colors.WHITE: self.Object(pawns=[], rooks=[], knights=[], bishops=[], queens=[], king=None) }
-      create = { "p" : self.createPawn,
+      self.create = { "p" : self.createPawn,
                  "r" : self.createRook,
                  "n" : self.createKnight,
-                 "b" : self.createQueen,
+                 "b" : self.createBishop,
+                 "q" : self.createQueen,
                  "k" : self.createKing }
 
 
    def createPawn(self, color, coord, castle, enPassant):
-      pass
+      canEnPassant = False
+      pawnRank = int(coord[1])
+      if enPassant == coord[0]+str(pawnRank - color.pawnRankModifier):
+         canEnPassant = True
+      self.pieces[color].pawns.append(Piece.Pawn(color, coord, canEnPassant))
 
    def createRook(self, color, coord, castle, enPassant):
       rook=Piece.Rook(color,coord)
@@ -29,12 +34,12 @@ class Pieces(object):
                  Util.colors.BLACK: { Util.colors.BLACK.kingsideRookFile+Util.colors.BLACK.majorRank: "k",
                                       Util.colors.BLACK.queensideRookFile+Util.colors.BLACK.majorRank: "q" }}
       castleValue = lookup[color].get(coord,"NA")
-      if castle is "-" or castleValue not in castle:
+      if castle is FEN.VALID_DASH or castleValue not in castle:
          rook.castleOption = Util.Castle.NONE
       self.pieces[color].rooks.append(rook)
 
    def createKnight(self, color, coord, castle, enPassant):
-      self.pieces[color].knights.append(Piece.Knights(color, coord))
+      self.pieces[color].knights.append(Piece.Knight(color, coord))
 
    def createBishop(self, color, coord, castle, enPassant):
       self.pieces[color].bishops.append(Piece.Bishop(color, coord))
@@ -52,7 +57,7 @@ class Pieces(object):
       if letter in FEN.VALID_WHITE_PIECES:
          color = Util.colors.WHITE
       #To lowercase for ease
-      letter.lower()
+      letter = letter.lower()
       self.create[letter](color, coord, castle, enPassant)
 
 class FEN(object):

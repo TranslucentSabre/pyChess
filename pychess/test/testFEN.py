@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import unittest
-from pychess.app.Util import colors
+from pychess.app.Util import colors,Castle
 from pychess.app.fen import FEN,Pieces
 from pychess.app import Piece
 
@@ -115,12 +115,202 @@ Fullmove clock is not an integer.
       self.assertFalse(self.fen.parse(testFen))
       self.assertEqual(error, self.fen.getParseErrors())
 
-   def test_add_king(self):
+   def test_add_white_king(self):
       testKing = Piece.King(colors.WHITE,"e1")
-      pieces = Pieces()
-      pieces.createKing(colors.WHITE,"e1","","")
-      self.assertEqual(testKing,pieces.pieces[colors.WHITE].king)
+      self.fen.pieces.createPiece("e1","K","","")
+      self.assertEqual(testKing.piece,self.fen.pieces.pieces[colors.WHITE].king.piece)
+      self.assertEqual(testKing.position,self.fen.pieces.pieces[colors.WHITE].king.position)
+      self.assertEqual(None,self.fen.pieces.pieces[colors.BLACK].king)
    
+   def test_add_black_king(self):
+      testKing = Piece.King(colors.BLACK,"e1")
+      self.fen.pieces.createPiece("e1","k","","")
+      self.assertEqual(testKing.piece,self.fen.pieces.pieces[colors.BLACK].king.piece)
+      self.assertEqual(testKing.position,self.fen.pieces.pieces[colors.BLACK].king.position)
+      self.assertEqual(None,self.fen.pieces.pieces[colors.WHITE].king)
+   
+   def test_add_queens(self):
+      coord1 = "f3"
+      coord2 = "a5"
+      coord3 = "g4"
+      testQueen1 = Piece.Queen(colors.BLACK,coord1)
+      testQueen2 = Piece.Queen(colors.BLACK,coord2)
+      testQueen3 = Piece.Queen(colors.WHITE,coord3)
+      self.fen.pieces.createPiece(coord1,"q","","")
+      self.fen.pieces.createPiece(coord2,"q","","")
+      self.fen.pieces.createPiece(coord3,"Q","","")
+
+      self.assertEqual(testQueen1.piece,self.fen.pieces.pieces[colors.BLACK].queens[0].piece)
+      self.assertEqual(testQueen1.position,self.fen.pieces.pieces[colors.BLACK].queens[0].position)
+      self.assertEqual(testQueen2.piece,self.fen.pieces.pieces[colors.BLACK].queens[1].piece)
+      self.assertEqual(testQueen2.position,self.fen.pieces.pieces[colors.BLACK].queens[1].position)
+   
+      self.assertEqual(testQueen3.piece,self.fen.pieces.pieces[colors.WHITE].queens[0].piece)
+      self.assertEqual(testQueen3.position,self.fen.pieces.pieces[colors.WHITE].queens[0].position)
+   
+   def test_add_bishops(self):
+      coord1 = "c1"
+      coord2 = "d7"
+      coord3 = "e8"
+      testBishop1 = Piece.Bishop(colors.BLACK,coord1)
+      testBishop2 = Piece.Bishop(colors.WHITE,coord2)
+      testBishop3 = Piece.Bishop(colors.WHITE,coord3)
+      self.fen.pieces.createPiece(coord1,"b","","")
+      self.fen.pieces.createPiece(coord2,"B","","")
+      self.fen.pieces.createPiece(coord3,"B","","")
+
+      self.assertEqual(testBishop1.piece,self.fen.pieces.pieces[colors.BLACK].bishops[0].piece)
+      self.assertEqual(testBishop1.position,self.fen.pieces.pieces[colors.BLACK].bishops[0].position)
+
+      self.assertEqual(testBishop2.piece,self.fen.pieces.pieces[colors.WHITE].bishops[0].piece)
+      self.assertEqual(testBishop2.position,self.fen.pieces.pieces[colors.WHITE].bishops[0].position)
+      self.assertEqual(testBishop3.piece,self.fen.pieces.pieces[colors.WHITE].bishops[1].piece)
+      self.assertEqual(testBishop3.position,self.fen.pieces.pieces[colors.WHITE].bishops[1].position)
+   
+   def test_add_knights(self):
+      coord1 = "a6"
+      coord2 = "h2"
+      coord3 = "b5"
+      testKnight1 = Piece.Knight(colors.BLACK,coord1)
+      testKnight2 = Piece.Knight(colors.BLACK,coord2)
+      testKnight3 = Piece.Knight(colors.WHITE,coord3)
+      self.fen.pieces.createPiece(coord1,"n","","")
+      self.fen.pieces.createPiece(coord2,"n","","")
+      self.fen.pieces.createPiece(coord3,"N","","")
+
+      self.assertEqual(testKnight1.piece,self.fen.pieces.pieces[colors.BLACK].knights[0].piece)
+      self.assertEqual(testKnight1.position,self.fen.pieces.pieces[colors.BLACK].knights[0].position)
+      self.assertEqual(testKnight2.piece,self.fen.pieces.pieces[colors.BLACK].knights[1].piece)
+      self.assertEqual(testKnight2.position,self.fen.pieces.pieces[colors.BLACK].knights[1].position)
+   
+      self.assertEqual(testKnight3.piece,self.fen.pieces.pieces[colors.WHITE].knights[0].piece)
+      self.assertEqual(testKnight3.position,self.fen.pieces.pieces[colors.WHITE].knights[0].position)
+
+   def test_add_rook_can_castle(self):
+      testRook = Piece.Rook(colors.WHITE,"h1")
+      self.fen.pieces.createPiece("h1","R","kqKQ", "")
+
+      self.assertEqual(testRook.piece, self.fen.pieces.pieces[colors.WHITE].rooks[0].piece)
+      self.assertEqual(testRook.position, self.fen.pieces.pieces[colors.WHITE].rooks[0].position)
+      self.assertEqual(testRook.castleOption, self.fen.pieces.pieces[colors.WHITE].rooks[0].castleOption)
+      self.assertEqual(Castle.KINGSIDE, self.fen.pieces.pieces[colors.WHITE].rooks[0].castleOption)
+   
+   def test_add_rook_cannot_castle_missing_letter(self):
+      testRook = Piece.Rook(colors.BLACK,"a8")
+      self.fen.pieces.createPiece("a8","r","kKQ", "")
+
+      self.assertEqual(testRook.piece, self.fen.pieces.pieces[colors.BLACK].rooks[0].piece)
+      self.assertEqual(testRook.position, self.fen.pieces.pieces[colors.BLACK].rooks[0].position)
+      self.assertNotEqual(testRook.castleOption, self.fen.pieces.pieces[colors.BLACK].rooks[0].castleOption)
+      self.assertEqual(Castle.NONE, self.fen.pieces.pieces[colors.BLACK].rooks[0].castleOption)
+      self.assertEqual(Castle.QUEENSIDE, testRook.castleOption)
+   
+   def test_add_rook_cannot_castle_dash(self):
+      testRook = Piece.Rook(colors.BLACK,"a8")
+      self.fen.pieces.createPiece("a8","r","-", "")
+
+      self.assertEqual(testRook.piece, self.fen.pieces.pieces[colors.BLACK].rooks[0].piece)
+      self.assertEqual(testRook.position, self.fen.pieces.pieces[colors.BLACK].rooks[0].position)
+      self.assertNotEqual(testRook.castleOption, self.fen.pieces.pieces[colors.BLACK].rooks[0].castleOption)
+      self.assertEqual(Castle.NONE, self.fen.pieces.pieces[colors.BLACK].rooks[0].castleOption)
+      self.assertEqual(Castle.QUEENSIDE, testRook.castleOption)
+   
+   def test_add_rook_cannot_castle_wrong_position(self):
+      testRook = Piece.Rook(colors.WHITE,"h2")
+      self.fen.pieces.createPiece("h2","R","kqKQ", "")
+
+      self.assertEqual(testRook.piece, self.fen.pieces.pieces[colors.WHITE].rooks[0].piece)
+      self.assertEqual(testRook.position, self.fen.pieces.pieces[colors.WHITE].rooks[0].position)
+      self.assertEqual(testRook.castleOption, self.fen.pieces.pieces[colors.WHITE].rooks[0].castleOption)
+      self.assertEqual(Castle.NONE, self.fen.pieces.pieces[colors.WHITE].rooks[0].castleOption)
+   
+   def test_add_pawn_std(self):
+      testPawn = Piece.Pawn(colors.WHITE,"h2")
+      self.fen.pieces.createPiece("h2","P","kqKQ", "-")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.WHITE].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.WHITE].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(True, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+   
+   def test_add_pawn_major(self):
+      testPawn = Piece.Pawn(colors.BLACK,"h8")
+      self.fen.pieces.createPiece("h8","p","kqKQ", "-")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.BLACK].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.BLACK].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.BLACK].pawns[0].canCharge)
+      self.assertEqual(True, self.fen.pieces.pieces[colors.BLACK].pawns[0].canCharge)
+      self.assertEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
+   
+   def test_add_pawn_middle(self):
+      testPawn = Piece.Pawn(colors.WHITE,"h6")
+      self.fen.pieces.createPiece("h6","P","kqKQ", "-")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.WHITE].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.WHITE].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+   
+   def test_add_pawn_middle_other_enpassant(self):
+      testPawn = Piece.Pawn(colors.WHITE,"h6")
+      self.fen.pieces.createPiece("h6","P","kqKQ", "e3")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.WHITE].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.WHITE].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+   
+   def test_add_pawn_white_enpassant(self):
+      testPawn = Piece.Pawn(colors.WHITE,"e4")
+      self.fen.pieces.createPiece("e4","P","kqKQ", "e3")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.WHITE].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.WHITE].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertNotEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+      self.assertEqual(True, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+   
+   def test_add_pawn_white_enpassant_opposite(self):
+      testPawn = Piece.Pawn(colors.WHITE,"e4")
+      self.fen.pieces.createPiece("e4","P","kqKQ", "e5")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.WHITE].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.WHITE].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].canCharge)
+      self.assertEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.WHITE].pawns[0].enPassantCapturable)
+   
+   def test_add_pawn_black_enpassant(self):
+      testPawn = Piece.Pawn(colors.BLACK,"c5")
+      self.fen.pieces.createPiece("c5","p","kqKQ", "c6")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.BLACK].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.BLACK].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.BLACK].pawns[0].canCharge)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.BLACK].pawns[0].canCharge)
+      self.assertNotEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
+      self.assertEqual(True, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
+   
+   def test_add_pawn_black_enpassant_opposite(self):
+      testPawn = Piece.Pawn(colors.BLACK,"c5")
+      self.fen.pieces.createPiece("c5","p","kqKQ", "c4")
+
+      self.assertEqual(testPawn.piece, self.fen.pieces.pieces[colors.BLACK].pawns[0].piece)
+      self.assertEqual(testPawn.position, self.fen.pieces.pieces[colors.BLACK].pawns[0].position)
+      self.assertEqual(testPawn.canCharge, self.fen.pieces.pieces[colors.BLACK].pawns[0].canCharge)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.BLACK].pawns[0].canCharge)
+      self.assertEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
+      self.assertEqual(False, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
    
 if __name__ == "__main__":
     unittest.main()

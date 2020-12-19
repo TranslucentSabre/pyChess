@@ -347,12 +347,15 @@ class Pawn(Piece):
    """A Pawn"""
    def __init__(self, color, position, enPassant=False):
       super(Pawn,self).__init__("Pawn", color, position)
+      self.enPassantCapturable = enPassant
+      self.canCharge = False
       # It is possible we were given a given a bad position, if so skip the EnPassant math
       if self.placed:
          #Keep track of initial rank and charge rank for each pawn, necessary for random mode
          self.startingRank = self._getRankNumber()
          self.chargeRank = self.startingRank + (2 * self.color.pawnRankModifier)
-      self.enPassantCapturable = enPassant
+         if str(self.startingRank) in [ self.color.pawnRank, self.color.majorRank]:
+            self.canCharge = True
 
    def isEnPassantVulnerable(self):
       return self.enPassantCapturable
@@ -367,11 +370,12 @@ class Pawn(Piece):
       self.moveResultReason = "Success"
       if self.placed:
          if Util.isCoordValid(coord):
-            self.lastState = (self.position, self.moved, self.enPassantCapturable)
+            self.lastState = (self.position, self.moved, self.enPassantCapturable, self.canCharge)
             if str(self.startingRank) in self.position and str(self.chargeRank) in coord:
                self.enPassantCapturable = True
             else:
                self.enPassantCapturable = False
+            self.canCharge = False
             self.position = coord
             self.moved = True
             return True
@@ -386,6 +390,7 @@ class Pawn(Piece):
          self.position = self.lastState[0]
          self.moved = self.lastState[1]
          self.enPassantCapturable = self.lastState[2]
+         self.canCharge = self.lastState[3]
          self.lastState = ()
 
    def getCaptureCoords(self):
@@ -401,8 +406,8 @@ class Pawn(Piece):
          rankNum = self._getRankNumber()
          captures = [ chr(fileNum-1) + str(rankNum + self.color.pawnRankModifier), chr(fileNum +1) + str(rankNum + self.color.pawnRankModifier)]
          regular = [ chr(fileNum) + str(rankNum + self.color.pawnRankModifier) ]
-         if (not self.moved):
-            regular.append(chr(fileNum) + str(rankNum + (self.color.pawnRankModifier * 2)))
+         if self.canCharge:
+            regular.append(chr(fileNum) + str(self.chargeRank))
          validMoves = []
          for move in captures:
             if Util.isCoordValid(move):
