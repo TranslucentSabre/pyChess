@@ -6,6 +6,10 @@ import pychess.app.Util as Util
 
 class Pieces(object):
 
+   ROOK_LOOKUP = { Util.colors.WHITE: { Util.colors.WHITE.kingsideRookFile+Util.colors.WHITE.majorRank: "K", 
+                                        Util.colors.WHITE.queensideRookFile+Util.colors.WHITE.majorRank: "Q" }, 
+                   Util.colors.BLACK: { Util.colors.BLACK.kingsideRookFile+Util.colors.BLACK.majorRank: "k", 
+                                        Util.colors.BLACK.queensideRookFile+Util.colors.BLACK.majorRank: "q" }}
    def __init__(self):
       #Thank you https://stackoverflow.com/a/42816745
       self.Object = lambda **kwargs: type("Object", (), kwargs)
@@ -29,11 +33,7 @@ class Pieces(object):
    def createRook(self, color, coord, castle, enPassant):
       rook=Piece.Rook(color,coord)
       # Deal with castle eligability, use lookup dicts
-      lookup = { Util.colors.WHITE: { Util.colors.WHITE.kingsideRookFile+Util.colors.WHITE.majorRank: "K",
-                                      Util.colors.WHITE.queensideRookFile+Util.colors.WHITE.majorRank: "Q" },
-                 Util.colors.BLACK: { Util.colors.BLACK.kingsideRookFile+Util.colors.BLACK.majorRank: "k",
-                                      Util.colors.BLACK.queensideRookFile+Util.colors.BLACK.majorRank: "q" }}
-      castleValue = lookup[color].get(coord,"NA")
+      castleValue = Pieces.ROOK_LOOKUP[color].get(coord,"NA")
       if castle is FEN.VALID_DASH or castleValue not in castle:
          rook.castleOption = Util.Castle.NONE
       self.pieces[color].rooks.append(rook)
@@ -108,10 +108,6 @@ class FEN(object):
    def parse(self, fenString=STANDARD_OPENING):
       self.fenString = fenString
 
-      if self.fenString == FEN.RANDOM_OPENING:
-         #self.randomize_pieces()
-         pass
-
       self.parseErrors = ""
       self.parseValid = True
 
@@ -122,17 +118,13 @@ class FEN(object):
          return self.parseValid
 
       self._validatePositions() 
-      self._validateNextPlayer() 
+      self.getNextPlayer() 
       self._validateCastle() 
       self._validateEnPassant()
       self.getHalfmoveClock()
       self.getFullmoveClock()
 
-      if not self.parseValid:
-         return self.parseValid
-
-      
-      return True
+      return self.parseValid
 
 
    def _validatePositions(self):
@@ -151,6 +143,25 @@ class FEN(object):
       
       return self.parseValid
 
+   def _validateCastle(self):
+      castle = self._getFENItem(FEN._castle_index_)
+      if castle is FEN.VALID_DASH:
+          #Short Circuit
+          return self.parseValid
+
+      for position in castle:
+          if position not in FEN.VALID_CASTLE:
+              self.parseErrors += "Invalid character '{}' in castle specification.\n".format(position)
+              self.parseValid = False
+      return self.parseValid
+
+   def _validateEnPassant(self):
+      enPassant = self._getFENItem(FEN._en_passant_index_)
+      if enPassant is not FEN.VALID_DASH and not Util.isCoordValid(enPassant):
+         self.parseErrors += "En Passant value of '{}' is not valid.\n".format(enPassant)
+         self.parseValid = False
+      return self.parseValid
+
    def _createPieces(self):
       if not self.parseValid:
          #Cowardly refusing to generate pieces if we do not have a valid parse
@@ -167,7 +178,7 @@ class FEN(object):
          emptyCollector = ""
          #iterate over files
          for item in rank:
-            if item not in self.VALID_PIECES:
+            if item not in FEN.VALID_PIECES:
                emptyCollector += item
                #don't update file until we encounter a piece
             else:
@@ -180,40 +191,6 @@ class FEN(object):
          rankNum = rankNum - 1
       self.piecesGenerated = True
 
-
-   def _validateNextPlayer(self):
-      firstPlayer = self.getNextPlayer()
-
-      itemLength = len(firstPlayer)
-      if itemLength != 1 or firstPlayer not in FEN.VALID_PLAYER:
-         self.parseErrors += "Next player token must be either {}.\n".format(" or ".join(FEN.VALID_PLAYER))
-         self.parseValid = False
-
-      return self.parseValid
-
-   def _validateCastle(self):
-      castle = self._getFENItem(FEN._castle_index_)
-      if castle is FEN.VALID_DASH:
-          #Short Circuit
-          return parse.Valid
-
-      for position in castle:
-          if position not in FEN.VALID_CASTLE:
-              self.parseErrors += "Invalid character '{}' in castle specification.\n".format(position)
-              self.parseValid = False
-      return self.parseValid
-
-   def _validateEnPassant(self):
-      enPassant = self._getFENItem(FEN._en_passant_index_)
-      if enPassant is not FEN.VALID_DASH and not Util.isCoordValid(enPassant):
-         self.parseErrors += "En Passant value of '{}' is not valid.\n".format(enPassant)
-         self.parseValid = False
-      return self.parseValid
-
-
-
-      
-
    def getBlackPieces(self):
       if not self.piecesGenerated:
          self._createPieces()
@@ -225,7 +202,15 @@ class FEN(object):
       return self.pieces.pieces[Util.colors.WHITE]
 
    def getNextPlayer(self):
-      return self._getFENItem(FEN._player_index_)
+      char = self._getFENItem(FEN._player_index_)
+      if char == "w":
+         return Util.colors.WHITE
+      elif char == "b":
+         return Util.colors.BLACK
+      else:
+         self.parseErrors += "Next player token must be either {}.\n".format(" or ".join(FEN.VALID_PLAYER))
+         self.parseValid = False
+         return Util.colors.NONE
 
    def getHalfmoveClock(self):
       clock = self._getFENItem(FEN._halfmove_index_)
