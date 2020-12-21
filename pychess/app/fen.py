@@ -191,16 +191,11 @@ class FEN(object):
          rankNum = rankNum - 1
       self.piecesGenerated = True
 
-   def getBlackPieces(self):
+   def getPieces(self, color):
       if not self.piecesGenerated:
          self._createPieces()
-      return self.pieces.pieces[Util.colors.BLACK]
-
-   def getWhitePieces(self):
-      if not self.piecesGenerated:
-         self._createPieces()
-      return self.pieces.pieces[Util.colors.WHITE]
-
+      return self.pieces.pieces[color]
+       
    def getNextPlayer(self):
       char = self._getFENItem(FEN._player_index_)
       if char == "w":

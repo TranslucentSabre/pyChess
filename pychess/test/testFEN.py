@@ -21,20 +21,20 @@ class FENTest(unittest.TestCase):
       self.assertEqual("No parse attempted", self.fen.getParseErrors())
 
    def test_getBlackPieces_NoParse(self):
-      self.assertEqual([], self.fen.getBlackPieces().pawns)
-      self.assertEqual([], self.fen.getBlackPieces().rooks)
-      self.assertEqual([], self.fen.getBlackPieces().knights)
-      self.assertEqual([], self.fen.getBlackPieces().bishops)
-      self.assertEqual([], self.fen.getBlackPieces().queens)
-      self.assertEqual(None, self.fen.getBlackPieces().king)
+      self.assertEqual([], self.fen.getPieces(colors.BLACK).pawns)
+      self.assertEqual([], self.fen.getPieces(colors.BLACK).rooks)
+      self.assertEqual([], self.fen.getPieces(colors.BLACK).knights)
+      self.assertEqual([], self.fen.getPieces(colors.BLACK).bishops)
+      self.assertEqual([], self.fen.getPieces(colors.BLACK).queens)
+      self.assertEqual(None, self.fen.getPieces(colors.BLACK).king)
 
    def test_getWhitePieces_NoParse(self):
-      self.assertEqual([], self.fen.getWhitePieces().pawns)
-      self.assertEqual([], self.fen.getWhitePieces().rooks)
-      self.assertEqual([], self.fen.getWhitePieces().knights)
-      self.assertEqual([], self.fen.getWhitePieces().bishops)
-      self.assertEqual([], self.fen.getWhitePieces().queens)
-      self.assertEqual(None, self.fen.getWhitePieces().king)
+      self.assertEqual([], self.fen.getPieces(colors.WHITE).pawns)
+      self.assertEqual([], self.fen.getPieces(colors.WHITE).rooks)
+      self.assertEqual([], self.fen.getPieces(colors.WHITE).knights)
+      self.assertEqual([], self.fen.getPieces(colors.WHITE).bishops)
+      self.assertEqual([], self.fen.getPieces(colors.WHITE).queens)
+      self.assertEqual(None, self.fen.getPieces(colors.WHITE).king)
 
    def test_getNextPlayer_NoParse(self):
       self.assertEqual(colors.NONE, self.fen.getNextPlayer())
@@ -117,7 +117,7 @@ Fullmove clock is not an integer.
 
    def test_getBlackPieces_Parse_Standard(self):
       self.assertTrue(self.fen.parse())
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(8, len(black.pawns))
       self.assertEqual("a7",black.pawns[0].position)
       self.assertEqual(True,black.pawns[0].canCharge)
@@ -146,7 +146,7 @@ Fullmove clock is not an integer.
 
    def test_getWhitePieces_Parse_Standard(self):
       self.assertTrue(self.fen.parse())
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(8, len(white.pawns))
       self.assertEqual("a2",white.pawns[0].position)
       self.assertEqual(True,white.pawns[0].canCharge)
@@ -175,7 +175,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_MultiRook(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/pppppppp/8/8/8/8/PPPPPPPP/RRRQKRRR w KQkq - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(6, len(black.rooks))
       self.assertEqual("a8",black.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, black.rooks[0].castleOption)
@@ -190,7 +190,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h8",black.rooks[5].position)
       self.assertEqual(Castle.KINGSIDE, black.rooks[5].castleOption)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(6, len(white.rooks))
       self.assertEqual("a1",white.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, white.rooks[0].castleOption)
@@ -207,7 +207,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_MultiRook_Dash(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/pppppppp/8/8/8/8/PPPPPPPP/RRRQKRRR w - - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(6, len(black.rooks))
       self.assertEqual("a8",black.rooks[0].position)
       self.assertEqual(Castle.NONE, black.rooks[0].castleOption)
@@ -222,7 +222,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h8",black.rooks[5].position)
       self.assertEqual(Castle.NONE, black.rooks[5].castleOption)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(6, len(white.rooks))
       self.assertEqual("a1",white.rooks[0].position)
       self.assertEqual(Castle.NONE, white.rooks[0].castleOption)
@@ -239,7 +239,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_MultiRook_NoBlackK(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/pppppppp/8/8/8/8/PPPPPPPP/RRRQKRRR w KQq - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(6, len(black.rooks))
       self.assertEqual("a8",black.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, black.rooks[0].castleOption)
@@ -254,7 +254,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h8",black.rooks[5].position)
       self.assertEqual(Castle.NONE, black.rooks[5].castleOption)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(6, len(white.rooks))
       self.assertEqual("a1",white.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, white.rooks[0].castleOption)
@@ -271,7 +271,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_MultiRook_NoBlackQ(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/pppppppp/8/8/8/8/PPPPPPPP/RRRQKRRR w KQk - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(6, len(black.rooks))
       self.assertEqual("a8",black.rooks[0].position)
       self.assertEqual(Castle.NONE, black.rooks[0].castleOption)
@@ -286,7 +286,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h8",black.rooks[5].position)
       self.assertEqual(Castle.KINGSIDE, black.rooks[5].castleOption)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(6, len(white.rooks))
       self.assertEqual("a1",white.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, white.rooks[0].castleOption)
@@ -303,7 +303,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_MultiRook_NoWhiteK(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/pppppppp/8/8/8/8/PPPPPPPP/RRRQKRRR w Qkq - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(6, len(black.rooks))
       self.assertEqual("a8",black.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, black.rooks[0].castleOption)
@@ -318,7 +318,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h8",black.rooks[5].position)
       self.assertEqual(Castle.KINGSIDE, black.rooks[5].castleOption)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(6, len(white.rooks))
       self.assertEqual("a1",white.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, white.rooks[0].castleOption)
@@ -335,7 +335,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_MultiRook_NoWhiteQ(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/pppppppp/8/8/8/8/PPPPPPPP/RRRQKRRR w Kkq - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(6, len(black.rooks))
       self.assertEqual("a8",black.rooks[0].position)
       self.assertEqual(Castle.QUEENSIDE, black.rooks[0].castleOption)
@@ -350,7 +350,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h8",black.rooks[5].position)
       self.assertEqual(Castle.KINGSIDE, black.rooks[5].castleOption)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(6, len(white.rooks))
       self.assertEqual("a1",white.rooks[0].position)
       self.assertEqual(Castle.NONE, white.rooks[0].castleOption)
@@ -367,7 +367,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_Pawn_Switch_Charge(self):
       self.assertTrue(self.fen.parse("pppppppp/rrrqkrrr/8/8/8/8/RRRQKRRR/PPPPPPPP w Kkq - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(8, len(black.pawns))
       self.assertEqual("a8",black.pawns[0].position)
       self.assertEqual(True,black.pawns[0].canCharge)
@@ -380,7 +380,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h8",black.pawns[7].position)
       self.assertEqual(True,black.pawns[7].canCharge)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(8, len(white.pawns))
       self.assertEqual("a1",white.pawns[0].position)
       self.assertEqual(True,white.pawns[0].canCharge)
@@ -395,7 +395,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_Pawn_Advance_NoCharge(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/8/pppppppp/8/8/PPPPPPPP/8/RRRQKRRR w Kkq - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(8, len(black.pawns))
       self.assertEqual("a6",black.pawns[0].position)
       self.assertEqual(False,black.pawns[0].canCharge)
@@ -408,7 +408,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h6",black.pawns[7].position)
       self.assertEqual(False,black.pawns[7].canCharge)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(8, len(white.pawns))
       self.assertEqual("a3",white.pawns[0].position)
       self.assertEqual(False,white.pawns[0].canCharge)
@@ -423,7 +423,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_Pawn_Advance_NoCharge(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/8/pppppppp/8/8/PPPPPPPP/8/RRRQKRRR w Kkq - 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(8, len(black.pawns))
       self.assertEqual("a6",black.pawns[0].position)
       self.assertEqual(False,black.pawns[0].canCharge)
@@ -436,7 +436,7 @@ Fullmove clock is not an integer.
       self.assertEqual("h6",black.pawns[7].position)
       self.assertEqual(False,black.pawns[7].canCharge)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(8, len(white.pawns))
       self.assertEqual("a3",white.pawns[0].position)
       self.assertEqual(False,white.pawns[0].canCharge)
@@ -451,7 +451,7 @@ Fullmove clock is not an integer.
 
    def test_getPieces_Parse_Pawn_Advance_EnPassant(self):
       self.assertTrue(self.fen.parse("rrrqkrrr/pp2pppp/2p5/3p4/1P6/P7/2PPPPPP/RRRQKRRR w Kkq d6 0 1"))
-      black = self.fen.getBlackPieces()
+      black = self.fen.getPieces(colors.BLACK)
       self.assertEqual(8, len(black.pawns))
       self.assertEqual("a7",black.pawns[0].position)
       self.assertEqual(True,black.pawns[0].canCharge)
@@ -468,7 +468,7 @@ Fullmove clock is not an integer.
       self.assertEqual(False,black.pawns[7].canCharge)
       self.assertEqual(True,black.pawns[7].enPassantCapturable)
 
-      white = self.fen.getWhitePieces()
+      white = self.fen.getPieces(colors.WHITE)
       self.assertEqual(8, len(white.pawns))
       self.assertEqual("b4",white.pawns[0].position)
       self.assertEqual(False,white.pawns[0].canCharge)

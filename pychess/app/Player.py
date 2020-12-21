@@ -4,6 +4,7 @@ from pychess.app.Board import *
 from pychess.app.Algebra import *
 from pychess.app.Debug import *
 from pychess.app import Util
+from pychess.app.fen import FEN, Pieces
 
 class PlayerLastMove(object):
    """Class used to hold the previous move of a player"""
@@ -17,7 +18,7 @@ class PlayerLastMove(object):
 class Player(object):
    """Base player class"""
 
-   def __init__(self, **kwargs):
+   def __init__(self, fen, **kwargs):
       """Create all our pieces in their initial locations"""
 
       self.checked = False
@@ -30,65 +31,24 @@ class Player(object):
       self.parsedAlgebraicMoveString = ""
       self.lastMoveString = ""
 
-      rookFiles = "ah"
-      knightFiles = "bg"
-      bishopFiles = "cf"
-
+      
       self.parser = AlgebraicParser()
       self.algebraicMoveClass = AlgebraicMove()
       self.parsedAlgebraicMoveClass = AlgebraicMove()
       self.updateMoveValues = False
 
       self.debug = Debug()
-
-      randomPieces = kwargs.get("pieces", None)
-
-      if randomPieces:
-         #Random piece distribution and placement
-         self.pawns = []
-         self.rooks = []
-         self.knights = []
-         self.bishops = []
-         self.queens = []
-
-         #Create a list of all possible coords except for the king's coord
-         consumeCoords = [file+rank for file in Util.files for rank in [self.color.pawnRank, self.color.majorRank]]  
-         consumeCoords.remove("e"+self.color.majorRank)
-
-         for piece in randomPieces:
-            coord = random.choice(consumeCoords)
-            consumeCoords.remove(coord)
-
-            if piece == "P":
-               self.pawns.append(Pawn(self.color, coord))
-            elif piece == "R":
-               self.rooks.append(Rook(self.color, coord))
-            elif piece == "N":
-               self.knights.append(Knight(self.color, coord))
-            elif piece == "B":
-               self.bishops.append(Bishop(self.color, coord))
-            elif piece == "Q":
-               self.queens.append(Queen(self.color, coord))
-
-
-      else:
-         #Standard piece distribution and placement
-         self.pawns = [Pawn(self.color,file+self.color.pawnRank) for file in Util.files]
-         self.rooks = [Rook(self.color,file+self.color.majorRank) for file in rookFiles]
-         self.knights = [Knight(self.color,file+self.color.majorRank) for file in knightFiles]
-         self.bishops = [Bishop(self.color,file+self.color.majorRank) for file in bishopFiles]
-         self.queens = [Queen(self.color,"d"+self.color.majorRank)]
-
-      #The king is always in the same space no matter what
-      self.king = King(self.color,"e"+self.color.majorRank)
+   
+      self.fen = fen
+      self.pieces = fen.getPieces(self.color)
 
       #This is a lookup table that is primarily used for captures and un-captures
-      self.pieceMap = { "Pawn" : self.pawns,
-                        "Rook" : self.rooks,
-                        "Knight" : self.knights,
-                        "Bishop" : self.bishops,
-                        "Queen" : self.queens,
-                        "King" : [self.king]}
+      self.pieceMap = { "Pawn" : self.pieces.pawns,
+                        "Rook" : self.pieces.rooks,
+                        "Knight" : self.pieces.knights,
+                        "Bishop" : self.pieces.bishops,
+                        "Queen" : self.pieces.queens,
+                        "King" : [self.pieces.king]}
 
    def setOpponent(self, player):
       self.otherPlayer = player
@@ -101,7 +61,7 @@ class Player(object):
 
    def getAllPieces(self):
       """Return an array of all of my current pieces"""
-      return self.pawns + self.rooks + self.knights + self.bishops + self.queens + [self.king]
+      return self.pieces.pawns + self.pieces.rooks + self.pieces.knights + self.pieces.bishops + self.pieces.queens + [self.pieces.king]
 
    def mateCheck(self):
       mated = False
@@ -154,7 +114,7 @@ class Player(object):
          self.debug.dprint("Parsed Algebraic move class:\n", self.parsedAlgebraicMoveClass)
          if algebraicMove.castle:
             promotionPiece = ""
-            currentPieceLocation = self.king.position
+            currentPieceLocation = self.pieces.king.position
             if algebraicMove.kingside:
                pieceDestination = self.color.kingsideKingFile + self.color.majorRank
             else:
@@ -307,7 +267,7 @@ class Player(object):
                for file in files:
                   nextMove = file+king.position[1]
                   king.move(nextMove)
-                  self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
+                  self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.pieces.king.position)
                   if len(self.otherPlayer.getPiecesThatThreatenLocation(king.position)) != 0:
                      self.debug.dprint("Check found attempting to verify castle at:", nextMove)
                      king.undoLastMove()
@@ -319,7 +279,7 @@ class Player(object):
 
    def findCastlingRook(self, castleDirection):
       foundRook = None
-      for rook in self.rooks:
+      for rook in self.pieces.rooks:
          if rook.castleOption == castleDirection:
             foundRook = rook
             break
@@ -327,7 +287,7 @@ class Player(object):
 
    def clearEnPassant(self):
       """The opponent has just made a move, if we still have EnPassant vulnerable Pawns they are not anymore"""
-      [pawn.clearEnPassantVunerable() for pawn in self.pawns if pawn.isEnPassantVulnerable()]
+      [pawn.clearEnPassantVunerable() for pawn in self.pieces.pawns if pawn.isEnPassantVulnerable()]
 
    def canPawnCaptureEnPassantAtCoord(self, pawn, coord):
       """Determine if the destination coordinate is an En Passant capture for the given pawn"""
@@ -612,8 +572,8 @@ class Player(object):
    def verifyCheck(self):
       """Check to see if I am checked, and update my flag as appropriate"""
       self.debug.startSection("verifyCheck")
-      self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
-      if len(self.otherPlayer.getPiecesThatThreatenLocation(self.king.position)) != 0:
+      self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.pieces.king.position)
+      if len(self.otherPlayer.getPiecesThatThreatenLocation(self.pieces.king.position)) != 0:
          self.checked = True
       else:
          self.checked = False
@@ -627,8 +587,8 @@ class Player(object):
       self.debug.startSection("verifyMate")
       if self.checked:
          #Get the attacking pieces to start off with"""
-         self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.king.position)
-         attackingPieces = self.otherPlayer.getPiecesThatThreatenLocation(self.king.position)
+         self.debug.dprint(self.color, "Player transferring control to other player to get pieces that can attack our King at: ", self.pieces.king.position)
+         attackingPieces = self.otherPlayer.getPiecesThatThreatenLocation(self.pieces.king.position)
          numberOfAttackers = len(attackingPieces)
          self.debug.dprint("Number of pieces attacking our King: ", numberOfAttackers)
          if numberOfAttackers == 0:
@@ -640,9 +600,9 @@ class Player(object):
             #Always check to see if we can just move the king away"""
             kingCanMove = False
             self.debug.dprint("Getting all valid moves for the king and trying them.")
-            kingMovements = self.getValidMovesForPiece(self.king)
+            kingMovements = self.getValidMovesForPiece(self.pieces.king)
             for move in kingMovements:
-                  if self._testMove(self.king.position, move):
+                  if self._testMove(self.pieces.king.position, move):
                      kingCanMove = True
                      self.mated = False
                      break
@@ -654,7 +614,7 @@ class Player(object):
                self.debug.dprint("The king is stuck, try moving all other pieces into the path of the one attacker.")
                attacker = attackingPieces[0]
                vBoard = VerifyBoard(self.getAllPieces() + self.otherPlayer.getAllPieces())
-               pathToKing = attacker.getPath(self.king.position, vBoard)
+               pathToKing = attacker.getPath(self.pieces.king.position, vBoard)
 
                #Now get all of my pieces minus the king, we have already taken care of his movements
                myPieces = self.getAllPieces()
@@ -674,15 +634,15 @@ class Player(object):
 
 class WhitePlayer(Player):
    """The Player of the White Pieces"""
-   def __init__(self, **kwargs):
+   def __init__(self, fen, **kwargs):
       self.color = Util.colors.WHITE
-      super(WhitePlayer,self).__init__(**kwargs)
+      super(WhitePlayer,self).__init__(fen, **kwargs)
 
 class BlackPlayer(Player):
    """The Player of the Black Pieces"""
-   def __init__(self, **kwargs):
+   def __init__(self, fen, **kwargs):
       self.color = Util.colors.BLACK
-      super(BlackPlayer,self).__init__(**kwargs) 
+      super(BlackPlayer,self).__init__(fen, **kwargs) 
 
 def getIds(lst):
    return [id(val) for val in lst]

@@ -3,22 +3,18 @@ from pychess.app.Board import *
 from pychess.app.Player import *
 from pychess.app.ChessFile import *
 from pychess.test.TestPyChess import *
-from pychess.app import Piece, Util, randomizer
+from pychess.app import Piece, Util
+from pychess.app.fen import FEN
 import os
 
 
 class ChessGame(object):
    files = ChessFiles()
-   whitePlayer = WhitePlayer()
-   blackPlayer = BlackPlayer()
-   whitePlayer.setOpponent(blackPlayer)
-   blackPlayer.setOpponent(whitePlayer)
-   gameBoard = GameBoard(whitePlayer, blackPlayer)
-   #We could get by with only one randomzer, but two makes for more randomness
-   whiteRandom = randomizer.Randomizer()
-   blackRandom = randomizer.Randomizer()
+   fen = FEN()
    lastError = ""
-   moveList = []
+
+   def __init__(self):
+      self.resetAllGames()
 
    def getLastError(self):
       return self.lastError
@@ -63,16 +59,22 @@ class ChessGame(object):
       
    def resetGameRepresentation(self):
       self.files.resetCurrentGameMoves()
-      whitePieces = None
-      blackPieces = None
-      if booleanConfigItemIsTrue(self._getConfigOption(ValidConfig.RandomMode)):
-         whitePieces = []
-         blackPieces = []
+      self.fen.reset()
 
-      self.whitePlayer = WhitePlayer(pieces=whitePieces)
-      self.blackPlayer = BlackPlayer(pieces=blackPieces)
-      self.whitePlayer.otherPlayer = self.blackPlayer
-      self.blackPlayer.otherPlayer = self.whitePlayer
+      fenString = FEN.STANDARD_OPENING
+      #Returned tags are tuples of (name, value)
+      fenTag = self.getTag("FEN")[1]
+      if self.getTag("SetUp")[1] == "1" and fenTag != "":
+         #We should use the given FEN for initial setup
+         fenString = fenTag
+      if not self.fen.parse(fenString):
+         self.fen.reset()
+         self.fen.parse(FEN.STANDARD_OPENING)
+
+      self.whitePlayer = WhitePlayer(self.fen)
+      self.blackPlayer = BlackPlayer(self.fen)
+      self.whitePlayer.setOpponent(self.blackPlayer)
+      self.blackPlayer.setOpponent(self.whitePlayer)
       self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)
       self.moveList = []
       
@@ -213,9 +215,15 @@ if one is given use the argument as a filename to read a savegame from."""
       
    def setTag(self, tagName, tagValue):
       self.files.setTag(tagName, tagValue)
+      # Special case, reset if FEN applicability could have changed
+      if tagName == "SetUp" or tagName == "FEN":
+         self.resetGameRepresentation()
 
    def deleteTag(self, tagName):
       self.files.deleteTag(tagName)
+      # Special case, reset if FEN applicability could have changed
+      if tagName == "SetUp" or tagName == "FEN":
+         self.resetGameRepresentation()
       
    def getTag(self, tagName):
       return self.files.getTag(tagName)
