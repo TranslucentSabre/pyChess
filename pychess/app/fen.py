@@ -89,6 +89,7 @@ class FEN(object):
       self.fenString = ""
       self.parseValid = False
       self.parseErrors = "No parse attempted"
+      self.piecesGenerated = False
       self.pieces = Pieces()
 
    def getParseValid(self):
@@ -151,7 +152,34 @@ class FEN(object):
       return self.parseValid
 
    def _createPieces(self):
-       pass
+      if not self.parseValid:
+         #Cowardly refusing to generate pieces if we do not have a valid parse
+         return
+
+      ranks = self._getFENItem(FEN._position_index_).split("/")
+      castle = self._getFENItem(FEN._castle_index_)
+      enPassant = self._getFENItem(FEN._en_passant_index_)
+      rankNum = len(ranks)
+
+      #iterate over ranks
+      for rank in ranks:
+         fileNum = ord('a')
+         emptyCollector = ""
+         #iterate over files
+         for item in rank:
+            if item not in self.VALID_PIECES:
+               emptyCollector += item
+               #don't update file until we encounter a piece
+            else:
+               #Update file with collected empty files
+               if emptyCollector != "":
+                  fileNum += int(emptyCollector)
+                  emptyCollector = ""
+               self.pieces.createPiece(chr(fileNum)+str(rankNum),item,castle,enPassant)
+               fileNum = fileNum + 1
+         rankNum = rankNum - 1
+      self.piecesGenerated = True
+
 
    def _validateNextPlayer(self):
       firstPlayer = self.getNextPlayer()
@@ -187,9 +215,13 @@ class FEN(object):
       
 
    def getBlackPieces(self):
+      if not self.piecesGenerated:
+         self._createPieces()
       return self.pieces.pieces[Util.colors.BLACK]
 
    def getWhitePieces(self):
+      if not self.piecesGenerated:
+         self._createPieces()
       return self.pieces.pieces[Util.colors.WHITE]
 
    def getNextPlayer(self):
