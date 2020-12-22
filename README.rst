@@ -8,7 +8,10 @@ played over email.
 
 This is currently implemented in Python 3.4.
 This is back under active development right now. The game engine is fully functional 
-and so is a minimum functionality PGN parser/exporter.
+including a PGN parser/exporter that support FEN notation.
+
+Also included is configuration that allows for randomized starting positions, an idea
+shameless inspired by `Really Bad Chess<http://www.reallybadchess.com/>`
 
 To Install:
     pip install .

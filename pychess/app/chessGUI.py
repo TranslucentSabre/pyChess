@@ -397,5 +397,15 @@ class ConfigItem(Resource):
 
 api.add_resource(ConfigItem, "/config/<item>")
 
+class Version(Resource):
+   def get(self):
+      result = {}
+      result['version'] = VERSION
+      return result
+
+api.add_resource(Version, "/version")
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)

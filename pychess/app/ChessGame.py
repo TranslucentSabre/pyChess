@@ -7,6 +7,7 @@ from pychess.app import Piece, Util
 from pychess.app.fen import FEN
 import os
 
+VERSION = "1.6.0"
 
 class ChessGame(object):
    files = ChessFiles()
