@@ -62,6 +62,8 @@ function buildRightPanel(){
 function generateBoard() {
    var jQueryDiv = $(boardSelector)
    var htmlString = "";
+   //Add pyChess version
+   htmlString += '<div class="label newLine">Version:</div><div class="horizontal" id="version"></div>';
    var columnArray = ["a", "b", "c", "d", "e", "f", "g", "h"];
    var blackSquares = ["#a1","#c1","#e1","#g1","#b2","#d2","#f2","#h2","#a3","#c3","#e3","#g3","#b4","#d4","#f4","#h4",
                    "#a5","#c5","#e5","#g5","#b6","#d6","#f6","#h6","#a7","#c7","#e7","#g7","#b8","#d8","#f8","#h8"];
@@ -93,6 +95,8 @@ function generateBoard() {
    htmlString += '<div class="label newLine">Status for White Player:</div><div class="horizontal" id="whiteStatus"></div>';
    htmlString += '<div class="label newLine">Captured by White Player:</div><div class="horizontal" id="whiteCaptured"></div>';
    jQueryDiv.html(htmlString);
+   //populate Version field
+   getVersion()
    $(whiteSquares.join(",")).addClass("whiteSquare");
    $(blackSquares.join(",")).addClass("blackSquare");
    $('.chessSquare[id^="a"]').addClass("left-bordered");
@@ -363,6 +367,16 @@ function loadButtonClick() {
    loadGameFile($("#fileName").val());
 }
 
+function getVersion() {
+   $.ajax( {
+      url: "/version",
+      dataType: "json",
+      success: function(data, textStatus) {
+         $("#version").html(data.version)
+      }
+   } );
+}
+
 function populateGameSelection(callback) {
    $.ajax( {
       url: "/games",
@@ -560,12 +574,16 @@ function resetAllGames() {
 
 var Config = {
    values : {},
-   backToFront : {"import" : "Default File To Load",
-                  "export" : "Default File To Save",
-                  "strict" : "Strict Algebraic Move Parsing"},
+   backToFront : {"import"    : "Default File To Load",
+                  "export"    : "Default File To Save",
+                  "strict"    : "Strict Algebraic Move Parsing",
+                  "random"    : "Random pieces on new game",
+                  "threshold" : "Maximum difference between piece values in random games"},
    frontToBack : {"Default File To Load" : "import",
                   "Default File To Save" : "export",
-                  "Strict Algebraic Move Parsing" : "strict"}
+                  "Strict Algebraic Move Parsing" : "strict",
+                  "Random pieces on new game" : "random",
+                  "Maximum difference between piece values in random games" : "threshold"},
 };
 
 function showConfigItem() {

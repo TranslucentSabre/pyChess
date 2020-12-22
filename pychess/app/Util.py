@@ -1,8 +1,20 @@
 from math import ceil
 
+def getTurnNumberFromFenData(fullmoveClock, nextPlayer):
+    #This is heavily based upon the algorithm in GameBoard.gotoTurnString
+    
+    #Default to white value
+    colorMod = -1
+    if colors.BLACK == nextPlayer:
+        colorMod = 0
+    return fullmoveClock * 2 + colorMod
+
 def getTurnStringFromOnesBasedIndex(onesBasedIndex):
     turnString = ""
     numericTurn = int(ceil(onesBasedIndex/float(2)))
+    if 0 == numericTurn:
+        return "0"
+
     WHITE = 1
     if onesBasedIndex & 1 == WHITE:
         turnString = str(numericTurn)+"."
@@ -63,7 +75,6 @@ class colors(object):
       pawnRank = "2"
       majorRank = "1"
       promotionRank = "8"
-      pawnChargeRank = "4"
       pawnRankModifier = 1
 
    class BLACK(CommonColor):
@@ -71,7 +82,6 @@ class colors(object):
       pawnRank = "7"
       majorRank = "8"
       promotionRank = "1"
-      pawnChargeRank = "5"
       pawnRankModifier = -1
 
    class NONE(CommonColor):
@@ -79,6 +89,5 @@ class colors(object):
       pawnRank = "0"
       majorRank = "0"
       promotionRank = "0"
-      pawnChargeRank = "0"
       pawnRankModifier = 0
       

@@ -347,7 +347,10 @@ import    (read/set default import file)
 export    (read/set default export file)
 name      (read/set the players real name)
 location  (read/set the physical location of the player)
-strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)"""
+strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
+files     (read/set path to the location of save games and configuration
+random    (read/set whether we have random peices when starting a new game
+threshold (read/set allowed piece value variance between players in random mode"""
 
 class Config(Resource):
    def get(self):
@@ -393,6 +396,16 @@ class ConfigItem(Resource):
          return result
 
 api.add_resource(ConfigItem, "/config/<item>")
+
+class Version(Resource):
+   def get(self):
+      result = {}
+      result['version'] = VERSION
+      return result
+
+api.add_resource(Version, "/version")
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

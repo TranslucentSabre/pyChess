@@ -33,6 +33,14 @@ class Piece(object):
       else:
          return returnValue
 
+   def _getFileNumber(self):
+      """Return the ascii value of the file of the piece as a number"""
+      return ord(self.position[0])
+
+   def _getRankNumber(self):
+      """Return the rank of the piece as a number"""
+      return int(self.position[1])
+
    def move(self,coord):
       """Attempt to move this piece, it will fail if the movement places it outside the
          board or if it does not have an initial position"""
@@ -99,8 +107,8 @@ class Knight(Piece):
       """Get the valid moves for a Knight"""
       currentPosition = self.position
       if vBoard.getPiece(currentPosition) == self:
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          #I probably should break this list comprension up because this is just long, we will see
          physicalMoves = [chr(file) + str(rank) for file in range(fileNum - 2, fileNum + 3) for rank in range(rankNum - 2, rankNum + 3) if (abs(rank-rankNum) == 2 and abs(file-fileNum) == 1) or (abs(rank-rankNum) == 1 and abs(file-fileNum) == 2)]
          validMoves = []
@@ -133,8 +141,8 @@ class Rook(Piece):
          continueLeft = True
          continueRight = True
          keepChecking = True
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          loopCounter = 1
          validMoves = []
          while keepChecking:
@@ -188,8 +196,8 @@ class Bishop(Piece):
          continueLowerLeft = True
          continueLowerRight = True
          keepChecking = True
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          loopCounter = 1
          validMoves = []
          while keepChecking:
@@ -246,8 +254,8 @@ class Queen(Piece):
          continueLeft = True
          continueRight = True
          keepChecking = True
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          loopCounter = 1
          validMoves = []
          while keepChecking:
@@ -322,8 +330,8 @@ class King(Piece):
       """Get the valid moves for the King"""
       currentPosition = self.position
       if vBoard.getPiece(currentPosition) == self:
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          physicalMoves = [chr(file) + str(rank) for file in range(fileNum - 1, fileNum + 2) for rank in range(rankNum - 1, rankNum + 2) if not file == rank]
          validMoves = []
          for move in physicalMoves:
@@ -337,9 +345,17 @@ class King(Piece):
 
 class Pawn(Piece):
    """A Pawn"""
-   def __init__(self, color, position):
+   def __init__(self, color, position, enPassant=False):
       super(Pawn,self).__init__("Pawn", color, position)
-      self.enPassantCapturable = False
+      self.enPassantCapturable = enPassant
+      self.canCharge = False
+      # It is possible we were given a given a bad position, if so skip the EnPassant math
+      if self.placed:
+         #Keep track of initial rank and charge rank for each pawn, necessary for random mode
+         self.startingRank = self._getRankNumber()
+         self.chargeRank = self.startingRank + (2 * self.color.pawnRankModifier)
+         if str(self.startingRank) in [ self.color.pawnRank, self.color.majorRank]:
+            self.canCharge = True
 
    def isEnPassantVulnerable(self):
       return self.enPassantCapturable
@@ -354,11 +370,12 @@ class Pawn(Piece):
       self.moveResultReason = "Success"
       if self.placed:
          if Util.isCoordValid(coord):
-            self.lastState = (self.position, self.moved, self.enPassantCapturable)
-            if self.color.pawnRank in self.position and self.color.pawnChargeRank in coord:
+            self.lastState = (self.position, self.moved, self.enPassantCapturable, self.canCharge)
+            if str(self.startingRank) in self.position and str(self.chargeRank) in coord:
                self.enPassantCapturable = True
             else:
                self.enPassantCapturable = False
+            self.canCharge = False
             self.position = coord
             self.moved = True
             return True
@@ -373,23 +390,24 @@ class Pawn(Piece):
          self.position = self.lastState[0]
          self.moved = self.lastState[1]
          self.enPassantCapturable = self.lastState[2]
+         self.canCharge = self.lastState[3]
          self.lastState = ()
 
    def getCaptureCoords(self):
-      fileNum = ord(self.position[0])
-      rankNum = int(self.position[1])
+      fileNum = self._getFileNumber()
+      rankNum = self._getRankNumber()
       return [coord for coord in [chr(fileNum-1) + str(rankNum + self.color.pawnRankModifier), chr(fileNum +1) + str(rankNum + self.color.pawnRankModifier)] if Util.isCoordValid(coord)]
 
    def getValidMoves(self, vBoard):
       """Get the valid moves for a Pawn"""
       currentPosition = self.position
       if vBoard.getPiece(currentPosition) == self:
-         fileNum = ord(currentPosition[0])
-         rankNum = int(currentPosition[1])
+         fileNum = self._getFileNumber()
+         rankNum = self._getRankNumber()
          captures = [ chr(fileNum-1) + str(rankNum + self.color.pawnRankModifier), chr(fileNum +1) + str(rankNum + self.color.pawnRankModifier)]
          regular = [ chr(fileNum) + str(rankNum + self.color.pawnRankModifier) ]
-         if (not self.moved):
-            regular.append(chr(fileNum) + str(rankNum + (self.color.pawnRankModifier * 2)))
+         if self.canCharge:
+            regular.append(chr(fileNum) + str(self.chargeRank))
          validMoves = []
          for move in captures:
             if Util.isCoordValid(move):

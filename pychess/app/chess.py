@@ -11,7 +11,7 @@ except NameError:
     pass
 
 class Chess(cmd.Cmd):
-   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version 1.4.0\n"
+   intro = "Welcome to pyChess. Type help or ? to list commands.\nWritten by Tim Myers -- Version "+VERSION+"\n"
    prompt = "pyChess# "
    game = ChessGame()
 
@@ -135,6 +135,8 @@ if one is given use the argument as a filename to write the savegame to."""
       location  (read/set the physical location of the player)
       strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
       files     (read/set path to the location of save games and configuration
+      random    (read/set whether we have random peices when starting a new game
+      threshold (read/set allowed piece value variance between players in random mode
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen."""
       #Only split once, this allows the user to supply items with spaces in them

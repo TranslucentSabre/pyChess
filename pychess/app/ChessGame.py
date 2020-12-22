@@ -3,20 +3,19 @@ from pychess.app.Board import *
 from pychess.app.Player import *
 from pychess.app.ChessFile import *
 from pychess.test.TestPyChess import *
-from pychess.app import Piece
-from pychess.app import Util
+from pychess.app import Piece, Util
+from pychess.app.fen import FEN
 import os
 
+VERSION = "1.6.0"
 
-class ChessGame():
+class ChessGame(object):
    files = ChessFiles()
-   whitePlayer = WhitePlayer()
-   blackPlayer = BlackPlayer()
-   whitePlayer.setOpponent(blackPlayer)
-   blackPlayer.setOpponent(whitePlayer)
-   gameBoard = GameBoard(whitePlayer, blackPlayer)
+   fen = FEN()
    lastError = ""
-   moveList = []
+
+   def __init__(self):
+      self.resetAllGames()
 
    def getLastError(self):
       return self.lastError
@@ -58,14 +57,28 @@ class ChessGame():
    def resetAllGames(self):
       self.files.resetPgnFile()
       self.resetGameRepresentation()
-      
+
    def resetGameRepresentation(self):
       self.files.resetCurrentGameMoves()
-      self.whitePlayer = WhitePlayer()
-      self.blackPlayer = BlackPlayer()
-      self.whitePlayer.otherPlayer = self.blackPlayer
-      self.blackPlayer.otherPlayer = self.whitePlayer
-      self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)
+      self.fen.reset()
+
+      self.setupRandomGame()
+
+      fenString = FEN.STANDARD_OPENING
+      #Returned tags are tuples of (name, value)
+      fenTag = self.getTag("FEN")[1]
+      if self.getTag("SetUp")[1] == "1" and fenTag != "":
+         #We should use the given FEN for initial setup
+         fenString = fenTag
+      if not self.fen.parse(fenString):
+         self.fen.reset()
+         self.fen.parse(FEN.STANDARD_OPENING)
+
+      self.whitePlayer = WhitePlayer(self.fen)
+      self.blackPlayer = BlackPlayer(self.fen)
+      self.whitePlayer.setOpponent(self.blackPlayer)
+      self.blackPlayer.setOpponent(self.whitePlayer)
+      self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer, self.fen)
       self.moveList = []
       
    def commitTurn(self):
@@ -87,9 +100,11 @@ class ChessGame():
       return self.gameBoard.getTurnString(turn)
 
    def getTurnStringArray(self):
-      turnArray = [ { "0" : "Initial" } ]
-      for index, move in enumerate(self.moveList):
-         turnArray.append({self.gameBoard.getTurnString(index+1) : move })
+      turnNum = self.gameBoard.initialSetup
+      turnArray = [ { self.gameBoard.getTurnString(turnNum) : "Initial" } ]
+      for move in self.moveList:
+         turnNum += 1
+         turnArray.append({self.gameBoard.getTurnString(turnNum) : move })
       return turnArray
 
    def twoCoordMove(self,firstCoord,secondCoord,promotionAbbreviation=None):
@@ -205,9 +220,15 @@ if one is given use the argument as a filename to read a savegame from."""
       
    def setTag(self, tagName, tagValue):
       self.files.setTag(tagName, tagValue)
+      # Special case, reset if FEN applicability could have changed
+      if tagName == "SetUp" or tagName == "FEN":
+         self.resetGameRepresentation()
 
    def deleteTag(self, tagName):
       self.files.deleteTag(tagName)
+      # Special case, reset if FEN applicability could have changed
+      if tagName == "SetUp" or tagName == "FEN":
+         self.resetGameRepresentation()
       
    def getTag(self, tagName):
       return self.files.getTag(tagName)
@@ -224,6 +245,26 @@ if one is given use the argument as a filename to read a savegame from."""
    def startNewGame(self):
       self.files.startNewGame()
       self.restartGame()
+
+   def setupRandomGame(self):
+      # Generate random fen and set the appropriate tags, if we are configured to do so
+      if self.getConfigItem("random") == "True":
+         try:
+            threshold = self.getConfigItem("threshold")
+            if threshold == None:
+               threshold = 5
+            threshold = int(threshold)
+         except ValueError:
+            threshold = 5
+
+         existingFen = self.getTag("FEN")[0]
+         #Only reset with random FEN if we don't already have a FEN
+         if existingFen != "":
+            fen = FEN.generateRandomFEN(threshold)
+            #Write these tags directly to the files object to avoid representation reset in our setTag function
+            self.files.setTag("FEN", fen)
+            self.files.setTag("SetUp", "1")
+
 
    def getConfigItem(self,configItem):
       """Read configuration options. The argument must be one of the following settings:
