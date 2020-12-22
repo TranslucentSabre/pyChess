@@ -178,14 +178,14 @@ class VerifyBoard(Board):
 class GameBoard(object):
    """The board that holds all of the turns in the game"""
 
-   def __init__(self, whitePlayer, blackPlayer):
+   def __init__(self, whitePlayer, blackPlayer, fen):
       """Sets up the game, with the initial positions being the positions as given by the players at this time."""
-      self.boards = []
-      self.boards.append(DisplayBoard(whitePlayer.getAllPieces() + blackPlayer.getAllPieces()))
-      self.boards.append(DisplayBoard())
-      self.currentTurn = 0
-      self.initialSetup = 0
-      self.pendingTurn = 1
+      self.boards = {}
+      self.pendingTurn = Util.getTurnNumberFromFenData(fen.getFullmoveClock(), fen.getNextPlayer())
+      self.currentTurn = self.pendingTurn - 1
+      self.initialSetup = self.currentTurn
+      self.boards[self.currentTurn] = DisplayBoard(whitePlayer.getAllPieces() + blackPlayer.getAllPieces())
+      self.boards[self.pendingTurn] = DisplayBoard()
       self.commitReady = False
 
    def __str__(self):
@@ -204,10 +204,7 @@ class GameBoard(object):
             turn = self.pendingTurn - 1
          else:
             turn = self.pendingTurn
-      if turn == self.initialSetup:
-         turnString = "0"
-      else:
-         turnString = Util.getTurnStringFromOnesBasedIndex(turn)
+      turnString = Util.getTurnStringFromOnesBasedIndex(turn)
       return turnString
 
    def firstTurn(self):
@@ -283,7 +280,7 @@ class GameBoard(object):
       if self.commitReady == True:
          self.currentTurn = self.pendingTurn
          self.pendingTurn += 1
-         self.boards.append(DisplayBoard())
+         self.boards[self.pendingTurn] = DisplayBoard()
          self.commitReady = False
          return True
       else:

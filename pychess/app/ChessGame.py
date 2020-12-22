@@ -75,7 +75,7 @@ class ChessGame(object):
       self.blackPlayer = BlackPlayer(self.fen)
       self.whitePlayer.setOpponent(self.blackPlayer)
       self.blackPlayer.setOpponent(self.whitePlayer)
-      self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer)
+      self.gameBoard = GameBoard(self.whitePlayer, self.blackPlayer, self.fen)
       self.moveList = []
       
    def commitTurn(self):
@@ -97,9 +97,11 @@ class ChessGame(object):
       return self.gameBoard.getTurnString(turn)
 
    def getTurnStringArray(self):
-      turnArray = [ { "0" : "Initial" } ]
-      for index, move in enumerate(self.moveList):
-         turnArray.append({self.gameBoard.getTurnString(index+1) : move })
+      turnNum = self.gameBoard.initialSetup
+      turnArray = [ { self.gameBoard.getTurnString(turnNum) : "Initial" } ]
+      for move in self.moveList:
+         turnNum += 1
+         turnArray.append({self.gameBoard.getTurnString(turnNum) : move })
       return turnArray
 
    def twoCoordMove(self,firstCoord,secondCoord,promotionAbbreviation=None):
