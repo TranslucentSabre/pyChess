@@ -682,5 +682,33 @@ Fullmove clock is not an integer.
       self.assertEqual(testPawn.enPassantCapturable, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
       self.assertEqual(False, self.fen.pieces.pieces[colors.BLACK].pawns[0].enPassantCapturable)
    
+   def test_multiple_random_fen_high_threshold(self):
+      for count in range(10):
+         generated = FEN.generateRandomFEN(20)
+         self.assertNotEqual(FEN.STANDARD_OPENING,generated)
+         self.fen.reset()
+         self.assertEqual(True,self.fen.parse(generated),"Error: {}".format(self.fen.getParseErrors()))
+
+   def test_multiple_random_fen_medium_threshold(self):
+      for count in range(10):
+         generated = FEN.generateRandomFEN(10)
+         self.assertNotEqual(FEN.STANDARD_OPENING,generated)
+         self.fen.reset()
+         self.assertEqual(True,self.fen.parse(generated),"Error: {}".format(self.fen.getParseErrors()))
+
+   def test_multiple_random_fen_low_threshold(self):
+      for count in range(10):
+         generated = FEN.generateRandomFEN(5)
+         self.assertNotEqual(FEN.STANDARD_OPENING,generated)
+         self.fen.reset()
+         self.assertEqual(True,self.fen.parse(generated),"Error: {}".format(self.fen.getParseErrors()))
+
+   def test_multiple_random_fen_identical_threshold(self):
+      for count in range(10):
+         generated = FEN.generateRandomFEN(0)
+         self.assertNotEqual(FEN.STANDARD_OPENING,generated)
+         self.fen.reset()
+         self.assertEqual(True,self.fen.parse(generated),"Error: {}".format(self.fen.getParseErrors()))
+
 if __name__ == "__main__":
     unittest.main()

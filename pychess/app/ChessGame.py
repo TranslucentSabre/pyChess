@@ -56,10 +56,12 @@ class ChessGame(object):
    def resetAllGames(self):
       self.files.resetPgnFile()
       self.resetGameRepresentation()
-      
+
    def resetGameRepresentation(self):
       self.files.resetCurrentGameMoves()
       self.fen.reset()
+
+      self.setupRandomGame()
 
       fenString = FEN.STANDARD_OPENING
       #Returned tags are tuples of (name, value)
@@ -242,6 +244,26 @@ if one is given use the argument as a filename to read a savegame from."""
    def startNewGame(self):
       self.files.startNewGame()
       self.restartGame()
+
+   def setupRandomGame(self):
+      # Generate random fen and set the appropriate tags, if we are configured to do so
+      if self.getConfigItem("random") == "True":
+         try:
+            threshold = self.getConfigItem("threshold")
+            if threshold == None:
+               threshold = 5
+            threshold = int(threshold)
+         except ValueError:
+            threshold = 5
+
+         existingFen = self.getTag("FEN")[0]
+         #Only reset with random FEN if we don't already have a FEN
+         if existingFen != "":
+            fen = FEN.generateRandomFEN(threshold)
+            #Write these tags directly to the files object to avoid representation reset in our setTag function
+            self.files.setTag("FEN", fen)
+            self.files.setTag("SetUp", "1")
+
 
    def getConfigItem(self,configItem):
       """Read configuration options. The argument must be one of the following settings:

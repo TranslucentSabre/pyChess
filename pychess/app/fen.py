@@ -1,5 +1,5 @@
 import re
-import pychess.app.randomizer
+from pychess.app.randomizer import Randomizer
 import pychess.app.Piece as Piece
 import pychess.app.Util as Util
 
@@ -82,6 +82,49 @@ class FEN(object):
    VALID_CASTLE = VALID_BLACK_CASTLE + VALID_WHITE_CASTLE
    VALID_DASH = "-"
 
+   @staticmethod
+   def generateRandomFEN(threshold=5):
+      # Use two instances of randomizer to maximize our chances of hitting a threshold value
+      thing1 = Randomizer()
+      thing2 = Randomizer()
+      thing1.generatePieceSets(20)
+      thing2.generatePieceSets(20)
+
+      piecesWhite = None
+      for piecesBlack in thing1.getPieceSets():
+         piecesWhite = thing2.getPieceSetWithinThreshold(piecesBlack,threshold)
+         if None != piecesWhite:
+            break
+
+      if piecesWhite == None:
+         return FEN.STANDARD_OPENING
+
+      castle = ""
+      fen = ""
+
+      piecesBlack = piecesBlack.lower()
+      rank = piecesBlack[:4] + "k" + piecesBlack[4:7]
+      if rank[0] == "r":
+         castle = "q"
+      if rank[-1] == "r":
+         castle = "k" + castle
+      fen = rank + "/"
+      fen = fen + piecesBlack[7:] + "/"
+      fen = fen + "8/8/8/8/"
+      fen = fen + piecesWhite[:8] + "/"
+      rank = piecesWhite[8:12] + "K" + piecesWhite[12:]
+      if rank [0] == "R":
+         castle = "Q" + castle
+      if rank [-1] == "R":
+         castle = "K" + castle
+      if castle == "":
+         castle = FEN.VALID_DASH
+      fen = fen + rank + " w " + castle + " " + FEN.VALID_DASH + " 0 1"
+
+      return fen
+
+       
+
    def __init__(self):
       self.reset()
 
@@ -128,7 +171,13 @@ class FEN(object):
 
 
    def _validatePositions(self):
-      ranks = self._getFENItem(FEN._position_index_).split("/")
+      try:
+         ranks = self._getFENItem(FEN._position_index_).split("/")
+      except IndexError:
+         self.parseErrors += "FEN Postitions could not be found.\n"
+         self.parseValid = False
+         return self.parseValid
+
       rankCount = len(ranks)
      
       for invRankNum, rank in enumerate(ranks):
@@ -144,19 +193,31 @@ class FEN(object):
       return self.parseValid
 
    def _validateCastle(self):
-      castle = self._getFENItem(FEN._castle_index_)
+      try:
+         castle = self._getFENItem(FEN._castle_index_)
+      except IndexError:
+         self.parseErrors += "No value could be found for the castle value.\n"
+         self.parseValid = False
+         return self.parseValid
+
       if castle is FEN.VALID_DASH:
           #Short Circuit
           return self.parseValid
 
       for position in castle:
-          if position not in FEN.VALID_CASTLE:
-              self.parseErrors += "Invalid character '{}' in castle specification.\n".format(position)
-              self.parseValid = False
+         if position not in FEN.VALID_CASTLE:
+            self.parseErrors += "Invalid character '{}' in castle specification.\n".format(position)
+            self.parseValid = False
       return self.parseValid
 
    def _validateEnPassant(self):
-      enPassant = self._getFENItem(FEN._en_passant_index_)
+      try:
+         enPassant = self._getFENItem(FEN._en_passant_index_)
+      except IndexError:
+         self.parseErrors += "No value could be found for EnPassant.\n"
+         self.parseValid = False
+         return self.parseValid
+
       if enPassant is not FEN.VALID_DASH and not Util.isCoordValid(enPassant):
          self.parseErrors += "En Passant value of '{}' is not valid.\n".format(enPassant)
          self.parseValid = False
@@ -197,7 +258,13 @@ class FEN(object):
       return self.pieces.pieces[color]
        
    def getNextPlayer(self):
-      char = self._getFENItem(FEN._player_index_)
+      try:
+         char = self._getFENItem(FEN._player_index_)
+      except IndexError:
+         self.parseErrors += "No value could be found for next player.\n"
+         self.parseValid = False
+         return Util.colors.NONE
+
       if char == "w":
          return Util.colors.WHITE
       elif char == "b":
@@ -208,7 +275,13 @@ class FEN(object):
          return Util.colors.NONE
 
    def getHalfmoveClock(self):
-      clock = self._getFENItem(FEN._halfmove_index_)
+      try:
+         clock = self._getFENItem(FEN._halfmove_index_)
+      except IndexError:
+         self.parseErrors += "No value could be found for the Halfmove Clock.\n"
+         self.parseValid = False
+         return ""
+
       try:
          return int(clock)
       except ValueError:
@@ -217,7 +290,13 @@ class FEN(object):
          return ""
 
    def getFullmoveClock(self):
-      clock = self._getFENItem(FEN._fullmove_index_)
+      try:
+         clock = self._getFENItem(FEN._fullmove_index_)
+      except IndexError:
+         self.parseErrors += "No value could be found for the Fullmove Clock.\n"
+         self.parseValid = False
+         return ""
+
       try:
          return int(clock)
       except ValueError:

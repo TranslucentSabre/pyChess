@@ -15,7 +15,7 @@ class Randomizer(object):
       pieces = []
       while len(pieces) < 15:
          pieces.append(random.choice(list(self.pieceValues.keys())))
-      pieceSet = "".join(sorted(pieces))
+      pieceSet = "".join(pieces)
       pieceSetValue = self.getSetValue(pieceSet)
       self.generatedPieces[pieceSet] = pieceSetValue
       return pieceSet
@@ -30,6 +30,10 @@ class Randomizer(object):
 
    def getSetValue(self, pieceSet):
       return self.generatedPieces.get(pieceSet, sum([self.pieceValues.get(piece, 0) for piece in pieceSet]))
+
+   def getPieceSets(self):
+      for pieces in self.generatedPieces.keys():
+         yield pieces
 
    def getRandomPieceSet(self):
       try:
