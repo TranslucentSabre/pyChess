@@ -386,7 +386,7 @@ class Pawn(Piece):
 
    def undoLastMove(self):
       """Undo the last move performed by this piece"""
-      if len(self.lastState) == 3:
+      if len(self.lastState) == 4:
          self.position = self.lastState[0]
          self.moved = self.lastState[1]
          self.enPassantCapturable = self.lastState[2]

@@ -79,7 +79,7 @@ class Chess(cmd.Cmd):
          return
       if len(move) == 1:
          if self.game.algebraicMove(move[0]):
-            if booleanConfigItemIsTrue(self.game.getConfigItem("confirm")):
+            if booleanConfigItemIsTrue(self.game.getConfigItem("moveConfirm")):
                print(self.game.showPendingBoard())
                if self._booleanPrompt("Are you sure this is the move you would like to make?"):
                   self.game.commitTurn()
@@ -134,15 +134,15 @@ if one is given use the argument as a filename to write the savegame to."""
 
    def do_config(self,arg):
       """Set or read configuration options. The first argument must be one of the following settings:
-      import    (read/set default import file)
-      export    (read/set default export file)
-      name      (read/set the players real name)
-      location  (read/set the physical location of the player)
-      strict    (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
-      files     (read/set path to the location of save games and configuration
-      random    (read/set whether we have random peices when starting a new game
-      threshold (read/set allowed piece value variance between players in random mode
-      confirm   (read/set whether to ask for confirmation on moves)
+      import          (read/set default import file)
+      export          (read/set default export file)
+      name            (read/set the players real name)
+      location        (read/set the physical location of the player)
+      strict          (read/set strict algebraic parsing mode, if True only exactly formed algebraic notation is accepted)
+      files           (read/set path to the location of save games and configuration
+      random          (read/set whether we have random peices when starting a new game
+      randomThreshold (read/set allowed piece value variance between players in random mode
+      moveConfirm     (read/set whether to ask for confirmation on moves)
    If the second argument is given then the argument will be saved as the setting, if it is omitted then
    the current value of the setting is printed to the screen."""
       #Only split once, this allows the user to supply items with spaces in them

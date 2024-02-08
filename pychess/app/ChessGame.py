@@ -250,16 +250,16 @@ if one is given use the argument as a filename to read a savegame from."""
       # Generate random fen and set the appropriate tags, if we are configured to do so
       if self.getConfigItem("random") == "True":
          try:
-            threshold = self.getConfigItem("threshold")
+            threshold = self.getConfigItem("randomThreshold")
             if threshold == None:
                threshold = 5
             threshold = int(threshold)
          except ValueError:
             threshold = 5
 
-         existingFen = self.getTag("FEN")[0]
+         existingFen = self.getTag("FEN")[1]
          #Only reset with random FEN if we don't already have a FEN
-         if existingFen != "":
+         if existingFen == "":
             fen = FEN.generateRandomFEN(threshold)
             #Write these tags directly to the files object to avoid representation reset in our setTag function
             self.files.setTag("FEN", fen)

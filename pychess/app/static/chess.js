@@ -4,13 +4,13 @@ var refreshTimerInMs = 5000;
 
 function buildLeftPanel(){
    var htmlString = "";
-   htmlString += '<a id="fileLink" class="newLine" onclick="toggleFileVisibility();">File Selection</a>';
+   htmlString += '<a id="fileLink" class="newLine" onclick="toggleDivVisibility(\'#fileDiv\');">File Selection</a>';
    htmlString += '<div hidden="" id="fileDiv"><div class="label newLine">File Name:</div><input type="text" class="horizontal" id="fileName"></input>';
    htmlString += '<input type="button" class="newLine" id="loadButton" value="Load" onclick="loadButtonClick();"></input>';
    htmlString += '<input type="button" class="horizontal" id="saveButton" value="Save" onclick="saveButtonClick();"></input>';
    htmlString += '</div>';
    htmlString += '<br/><br/><br/><br/>'
-   htmlString += '<a id="gameLink" class="newLine" onclick="toggleGameVisibility();">Game Selection</a>';
+   htmlString += '<a id="gameLink" class="newLine" onclick="toggleDivVisibility(\'#GameSelection\');">Game Selection</a>';
    htmlString += '<div hidden="" id="GameSelection">';
    htmlString += '<select class="newLine" id="gameSelect" ><option id="tempGameSel" value="">Please Load a Game</option></select>';
    htmlString += '<input type="button" class="newLine" id="submitGameSelection" value="Select" onclick="selectGame();"></input>';
@@ -19,7 +19,7 @@ function buildLeftPanel(){
    htmlString += '<input type="button" class="horizontal" id="resetAllButton" value="Reset All Games" onclick="resetAllGames();"></input>';
    htmlString += '</div>';
    htmlString += '<br/><br/><br/><br/>';
-   htmlString += '<a id="configLink" class="newLine" onclick="toggleConfigVisibility();">Configuration</a>';
+   htmlString += '<a id="configLink" class="newLine" onclick="toggleDivVisibility(\'#configDiv\');">Configuration</a>';
    htmlString += '<div hidden="" id="configDiv">';
    htmlString += '<select class="newLine" id="configSelect" onchange="showConfigItem()"></select>';
    htmlString += '<input type="text" class="newLine" id="configValue"></input>';
@@ -31,7 +31,7 @@ function buildLeftPanel(){
 function buildRightPanel(){
    var htmlString = "";
    htmlString += '<div id="results"></div>';
-   htmlString += '<a id="movesLink" class="newLine" onclick="toggleMovesVisibility();">Moves</a>';
+   htmlString += '<a id="movesLink" class="newLine" onclick="toggleDivVisibility(\'#moveDiv\');">Moves</a>';
    htmlString += '<div hidden="" id="moveDiv"><select class="newLine" id="moveSelect" onchange="moveSelectChanged()"></select>';
    htmlString += '<div class="label newLine">Algebraic Notation: </div>';
    htmlString += '<input type="text" class="horizontal" id="algebraicMove"></input>';
@@ -47,13 +47,19 @@ function buildRightPanel(){
    htmlString += '</select>';
    htmlString += '</div>';
    htmlString += '<br/><br/><br/><br/><br/><br/>';
-   htmlString += '<a id="tagLink" class="newLine" onclick="toggleTagVisibility();">Tags</a>';
+   htmlString += '<a id="tagLink" class="newLine" onclick="toggleDivVisibility(\'#tagDiv\');">Tags</a>';
    htmlString += '<div hidden="" id="tagDiv"><select class="newLine" id="tagSelect" onchange="selectGameTag()"></select>';
    htmlString += '<div class="label newLine">Tag Name: </div><input type="text" class="horizontal" disabled="disabled" id="tagName"></input>';
    htmlString += '<div class="label newLine">Tag Value: </div><input type="text" class="horizontal" id="tagValue"></input>';
    htmlString += '<input type="button" class="newLine" id="createTag" value="Create" onclick="createTag();"></input>';
    htmlString += '<input type="button" class="horizontal" id="deleteTag" value="Delete" onclick="deleteTag();"></input>';
    htmlString += '<input type="button" class="horizontal" id="saveTag" value="Save" onclick="saveTag();"></input>';
+   htmlString += '</div>';
+   htmlString += '<br />';
+   htmlString += '<div hidden="" id="confirmDiv">';
+   htmlString += '<div class="label newLine">Confirm Move?</div>';
+   htmlString += '<input type="button" class="newLine" id="confirmYes" value="Yes" onclick="commitMove();"></input>';
+   htmlString += '<input type="button" class="horizontal" id="confirmNo" value="No" onclick="deleteMove();"></input>';
    htmlString += '</div>';
    $("#rightPanel").html(htmlString);
    $("#promoSelect").val("Q");
@@ -133,22 +139,6 @@ function setInputDisabled(disabled) {
    Game.pageDisabled = disabled;
 }
 
-function toggleFileVisibility() {
-   toggleDivVisibility("#fileDiv");
-}
-
-function toggleConfigVisibility() {
-   toggleDivVisibility("#configDiv");
-}
-
-function toggleGameVisibility() {
-   toggleDivVisibility("#GameSelection");
-}
-
-function toggleMovesVisibility() {
-   toggleDivVisibility("#moveDiv");
-}
-
 function togglePromoVisibility() {
    toggleDivVisibility("#promoDiv");
 
@@ -162,10 +152,6 @@ function togglePromoVisibility() {
         $("#promoLink").html(linkText+" ("+$("#promoSelect :selected").html()+")");
     }
 
-}
-
-function toggleTagVisibility() {
-   toggleDivVisibility("#tagDiv");
 }
 
 function getPromotionPiece() {
@@ -574,16 +560,14 @@ function resetAllGames() {
 
 var Config = {
    values : {},
-   backToFront : {"import"    : "Default File To Load",
-                  "export"    : "Default File To Save",
-                  "strict"    : "Strict Algebraic Move Parsing",
-                  "random"    : "Random pieces on new game",
-                  "threshold" : "Maximum difference between piece values in random games"},
-   frontToBack : {"Default File To Load" : "import",
-                  "Default File To Save" : "export",
-                  "Strict Algebraic Move Parsing" : "strict",
-                  "Random pieces on new game" : "random",
-                  "Maximum difference between piece values in random games" : "threshold"},
+   backToFront : {"import"          : "Default File To Load",
+                  "export"          : "Default File To Save",
+                  "strict"          : "Strict Algebraic Move Parsing",
+                  "random"          : "Random pieces on new game",
+                  "randomThreshold" : "Maximum difference between piece values in random games",
+                  "moveConfirm"     : "Confirm moves"},
+    // frontToBack will be generated later
+    frontToBack : {},
 };
 
 function showConfigItem() {
@@ -692,19 +676,77 @@ function makeMove(move) {
             if (data.result != "Success") {
                 printReturnAndGetMoves(data);
             }
+            else if (Config.values["moveConfirm"] === "True") {
+                getGameMoves(function(){prepareForConfirm(data)});
+            }
             else {
-                $.ajax( {
-                    url: data.url,
-                    dataType: "json",
-                    type: "PUT",
-                    data: {},
-                    success: printReturnAndGetMoves
-                });
+                commitMove(data.url)
             }
         }
     });
 }
 
+function prepareForConfirm(data) {
+    lastTurn = Game.lastTurnSaved;
+    lastTurnArray = lastTurn.split('.');
+    pendingTurn = ""
+    if ( lastTurn === "0" ) {
+        pendingTurn = "1."
+    }
+    else if (lastTurnArray.length === 2) {
+        pendingTurn = lastTurnArray[0]+"..."
+    }
+    else {
+        pendingTurn = Number(lastTurnArray[0])+1+"."
+    }
+    $("#moveSelect").val(pendingTurn);
+    showTurnBoard(pendingTurn);
+    disableInput();
+    $("#confirmDiv input").prop("disabled",false);
+    $("#confirmDiv").prop("hidden",false);
+    displaySuccessOrError(data);
+
+}
+
+function commitMove(url) {
+    if (typeof url === 'undefined' || url === null) {
+        url="/game/move/"+$("#moveSelect").val();
+    }
+    var printReturnAndGetMoves = function(data, textStatus) {
+        getGameMoves(function(){displaySuccessOrError(data)});
+    }
+    $.ajax( {
+        url: url,
+        dataType: "json",
+        type: "PUT",
+        data: {},
+        success: function(data, textStatus) {
+            $("#confirmDiv").prop("hidden",true);
+            enableInput();
+            printReturnAndGetMoves(data);
+        }
+    });
+}
+
+function deleteMove(url) {
+    if (typeof url === 'undefined' || url === null) {
+        url="/game/move/"+$("#moveSelect").val();
+    }
+    var printReturnAndGetMoves = function(data, textStatus) {
+        getGameMoves(function(){displaySuccessOrError(data)});
+    }
+    $.ajax( {
+        url: url,
+        dataType: "json",
+        type: "DELETE",
+        data: {},
+        success: function(data, textStatus) {
+            $("#confirmDiv").prop("hidden",true);
+            enableInput();
+            printReturnAndGetMoves(data);
+        }
+    });
+}
 
 
 var Game = {
@@ -827,6 +869,8 @@ $(document).ready(function() {
    populateGameSelection();
    getGameMoves();
    populateGameTags();
+   // Populate the reverse config dictionary
+   $.each(Config.backToFront, function(key, value) { Config.frontToBack[value]=key })
    getConfiguration();
    intervalID = window.setInterval(timerTick, refreshTimerInMs);
 });

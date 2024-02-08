@@ -14,21 +14,22 @@ def booleanConfigItemIsTrue(configValue):
 class ValidConfig(object):
       validConfigItems = ["defImportFile","defExportFile","playerName","location","debug","strict","files","debugFile",
                           "random", "randomThreshold", "moveConfirm"]
-      ImportFile       = {"name" : validConfigItems[0], "default" : "savegame.pgn"}
-      ExportFile       = {"name" : validConfigItems[1], "default" : "savegame.pgn"}
-      PlayerName       = {"name" : validConfigItems[2], "default" : "Unknown"}
-      Location         = {"name" : validConfigItems[3], "default" : "Unknown"}
-      Debug            = {"name" : validConfigItems[4], "default" : "False", "values" : ["True", "False"]}
-      StrictParse      = {"name" : validConfigItems[5], "default" : "False", "values" : ["True", "False"]}
-      FileDir          = {"name" : validConfigItems[6], "default" : "."}
-      DebugFile        = {"name" : validConfigItems[7], "default" : "STDOUT"}
-      RandomMode       = {"name" : validConfigItems[8], "default" : "False", "values" : ["True", "False"]}
-      RandomThreshold  = {"name" : validConfigItems[9], "default" : "5"}
-      Confirm          = {"name" : validConfigItems[8], "default" : "True", "values" : ["True", "False"]}
+      booleanValues = ["True", "False"]
+      ImportFile       = {"name" : validConfigItems[0],  "default" : "savegame.pgn"}
+      ExportFile       = {"name" : validConfigItems[1],  "default" : "savegame.pgn"}
+      PlayerName       = {"name" : validConfigItems[2],  "default" : "Unknown"}
+      Location         = {"name" : validConfigItems[3],  "default" : "Unknown"}
+      Debug            = {"name" : validConfigItems[4],  "default" : "False", "values" : booleanValues}
+      StrictParse      = {"name" : validConfigItems[5],  "default" : "False", "values" : booleanValues}
+      FileDir          = {"name" : validConfigItems[6],  "default" : "."}
+      DebugFile        = {"name" : validConfigItems[7],  "default" : "STDOUT"}
+      RandomMode       = {"name" : validConfigItems[8],  "default" : "False", "values" : booleanValues}
+      RandomThreshold  = {"name" : validConfigItems[9],  "default" : "5"}
+      Confirm          = {"name" : validConfigItems[10], "default" : "True", "values" : booleanValues}
       configMap = {"import":ImportFile, "export":ExportFile, "name":PlayerName, \
                    "location":Location, "debug":Debug, "strict":StrictParse, \
                    "files":FileDir, "debugFile":DebugFile, "random":RandomMode, \
-                   "threshold":RandomThreshold, "confirm":Confirm}
+                   "randomThreshold":RandomThreshold, "moveConfirm":Confirm}
 
 class ConfigFile(object):
    """A class that deals with reading, writing and storing configuration"""
@@ -63,6 +64,8 @@ class ConfigFile(object):
    def getConfigItem(self,key):
       if key in self.configDict:
          return self.configDict[key]
+      elif key in ValidConfig.validConfigItems:
+         return ValidConfig.configMap[key]["default"]
       else:
          return ""
 

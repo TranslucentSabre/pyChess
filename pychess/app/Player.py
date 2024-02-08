@@ -15,6 +15,14 @@ class PlayerLastMove(object):
       self.piecePromoted = piecePromoted
       self.rookCastled = rookCastled
 
+   def __str__(self):
+       rep =  "Piece: "+str(self.pieceMoved)+"\n"
+       rep += "Capture: "+str(self.pieceCaptured)+"\n"
+       rep += "Promoted: "+str(self.piecePromoted)+"\n"
+       rep += "Castled: "+str(self.rookCastled)+"\n"
+       return rep
+
+
 class Player(object):
    """Base player class"""
 
