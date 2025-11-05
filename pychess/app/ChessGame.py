@@ -7,7 +7,7 @@ from pychess.app import Piece, Util
 from pychess.app.fen import FEN
 import os
 
-VERSION = "1.6.0"
+VERSION = "1.7.0"
 
 class ChessGame(object):
    files = ChessFiles()
@@ -52,17 +52,18 @@ class ChessGame(object):
 
    def restartGame(self):
       self.files.resetCurrentGame()
-      self.resetGameRepresentation()
+      self.resetGameRepresentation(True)
 
    def resetAllGames(self):
       self.files.resetPgnFile()
-      self.resetGameRepresentation()
+      self.resetGameRepresentation(True)
 
-   def resetGameRepresentation(self):
+   def resetGameRepresentation(self, brandNewGame=False):
       self.files.resetCurrentGameMoves()
       self.fen.reset()
 
-      self.setupRandomGame()
+      if brandNewGame:
+         self.setupRandomGame()
 
       fenString = FEN.STANDARD_OPENING
       #Returned tags are tuples of (name, value)

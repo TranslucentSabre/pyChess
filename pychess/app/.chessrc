@@ -5,3 +5,6 @@ location:Unset
 debug:False
 defExportFile:savegame.pgn 
 defImportFile:savegame.pgn
+random:False
+randomThreshold:5
+moveConfirm:False
